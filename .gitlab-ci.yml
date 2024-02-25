@@ -47,7 +47,7 @@ releaseJob:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   needs:
-    - job: buildingJob
+    - job: docker-build
       artifacts: true
   script:
     - echo "Create Release $CI_COMMIT_TAG"
