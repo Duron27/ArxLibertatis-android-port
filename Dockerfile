@@ -157,6 +157,7 @@ RUN wget -c https://github.com/GNOME/libxml2/archive/refs/tags/v${LIBXML2_VERSIO
     cmake ${HOME}/src/libxml2-${LIBXML2_VERSION} \
         ${COMMON_CMAKE_ARGS} \
         -DBUILD_SHARED_LIBS=OFF \
+        -DLIBXML2_WITH_THREADS=ON \
         -DLIBXML2_WITH_CATALOG=OFF \
         -DLIBXML2_WITH_ICONV=OFF \
         -DLIBXML2_WITH_LZMA=OFF \
