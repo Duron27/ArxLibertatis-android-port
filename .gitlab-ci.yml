@@ -24,7 +24,8 @@ docker-build:
   script:
     - docker build -t "$DOCKER_IMAGE_NAME" . --progress=plain &> docker-build.log
     - CTID=$(docker create $DOCKER_IMAGE_NAME)
-    - docker cp $CTID:./*.apk openmw-android-$CI_COMMIT_TAG.apk
+    - echo $CTID
+    - docker cp $CTID:/openmw-0.49.apk openmw-android-$CI_COMMIT_TAG.apk
     - docker rm -v $CTID
 
   after_script:
