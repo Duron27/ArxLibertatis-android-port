@@ -73,9 +73,9 @@ ENV clang=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang
 ENV clang++=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang++
 
 # Global C, CXX and LDFLAGS
-ENV CFLAGS="-fPIC -O3"
-ENV CXXFLAGS="-fPIC -frtti -fexceptions -O3"
-ENV LDFLAGS="-fPIC -Wl,--undefined-version"
+ENV CFLAGS="-fPIC -flto -O3"
+ENV CXXFLAGS="-fPIC -flto -frtti -fexceptions -O3"
+ENV LDFLAGS="-fPIC -flto -Wl,--undefined-version"
 
 ENV COMMON_CMAKE_ARGS \
   "-DCMAKE_TOOLCHAIN_FILE=/root/Android/ndk/${NDK_VERSION}/build/cmake/android.toolchain.cmake" \
@@ -85,9 +85,7 @@ ENV COMMON_CMAKE_ARGS \
   "-DANDROID_CPP_FEATURES=" \
   "-DANDROID_ALLOW_UNDEFINED_VERSION_SCRIPT_SYMBOLS=ON" \
   "-DCMAKE_C_FLAGS=-I${PREFIX}" \
-  "-DCMAKE_CXX_FLAGS=-I${PREFIX}" \
-  "-DCMAKE_SHARED_LINKER_FLAGS=${LDFLAGS}" \
-  "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" \
+  "-DCMAKE_CXX_FLAGS=-I${PREFIX}" \ "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" \
   "-DCMAKE_DEBUG_POSTFIX=" \
   "-DCMAKE_INSTALL_PREFIX=${PREFIX}" \
   "-DCMAKE_FIND_ROOT_PATH=${PREFIX}" \
