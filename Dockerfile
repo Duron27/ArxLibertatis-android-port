@@ -73,9 +73,9 @@ ENV clang=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang
 ENV clang++=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang++
 
 # Global C, CXX and LDFLAGS
-ENV CFLAGS="-fPIC -flto -O3"
-ENV CXXFLAGS="-fPIC -flto -frtti -fexceptions -O3"
-ENV LDFLAGS="-fPIC -flto -Wl,--undefined-version"
+ENV CFLAGS="-fPIC -flto"
+ENV CXXFLAGS="-fPIC -flto -frtti -fexceptions"
+ENV LDFLAGS="-fPIC -flto -Wl,--undefined-version -fuse-ld=lld"
 
 ENV COMMON_CMAKE_ARGS \
   "-DCMAKE_TOOLCHAIN_FILE=/root/Android/ndk/${NDK_VERSION}/build/cmake/android.toolchain.cmake" \
@@ -84,9 +84,9 @@ ENV COMMON_CMAKE_ARGS \
   "-DANDROID_STL=c++_shared" \
   "-DANDROID_CPP_FEATURES=" \
   "-DANDROID_ALLOW_UNDEFINED_VERSION_SCRIPT_SYMBOLS=ON" \
-  "-DCMAKE_C_FLAGS=-I${PREFIX}" \
-  "-DCMAKE_CXX_FLAGS=-I${PREFIX}" \ 
   "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" \
+  "-DCMAKE_C_FLAGS=-I${PREFIX}" \
+  "-DCMAKE_CXX_FLAGS=-I${PREFIX}" \
   "-DCMAKE_DEBUG_POSTFIX=" \
   "-DCMAKE_INSTALL_PREFIX=${PREFIX}" \
   "-DCMAKE_FIND_ROOT_PATH=${PREFIX}" \
@@ -202,8 +202,8 @@ RUN wget -c https://github.com/boostorg/boost/releases/download/boost-${BOOST_VE
         abi=aapcs \
         address-model=64 \
         architecture=arm \
-        cflags=-fPIC \
-        cxxflags=-fPIC \
+        cflags="${CFLAGS}" \
+        cxxflags="${CXXFLAGS}" \
         variant=release \
         target-os=android \
         threading=multi \
@@ -303,7 +303,7 @@ RUN wget -c https://github.com/luaJit/LuaJIT/archive/v${LUAJIT_VERSION}.tar.gz -
     make amalg \
     HOST_CC='gcc -m64' \
     CFLAGS= \
-    TARGET_CFLAGS=-fPIC \
+    TARGET_CFLAGS="${CFLAGS}" \
     PREFIX=${PREFIX} \
     CROSS=${TOOLCHAIN}/bin/llvm- \
     STATIC_CC=${NDK_TRIPLET}${API}-clang \
@@ -312,7 +312,7 @@ RUN wget -c https://github.com/luaJit/LuaJIT/archive/v${LUAJIT_VERSION}.tar.gz -
     make install \
     HOST_CC='gcc -m64' \
     CFLAGS= \
-    TARGET_CFLAGS=-fPIC \
+    TARGET_CFLAGS="${CFLAGS}" \
     PREFIX=${PREFIX} \
     CROSS=${TOOLCHAIN}/bin/llvm- \
     STATIC_CC=${NDK_TRIPLET}${API}-clang \
@@ -332,7 +332,7 @@ RUN wget -c https://github.com/rdiankov/collada-dom/archive/v${COLLADA_DOM_VERSI
         -DBoost_USE_STATIC_RUNTIME=ON \
         -DBoost_NO_SYSTEM_PATHS=ON \
         -DBoost_INCLUDE_DIR=${PREFIX}/include \
-        -DCMAKE_CXX_FLAGS=-Dauto_ptr=unique_ptr && \
+        -DCMAKE_CXX_FLAGS=-Dauto_ptr=unique_ptr\ "${CXXFLAGS}" && \
     make -j $(nproc) && make install
 
 # Setup OPENSCENEGRAPH_VERSION
@@ -374,7 +374,7 @@ RUN wget -c https://github.com/openmw/osg/archive/${OSG_VERSION}.tar.gz -O - | t
         -DBUILD_OSG_DEPRECATED_SERIALIZERS=OFF \
         -DOSG_FIND_3RD_PARTY_DEPS=OFF \
         -DOPENGL_INCLUDE_DIR=${PREFIX}/include/gl4es/ \
-        -DCMAKE_CXX_FLAGS=-Dauto_ptr=unique_ptr\ -I${PREFIX}/include/freetype2/ && \
+        -DCMAKE_CXX_FLAGS=-Dauto_ptr=unique_ptr\ -I${PREFIX}/include/freetype2/\ "${CXXFLAGS}" && \
     make -j $(nproc) && make install
 
 # Setup OPENMW_VERSION
