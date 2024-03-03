@@ -5,7 +5,7 @@ FROM fedora:39
 ENV BUILD_TYPE=release
 
 # App versions - change settings here
-ENV LIBJPEG_TURBO_VERSION=1.5.3
+ENV LIBJPEG_TURBO_VERSION=3.0.2
 ENV LIBPNG_VERSION=1.6.42
 ENV FREETYPE2_VERSION=2.13.2
 ENV OPENAL_VERSION=1.23.1
@@ -126,13 +126,12 @@ RUN wget -c https://github.com/madler/zlib/archive/refs/tags/v${ZLIB_VERSION}.ta
     make -j $(nproc) && make install
 
 # Setup LIBJPEG_TURBO
-RUN wget -c https://sourceforge.net/projects/libjpeg-turbo/files/${LIBJPEG_TURBO_VERSION}/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
+RUN wget -c https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/${LIBJPEG_TURBO_VERSION}/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}/build && cd $_ && \
-    ${HOME}/src/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}/configure \
-        ${COMMON_AUTOCONF_FLAGS} \
-        --without-simd && \
-    make -j $(nproc) check_PROGRAMS=bin_PROGRAMS= && \
-    make install check_PROGRAMS=bin_PROGRAMS=
+    cmake ${HOME}/src/libjpeg-turbo-${LIBJPEG_TURBO_VERSION} \
+        ${COMMON_CMAKE_ARGS} \
+        -DENABLE_SHARED=false && \
+    make -j $(nproc) && make install
 
 # Setup LIBPNG
 RUN wget -c http://prdownloads.sourceforge.net/libpng/libpng-${LIBPNG_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
