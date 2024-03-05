@@ -403,6 +403,7 @@ RUN cd ${HOME}/src/openmw-${OPENMW_VERSION}/build && cmake .. \
         -DBUILD_NAVMESHTOOL=0 \
         -DBUILD_WIZARD=0 \
         -DBUILD_MYGUI_PLUGIN=0 \
+        -DOPENMW_LTO_BUILD=1 \
         -DBUILD_BULLETOBJECTTOOL=0 \
         -DOPENMW_USE_SYSTEM_SQLITE3=OFF \
         -DOPENMW_USE_SYSTEM_YAML_CPP=OFF \
