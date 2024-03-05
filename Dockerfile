@@ -5,7 +5,7 @@ FROM fedora:39
 ENV BUILD_TYPE=release
 
 # App versions - change settings here
-ENV LIBJPEG_TURBO_VERSION=1.5.3
+ENV LIBJPEG_TURBO_VERSION=3.0.2
 ENV LIBPNG_VERSION=1.6.42
 ENV FREETYPE2_VERSION=2.13.2
 ENV OPENAL_VERSION=1.23.1
@@ -17,7 +17,7 @@ ENV BULLET_VERSION=3.25
 ENV ZLIB_VERSION=1.3.1
 ENV LIBXML2_VERSION=2.12.5
 ENV MYGUI_VERSION=3.4.3
-ENV GL4ES_VERSION=5ac069d82ad8ca2cc3c574484e4c5bad880db83e
+ENV GL4ES_VERSION=1.1.4
 ENV COLLADA_DOM_VERSION=2.5.0
 ENV OSG_VERSION=69cfecebfb6dc703b42e8de39eed750a84a87489
 ENV LZ4_VERSION=1.9.3
@@ -73,9 +73,9 @@ ENV clang=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang
 ENV clang++=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang++
 
 # Global C, CXX and LDFLAGS
-ENV CFLAGS="-fPIC -O3"
-ENV CXXFLAGS="-fPIC -frtti -fexceptions -O3"
-ENV LDFLAGS="-fPIC -Wl,--undefined-version"
+ENV CFLAGS="-fPIC -O3 -flto"
+ENV CXXFLAGS="-fPIC -O3 -frtti -fexceptions -flto"
+ENV LDFLAGS="-fPIC -Wl,--undefined-version -flto -fuse-ld=lld"
 
 ENV COMMON_CMAKE_ARGS \
   "-DCMAKE_TOOLCHAIN_FILE=/root/Android/ndk/${NDK_VERSION}/build/cmake/android.toolchain.cmake" \
@@ -84,10 +84,9 @@ ENV COMMON_CMAKE_ARGS \
   "-DANDROID_STL=c++_shared" \
   "-DANDROID_CPP_FEATURES=" \
   "-DANDROID_ALLOW_UNDEFINED_VERSION_SCRIPT_SYMBOLS=ON" \
+  "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" \
   "-DCMAKE_C_FLAGS=-I${PREFIX}" \
   "-DCMAKE_CXX_FLAGS=-I${PREFIX}" \
-  "-DCMAKE_SHARED_LINKER_FLAGS=${LDFLAGS}" \
-  "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" \
   "-DCMAKE_DEBUG_POSTFIX=" \
   "-DCMAKE_INSTALL_PREFIX=${PREFIX}" \
   "-DCMAKE_FIND_ROOT_PATH=${PREFIX}" \
@@ -127,13 +126,12 @@ RUN wget -c https://github.com/madler/zlib/archive/refs/tags/v${ZLIB_VERSION}.ta
     make -j $(nproc) && make install
 
 # Setup LIBJPEG_TURBO
-RUN wget -c https://sourceforge.net/projects/libjpeg-turbo/files/${LIBJPEG_TURBO_VERSION}/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
+RUN wget -c https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/${LIBJPEG_TURBO_VERSION}/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}/build && cd $_ && \
-    ${HOME}/src/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}/configure \
-        ${COMMON_AUTOCONF_FLAGS} \
-        --without-simd && \
-    make -j $(nproc) check_PROGRAMS=bin_PROGRAMS= && \
-    make install check_PROGRAMS=bin_PROGRAMS=
+    cmake ${HOME}/src/libjpeg-turbo-${LIBJPEG_TURBO_VERSION} \
+        ${COMMON_CMAKE_ARGS} \
+        -DENABLE_SHARED=false && \
+    make -j $(nproc) && make install
 
 # Setup LIBPNG
 RUN wget -c http://prdownloads.sourceforge.net/libpng/libpng-${LIBPNG_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
@@ -203,8 +201,8 @@ RUN wget -c https://github.com/boostorg/boost/releases/download/boost-${BOOST_VE
         abi=aapcs \
         address-model=64 \
         architecture=arm \
-        cflags=-fPIC \
-        cxxflags=-fPIC \
+        cflags="${CFLAGS}" \
+        cxxflags="${CXXFLAGS}" \
         variant=release \
         target-os=android \
         threading=multi \
@@ -271,8 +269,9 @@ RUN wget -c https://github.com/bulletphysics/bullet3/archive/${BULLET_VERSION}.t
     make -j $(nproc) && make install
 
 # Setup GL4ES_VERSION
-RUN wget -c https://github.com/sisah2/gl4es/archive/${GL4ES_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/ && \
-    cd ${HOME}/src/gl4es-${GL4ES_VERSION} && \
+RUN wget -c https://github.com/ptitSeb/gl4es/archive/refs/tags/v${GL4ES_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/
+RUN patch -d ${HOME}/src/gl4es-${GL4ES_VERSION} -p1 -t -N < /root/patches/gl4es/shared-library.patch
+RUN cd ${HOME}/src/gl4es-${GL4ES_VERSION} && \
     ndk-build ${NDK_BUILD_FLAGS} && \
     cp libs/${ABI}/libGL.so /root/prefix/lib/ && cp -r ${HOME}/src/gl4es-${GL4ES_VERSION}/include /root/prefix/include/gl4es/ && cp -r ${HOME}/src/gl4es-${GL4ES_VERSION}/include /root/prefix/
 
@@ -304,7 +303,7 @@ RUN wget -c https://github.com/luaJit/LuaJIT/archive/v${LUAJIT_VERSION}.tar.gz -
     make amalg \
     HOST_CC='gcc -m64' \
     CFLAGS= \
-    TARGET_CFLAGS=-fPIC \
+    TARGET_CFLAGS="${CFLAGS}" \
     PREFIX=${PREFIX} \
     CROSS=${TOOLCHAIN}/bin/llvm- \
     STATIC_CC=${NDK_TRIPLET}${API}-clang \
@@ -313,7 +312,7 @@ RUN wget -c https://github.com/luaJit/LuaJIT/archive/v${LUAJIT_VERSION}.tar.gz -
     make install \
     HOST_CC='gcc -m64' \
     CFLAGS= \
-    TARGET_CFLAGS=-fPIC \
+    TARGET_CFLAGS="${CFLAGS}" \
     PREFIX=${PREFIX} \
     CROSS=${TOOLCHAIN}/bin/llvm- \
     STATIC_CC=${NDK_TRIPLET}${API}-clang \
@@ -333,7 +332,7 @@ RUN wget -c https://github.com/rdiankov/collada-dom/archive/v${COLLADA_DOM_VERSI
         -DBoost_USE_STATIC_RUNTIME=ON \
         -DBoost_NO_SYSTEM_PATHS=ON \
         -DBoost_INCLUDE_DIR=${PREFIX}/include \
-        -DCMAKE_CXX_FLAGS=-Dauto_ptr=unique_ptr && \
+        -DCMAKE_CXX_FLAGS=-Dauto_ptr=unique_ptr\ "${CXXFLAGS}" && \
     make -j $(nproc) && make install
 
 # Setup OPENSCENEGRAPH_VERSION
@@ -375,7 +374,7 @@ RUN wget -c https://github.com/openmw/osg/archive/${OSG_VERSION}.tar.gz -O - | t
         -DBUILD_OSG_DEPRECATED_SERIALIZERS=OFF \
         -DOSG_FIND_3RD_PARTY_DEPS=OFF \
         -DOPENGL_INCLUDE_DIR=${PREFIX}/include/gl4es/ \
-        -DCMAKE_CXX_FLAGS=-Dauto_ptr=unique_ptr\ -I${PREFIX}/include/freetype2/ && \
+        -DCMAKE_CXX_FLAGS=-Dauto_ptr=unique_ptr\ -I${PREFIX}/include/freetype2/\ "${CXXFLAGS}" && \
     make -j $(nproc) && make install
 
 # Setup OPENMW_VERSION
@@ -405,6 +404,8 @@ RUN cd ${HOME}/src/openmw-${OPENMW_VERSION}/build && cmake .. \
         -DBUILD_NAVMESHTOOL=0 \
         -DBUILD_WIZARD=0 \
         -DBUILD_MYGUI_PLUGIN=0 \
+        -DOPENMW_LTO_BUILD=1 \
+        -DOPENMW_GL4ES_MANUAL_INIT=ON \
         -DBUILD_BULLETOBJECTTOOL=0 \
         -DOPENMW_USE_SYSTEM_SQLITE3=OFF \
         -DOPENMW_USE_SYSTEM_YAML_CPP=OFF \
