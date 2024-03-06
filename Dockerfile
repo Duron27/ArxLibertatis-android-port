@@ -17,7 +17,7 @@ ENV BULLET_VERSION=3.25
 ENV ZLIB_VERSION=1.3.1
 ENV LIBXML2_VERSION=2.12.5
 ENV MYGUI_VERSION=3.4.3
-ENV GL4ES_VERSION=e39434a2b17d12be569a1406f3bd23ac6a231347
+ENV GL4ES_VERSION=1.1.4
 ENV COLLADA_DOM_VERSION=2.5.0
 ENV OSG_VERSION=69cfecebfb6dc703b42e8de39eed750a84a87489
 ENV LZ4_VERSION=1.9.3
@@ -269,8 +269,7 @@ RUN wget -c https://github.com/bulletphysics/bullet3/archive/${BULLET_VERSION}.t
     make -j $(nproc) && make install
 
 # Setup GL4ES_VERSION
-RUN wget -c https://github.com/ptitSeb/gl4es/archive/${GL4ES_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/
-RUN patch -d ${HOME}/src/gl4es-${GL4ES_VERSION} -p1 -t -N < /root/patches/gl4es/shared-library.patch
+RUN wget -c https://github.com/Duron27/gl4es/archive/refs/tags/${GL4ES_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/
 RUN cd ${HOME}/src/gl4es-${GL4ES_VERSION} && \
     ndk-build ${NDK_BUILD_FLAGS} && \
     cp libs/${ABI}/libGL.so /root/prefix/lib/ && cp -r ${HOME}/src/gl4es-${GL4ES_VERSION}/include /root/prefix/include/gl4es/ && cp -r ${HOME}/src/gl4es-${GL4ES_VERSION}/include /root/prefix/
