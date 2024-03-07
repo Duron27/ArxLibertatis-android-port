@@ -86,7 +86,6 @@ ENV COMMON_CMAKE_ARGS \
   "-DANDROID_ALLOW_UNDEFINED_VERSION_SCRIPT_SYMBOLS=ON" \
   "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" \
   "-DCMAKE_C_FLAGS=-I${PREFIX}" \
-  "-DCMAKE_CXX_FLAGS=-I${PREFIX}" \
   "-DCMAKE_DEBUG_POSTFIX=" \
   "-DCMAKE_INSTALL_PREFIX=${PREFIX}" \
   "-DCMAKE_FIND_ROOT_PATH=${PREFIX}" \
@@ -122,7 +121,8 @@ RUN cd $HOME/src/ && git clone https://github.com/libarchive/bzip2 && cd bzip2 &
 RUN wget -c https://github.com/madler/zlib/archive/refs/tags/v${ZLIB_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/zlib-${ZLIB_VERSION}/build && cd $_ && \
     cmake ${HOME}/src/zlib-${ZLIB_VERSION} \
-        ${COMMON_CMAKE_ARGS} && \
+        ${COMMON_CMAKE_ARGS} \
+        -DCMAKE_CXX_FLAGS="${CXXFLAGS}" && \
     make -j $(nproc) && make install
 
 # Setup LIBJPEG_TURBO
@@ -130,6 +130,7 @@ RUN wget -c https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/${L
     mkdir -p ${HOME}/src/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}/build && cd $_ && \
     cmake ${HOME}/src/libjpeg-turbo-${LIBJPEG_TURBO_VERSION} \
         ${COMMON_CMAKE_ARGS} \
+        -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
         -DENABLE_SHARED=false && \
     make -j $(nproc) && make install
 
@@ -162,6 +163,7 @@ RUN wget -c https://github.com/GNOME/libxml2/archive/refs/tags/v${LIBXML2_VERSIO
         -DLIBXML2_WITH_PROGRAMS=OFF \
         -DLIBXML2_WITH_PYTHON=OFF \
         -DLIBXML2_WITH_TESTS=OFF \
+        -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
         -DLIBXML2_WITH_ZLIB=ON && \
     make -j $(nproc) && make install
 
@@ -175,6 +177,7 @@ RUN wget -c https://github.com/kcat/openal-soft/archive/${OPENAL_VERSION}.tar.gz
         -DALSOFT_UTILS=OFF \
         -DALSOFT_NO_CONFIG_UTIL=ON \
         -DALSOFT_BACKEND_OPENSL=ON \
+        -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
         -DALSOFT_BACKEND_WAVE=OFF && \
     make -j $(nproc) && make install
 
@@ -265,6 +268,7 @@ RUN wget -c https://github.com/bulletphysics/bullet3/archive/${BULLET_VERSION}.t
         -DBUILD_UNIT_TESTS=OFF \
         -DBUILD_EXTRAS=OFF \
         -DUSE_DOUBLE_PRECISION=ON \
+        -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
         -DBULLET2_MULTITHREADING=ON && \
     make -j $(nproc) && make install
 
@@ -284,6 +288,7 @@ RUN wget -c https://github.com/MyGUI/mygui/archive/MyGUI${MYGUI_VERSION}.tar.gz 
         -DMYGUI_BUILD_TOOLS=OFF \
         -DMYGUI_BUILD_PLUGINS=OFF \
         -DMYGUI_DONT_USE_OBSOLETE=ON \
+        -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
         -DMYGUI_STATIC=ON && \
     make -j $(nproc) && make install
 
@@ -293,6 +298,7 @@ RUN wget -c https://github.com/lz4/lz4/archive/v${LZ4_VERSION}.tar.gz -O - | tar
     cmake ${HOME}/src/lz4-${LZ4_VERSION}/build/cmake/ \
         ${COMMON_CMAKE_ARGS} \
         -DBUILD_STATIC_LIBS=ON \
+        -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
         -DBUILD_SHARED_LIBS=OFF && \
     make -j $(nproc) && make install
 
@@ -384,7 +390,8 @@ RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/open
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/0009-windowmanagerimp-always-show-mouse-when-possible-pat.patch
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/0010-android-fix-context-being-lost-on-app-minimize.patch
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/fix-build.patch
-RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/enablepost.patch
+RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/postprocessing1.patch
+RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/shaders1.patch
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/sdlfixreversed.patch
 RUN patch ${HOME}/src/openmw-${OPENMW_VERSION}/CMakeLists.txt < /root/patches/openmw/openmw_ignoreffmpegversion.patch
 RUN cp /root/patches/openmw/android_main.cpp /root/src/openmw-${OPENMW_VERSION}/apps/openmw/android_main.cpp
@@ -401,7 +408,6 @@ RUN cd ${HOME}/src/openmw-${OPENMW_VERSION}/build && cmake .. \
         -DBUILD_NAVMESHTOOL=0 \
         -DBUILD_WIZARD=0 \
         -DBUILD_MYGUI_PLUGIN=0 \
-        -DOPENMW_LTO_BUILD=1 \
         -DOPENMW_GL4ES_MANUAL_INIT=ON \
         -DBUILD_BULLETOBJECTTOOL=0 \
         -DOPENMW_USE_SYSTEM_SQLITE3=OFF \
@@ -410,6 +416,7 @@ RUN cd ${HOME}/src/openmw-${OPENMW_VERSION}/build && cmake .. \
         -DOPENAL_INCLUDE_DIR=${PREFIX}/include/AL/ \
         -DBullet_INCLUDE_DIR=${PREFIX}/include/bullet/ \
         -DOSG_STATIC=TRUE \
+        -DCMAKE_CXX_FLAGS=-I${PREFIX}/include/\ "${CXXFLAGS}" \
         -DMyGUI_LIBRARY=${PREFIX}/lib/libMyGUIEngineStatic.a && \
     make -j $(nproc)
 
