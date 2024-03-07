@@ -634,7 +634,7 @@ class MainActivity : AppCompatActivity() {
                         "show enchant chance" to if(prefs.getBoolean("gs_show_enchant_chance", false)) "true" else "false",
                         "show melee info" to if(prefs.getBoolean("gs_show_melee_info", false)) "true" else "false",
                         "show projectile damage" to if(prefs.getBoolean("gs_show_projectile_damage", false)) "true" else "false",
-                        "color topic enable" to if(prefs.getBoolean("gs_change_dialogue_topic_color", false)) "true" else "false",
+                        "color topic enable" to if(prefs.getBoolean("gs_change_dialogue_topic_color", true)) "true" else "false",
                         "stretch menu background" to if(prefs.getBoolean("gs_stretch_menu_background", false)) "true" else "false",
                         "allow zooming" to if(prefs.getBoolean("gs_can_zoom_on_maps", false)) "true" else "false",
 
