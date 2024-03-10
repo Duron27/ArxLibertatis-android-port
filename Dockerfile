@@ -439,6 +439,9 @@ RUN rm -rf "${DST}" && mkdir -p "${DST}"
 # Copy over Resources
 RUN cp -r "${SRC}/resources" "${DST}"
 
+# Add Zackhasacat's Controller Mod
+RUN cd ${DST}/resources/vfs/ && git clone https://gitlab.com/zackhasacat/controller_mode && cp -r ./controller_mode/* . && rm -rf controller_mode && cat "${DST}/resources/vfs/ControllerInterface.omwscripts" >> "${DST}/resources/vfs/builtin.omwscripts"
+
 # Global Config
 RUN mkdir -p "${DST}/openmw/"
 RUN cp "${SRC}/defaults.bin" "${DST}/openmw/"
