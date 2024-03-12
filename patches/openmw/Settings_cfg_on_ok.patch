@@ -10,19 +10,18 @@ Subject: [PATCH] hardcode
  2 files changed, 8 insertions(+)
 
 diff --git a/apps/openmw/main.cpp b/apps/openmw/main.cpp
-index a806df6fcd3..7df5ae58c2b 100644
+index 1f1c114e717..91bc0a2640c 100644
 --- a/apps/openmw/main.cpp
 +++ b/apps/openmw/main.cpp
-@@ -231,6 +231,8 @@ namespace
+@@ -216,6 +216,7 @@ namespace
+         }
      };
  }
- 
 +Files::ConfigurationManager *g_cfgMgr;
-+
+ 
  int runApplication(int argc, char* argv[])
  {
-     Platform::init();
-@@ -243,6 +245,7 @@ int runApplication(int argc, char* argv[])
+@@ -227,6 +228,7 @@ int runApplication(int argc, char* argv[])
  
      osg::setNotifyHandler(new OSGLogHandler());
      Files::ConfigurationManager cfgMgr;
@@ -31,32 +30,31 @@ index a806df6fcd3..7df5ae58c2b 100644
  
      // Android navmeshtool hack
 diff --git a/apps/openmw/mwgui/settingswindow.cpp b/apps/openmw/mwgui/settingswindow.cpp
-index 8a279ee630d..cefb7d20581 100644
+index 6c6a34595e0..e3c13ffc5e7 100644
 --- a/apps/openmw/mwgui/settingswindow.cpp
 +++ b/apps/openmw/mwgui/settingswindow.cpp
-@@ -26,6 +26,7 @@
+@@ -27,6 +27,7 @@
  #include <components/resource/resourcesystem.hpp>
  #include <components/resource/scenemanager.hpp>
  #include <components/sceneutil/lightmanager.hpp>
 +#include <components/files/configurationmanager.hpp>
- #include <components/settings/settings.hpp>
+ #include <components/settings/values.hpp>
  #include <components/vfs/manager.hpp>
- #include <components/widgets/sharedstatebutton.hpp>
-@@ -156,6 +157,8 @@ namespace
+ #include <components/vfs/recursivedirectoryiterator.hpp>
+@@ -142,6 +143,7 @@ namespace
+             box->setIndexSelected(MyGUI::ITEM_NONE);
      }
  }
- 
 +extern Files::ConfigurationManager *g_cfgMgr;
-+
+ 
  namespace MWGui
  {
-     void SettingsWindow::configureWidgets(MyGUI::Widget* widget, bool init)
-@@ -451,6 +454,8 @@ namespace MWGui
+@@ -451,6 +453,8 @@ namespace MWGui
  
      void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
      {
 +        const std::string settingspath = (g_cfgMgr->getUserConfigPath() / "settings.cfg").string();
 +        Settings::Manager::saveUser(settingspath);
-         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
+         setVisible(false);
      }
  
