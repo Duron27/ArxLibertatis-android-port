@@ -1,0 +1,62 @@
+From 962e6f3bf572123e858fcbc34bb63af307de0a9c Mon Sep 17 00:00:00 2001
+From: sisah <jirielbunda@seznam.cz>
+Date: Fri, 10 Mar 2023 14:50:24 -0500
+Subject: [PATCH] hardcode
+ 0014-settingswindow-save-user-settings-file-when-ok-is-pr.patch
+
+---
+ apps/openmw/main.cpp                 | 3 +++
+ apps/openmw/mwgui/settingswindow.cpp | 5 +++++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/apps/openmw/main.cpp b/apps/openmw/main.cpp
+index a806df6fcd3..7df5ae58c2b 100644
+--- a/apps/openmw/main.cpp
++++ b/apps/openmw/main.cpp
+@@ -231,6 +231,8 @@ namespace
+     };
+ }
+ 
++Files::ConfigurationManager *g_cfgMgr;
++
+ int runApplication(int argc, char* argv[])
+ {
+     Platform::init();
+@@ -243,6 +245,7 @@ int runApplication(int argc, char* argv[])
+ 
+     osg::setNotifyHandler(new OSGLogHandler());
+     Files::ConfigurationManager cfgMgr;
++    g_cfgMgr = &cfgMgr;
+     std::unique_ptr<OMW::Engine> engine = std::make_unique<OMW::Engine>(cfgMgr);
+ 
+     // Android navmeshtool hack
+diff --git a/apps/openmw/mwgui/settingswindow.cpp b/apps/openmw/mwgui/settingswindow.cpp
+index 8a279ee630d..cefb7d20581 100644
+--- a/apps/openmw/mwgui/settingswindow.cpp
++++ b/apps/openmw/mwgui/settingswindow.cpp
+@@ -26,6 +26,7 @@
+ #include <components/resource/resourcesystem.hpp>
+ #include <components/resource/scenemanager.hpp>
+ #include <components/sceneutil/lightmanager.hpp>
++#include <components/files/configurationmanager.hpp>
+ #include <components/settings/settings.hpp>
+ #include <components/vfs/manager.hpp>
+ #include <components/widgets/sharedstatebutton.hpp>
+@@ -156,6 +157,8 @@ namespace
+     }
+ }
+ 
++extern Files::ConfigurationManager *g_cfgMgr;
++
+ namespace MWGui
+ {
+     void SettingsWindow::configureWidgets(MyGUI::Widget* widget, bool init)
+@@ -451,6 +454,8 @@ namespace MWGui
+ 
+     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
+     {
++        const std::string settingspath = (g_cfgMgr->getUserConfigPath() / "settings.cfg").string();
++        Settings::Manager::saveUser(settingspath);
+         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
+     }
+ 
