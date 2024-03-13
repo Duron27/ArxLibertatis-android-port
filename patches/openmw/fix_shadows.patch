@@ -15,16 +15,16 @@ index 06930ebe595..7ee6d636885 100644
 @@ -554,8 +554,8 @@ MWShadowTechnique::ShadowData::ShadowData(MWShadowTechnique::ViewDependentData*
          _texture->setShadowTextureMode(osg::Texture2D::LUMINANCE);
      }
- 
+
 -    _texture->setFilter(osg::Texture2D::MIN_FILTER,osg::Texture2D::LINEAR);
 -    _texture->setFilter(osg::Texture2D::MAG_FILTER,osg::Texture2D::LINEAR);
 +    _texture->setFilter(osg::Texture2D::MIN_FILTER,osg::Texture2D::NEAREST);
 +    _texture->setFilter(osg::Texture2D::MAG_FILTER,osg::Texture2D::NEAREST);
- 
+
      // the shadow comparison should fail if object is outside the texture
      _texture->setWrap(osg::Texture2D::WRAP_S,osg::Texture2D::CLAMP_TO_BORDER);
 diff --git a/files/shaders/compatibility/shadows_fragment.glsl b/files/shaders/compatibility/shadows_fragment.glsl
-index 2945edff3dc..c33e7448553 100644
+index 2945edff3dc..768b961a36f 100755
 --- a/files/shaders/compatibility/shadows_fragment.glsl
 +++ b/files/shaders/compatibility/shadows_fragment.glsl
 @@ -4,7 +4,7 @@
@@ -34,7 +34,7 @@ index 2945edff3dc..c33e7448553 100644
 -        uniform sampler2DShadow shadowTexture@shadow_texture_unit_index;
 +        uniform sampler2D shadowTexture@shadow_texture_unit_index;
          varying vec4 shadowSpaceCoords@shadow_texture_unit_index;
- 
+
  #if @perspectiveShadowMaps
 @@ -33,7 +33,12 @@ float unshadowedLightRatio(float distance)
  #endif
@@ -47,7 +47,7 @@ index 2945edff3dc..c33e7448553 100644
 +                        shadowing = 0.0;
 +                    else
 +                        shadowing = 1.0;
- 
+
                      doneShadows = all(lessThan(shadowXYZ, vec3(0.95, 0.95, 1.0))) && all(greaterThan(shadowXYZ, vec3(0.05, 0.05, 0.0)));
  #if @perspectiveShadowMaps
 @@ -44,7 +49,12 @@ float unshadowedLightRatio(float distance)
@@ -71,19 +71,18 @@ index 2945edff3dc..c33e7448553 100644
 -}
 \ No newline at end of file
 +}
-
 diff --git a/files/shaders/compatibility/shadowcasting.vert b/files/shaders/compatibility/shadowcasting.vert
-index 0cbcc63fbf5..90882c09797 100644
+index c68bdd5c177..90882c09797 100755
 --- a/files/shaders/compatibility/shadowcasting.vert
 +++ b/files/shaders/compatibility/shadowcasting.vert
 @@ -6,8 +6,8 @@ varying float alphaPassthrough;
- 
+
  uniform int colorMode;
  uniform bool useTreeAnim;
--uniform bool useDiffuseMapForShadowAlpha// = true;
--uniform bool alphaTestShadows// = true;
+-uniform bool useDiffuseMapForShadowAlpha = true;
+-uniform bool alphaTestShadows = true;
 +uniform bool useDiffuseMapForShadowAlpha;// = true;
 +uniform bool alphaTestShadows;// = true;
- 
+
  void main(void)
  {
