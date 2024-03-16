@@ -499,13 +499,16 @@ class MainActivity : AppCompatActivity() {
         writeSetting("Shadows", "terrain shadows", if(prefs.getBoolean("gs_shadows_terrain", false)) "true" else "false")
         writeSetting("Shadows", "object shadows", if(prefs.getBoolean("gs_shadows_object", false)) "true" else "false")
         writeSetting("Shadows", "enable indoor shadows", if(prefs.getBoolean("gs_shadows_indoor", false)) "true" else "false")
-        writeSetting("Shadows", "Percentage of shadow maps to use", prefs.getString("gs_shadow_maps", "15").toString())
+        writeSetting("Shadows", "number of shadow maps", prefs.getString("gs_shadow_maps", "4").toString())
         writeSetting("Shadows", "maximum shadow rendering distance", prefs.getString("gs_shadow_distance", "3000").toString())
 
         // Visuals terrain
         writeSetting("Terrain", "object paging min size", prefs.getString("gs_object_paging_min_size", "0.01").toString())
         writeSetting("Terrain", "distant terrain", if(prefs.getBoolean("gs_distant_land", false)) "true" else "false")
         writeSetting("Terrain", "object paging active grid", if(prefs.getBoolean("gs_active_grid_object_paging", true)) "true" else "false")
+
+        // Camera
+        writeSetting("Camera", "viewing distance", prefs.getString("gs_viewing_distance", "2048").toString())
 
         // Visuals graphics
         writeSetting("Video", "framerate limit", prefs.getString("gs_framerate_limit", "60").toString())
