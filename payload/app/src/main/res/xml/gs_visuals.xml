@@ -52,8 +52,8 @@
             android:title="Percentage of shadow maps to use"
             android:dialogTitle="Percentage of shadow maps to use"
             android:inputType="numberDecimal"
-            android:hint="5"
-            android:defaultValue="15"
+            android:hint="4"
+            android:defaultValue="4"
             android:summary="Higher number means smoother shadows." />
 
     </PreferenceCategory>
@@ -79,6 +79,15 @@
             android:title="Active Grid Object Paging"
             android:defaultValue="true"
             android:summary="Use object paging for active cells grid."/>
+
+        <EditTextPreference
+            android:key="gs_viewing_distance"
+            android:title="Maximum visible distance"
+            android:dialogTitle="Maximum visible distance"
+            android:inputType="numberDecimal"
+            android:hint="2048"
+            android:defaultValue="2048"
+            android:summary="Maximum visible distance. Caution: this setting can dramatically affect performance, see documentation for details." />
 
     </PreferenceCategory>
 
