@@ -453,6 +453,7 @@ RUN cp "${SRC}/gamecontrollerdb.txt" "${DST}/openmw/"
 RUN cat "${SRC}/openmw.cfg" | grep -v "data=" | grep -v "data-local=" >> "${DST}/openmw/openmw.base.cfg"
 RUN cat "/root/payload/app/openmw.base.cfg" >> "${DST}/openmw/openmw.base.cfg"
 RUN mkdir -p /root/payload/app/src/main/assets/libopenmw/resources && cd $_ && echo "${APP_VERSION}" >> version
+RUN sed -i '4i\    <string name="version_info">OMW ${APP_VERSION}</string>' /root/payload/app/src/main/res/values/strings.xml
 
 # licensing info
 RUN cp "/root/payload/3rdparty-licenses.txt" "${DST}"
