@@ -423,58 +423,64 @@ class MainActivity : AppCompatActivity() {
 
     private fun writeSetting(category: String, name: String, value: String) {
         var lineList = mutableListOf<String>()
-        File("/storage/emulated/0/omw_nightly/config/settings.cfg").useLines { lines -> lines.forEach { lineList.add(it) }}
-
         var lineNumber = 0
         var categoryFound = 0
         var categoryLine = 0
         var nameFound = 0
         var nameLine = 0
+        var currentCategory = ""
 
-        lineList.forEach {
-            if (it.substringAfter("[").substringBefore("]").contains(category)) { categoryLine = lineNumber; categoryFound = 1}
-            if (categoryFound == 1 && it.substringBefore("=").contains(name)) { nameLine = lineNumber; nameFound = 1 }
-            lineNumber++
-        }
+        File(Constants.USER_CONFIG + "/settings.cfg").useLines {
+	    lines -> lines.forEach {
+		lineList.add(it)
+                if (it.contains("[") && it.contains("]")) currentCategory = it.replace("[", "").replace("]", "").replace(" ", "")
+                if (currentCategory == category.replace(" ", "") && categoryFound == 0 ) { categoryLine = lineNumber; categoryFound = 1 } 
+                if (currentCategory == category.replace(" ", "") && it.substringBefore("=").replace(" ", "") == name.replace(" ", ""))
+		    { nameLine = lineNumber; nameFound = 1 }
 
+                lineNumber++
+	    }
+	}
 
         if(nameFound == 1)
             lineList.set(nameLine, name + " = " + value)
         if(categoryFound == 1 && nameFound == 0)
             lineList.add(categoryLine + 1, name + " = " + value)
-        if(categoryFound == 0 && nameFound == 0)
+        if(categoryFound == 0 && nameFound == 0) 
             lineList.add(lineNumber, "\n" + "[" + category + "]" + "\n" + name + " = " + value)
 
         var output = ""
         lineList.forEach { output += it + "\n" }
 
-        File("/storage/emulated/0/omw_nightly/config/settings.cfg").writeText(output)
-
+        File(Constants.USER_CONFIG + "/settings.cfg").writeText(output)
     }
 
 
     private fun writeUserSettings() {
-        File("/storage/emulated/0/omw_nightly/config/settings.cfg").createNewFile()
-        /*
-            // This need some investigation there are issues with custom resolutions if incorect resolution is set in settings.cfg
-            val dm = DisplayMetrics()
-            windowManager.defaultDisplay.getRealMetrics(dm)
-            val orientation = this.getResources().getConfiguration().orientation
-            var displayWidth = 0
-            var displayHeight = 0
-            if (orientation == Configuration.ORIENTATION_PORTRAIT)
-            {
-                displayWidth = if(resolutionX == 0) dm.heightPixels else resolutionX
-                displayHeight = if(resolutionY == 0) dm.widthPixels else resolutionY
-            }
-            else
-            {
-                displayWidth = if(resolutionX == 0) dm.widthPixels else resolutionX
-                displayHeight = if(resolutionY == 0) dm.heightPixels else resolutionY
-            }
-            writeSetting("Video", "resolution x", displayWidth.toString())
-            writeSetting("Video", "resolution y", displayHeight.toString())
-        */
+        File(Constants.USER_CONFIG + "/settings.cfg").createNewFile()
+
+	// Write resolution to prevent issues if incorect one is set, probably need to account notch size too
+	val dm = DisplayMetrics()
+	windowManager.defaultDisplay.getRealMetrics(dm)
+
+	val orientation = this.getResources().getConfiguration().orientation
+	var displayWidth = 0
+	var displayHeight = 0
+
+	if (orientation == Configuration.ORIENTATION_PORTRAIT)
+	{
+		displayWidth = if(resolutionX == 0) dm.heightPixels else resolutionX
+		displayHeight = if(resolutionY == 0) dm.widthPixels else resolutionY
+	}
+	else
+	{
+		displayWidth = if(resolutionX == 0) dm.widthPixels else resolutionX
+		displayHeight = if(resolutionY == 0) dm.heightPixels else resolutionY
+	}
+
+	writeSetting("Video", "resolution x", displayWidth.toString())
+	writeSetting("Video", "resolution y", displayHeight.toString())
+
         // Game Mechanics
         writeSetting("Game", "toggle sneak", if(prefs.getBoolean("gs_toggle_sneak", true)) "true" else "false")
         writeSetting("Game", "uncapped damage fatigue", if(prefs.getBoolean("gs_uncapped_damage_fatigue", false)) "true" else "false")
@@ -544,7 +550,7 @@ class MainActivity : AppCompatActivity() {
         writeSetting("Game", "show enchant chance", if(prefs.getBoolean("gs_show_enchant_chance", false)) "true" else "false")
         writeSetting("Game", "show melee info", if(prefs.getBoolean("gs_show_melee_info", false)) "true" else "false")
         writeSetting("Game", "show projectile damage", if(prefs.getBoolean("gs_show_projectile_damage", false)) "true" else "false")
-        writeSetting("GUI", "color topic enable", if(prefs.getBoolean("gs_change_dialogue_topic_color", false)) "true" else "false")
+        writeSetting("GUI", "color topic enable", if(prefs.getBoolean("gs_change_dialogue_topic_color", true)) "true" else "false")
         writeSetting("GUI", "stretch menu background", if(prefs.getBoolean("gs_stretch_menu_background", false)) "true" else "false")
         writeSetting("Map", "allow zooming", if(prefs.getBoolean("gs_can_zoom_on_maps", false)) "true" else "false")
 
@@ -703,7 +709,7 @@ class MainActivity : AppCompatActivity() {
                         "companion h" to "0.375"
                 ))
 
-                writeUserSettings()
+		writeUserSettings()
 
                 runOnUiThread {
                     obtainFixedScreenResolution()
