@@ -508,7 +508,7 @@ class MainActivity : AppCompatActivity() {
         writeSetting("Shadows", "enable indoor shadows", if(prefs.getBoolean("gs_shadows_indoor", false)) "true" else "false")
         writeSetting("Shadows", "number of shadow maps", prefs.getString("gs_shadow_maps", "4").toString())
         writeSetting("Shadows", "maximum shadow rendering distance", prefs.getString("gs_shadow_distance", "3000").toString())
-        writeSetting("Shadows", "shadow map resolution", prefs.getString("gs_shadow_map_resolution", "512").toString())
+        writeSetting("Shadows", "shadow map resolution", prefs.getString("gs_shadow_map_resolution", "1024").toString())
         writeSetting("Shadows", "split point uniform logarithmic ratio", prefs.getString("gs_shadow_split_point", "0.5").toString())
         writeSetting("Shadows", "percentage closer filtering", prefs.getString("gs_shadow_pcf", "1").toString())
 
