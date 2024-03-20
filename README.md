@@ -9,6 +9,11 @@ https://github.com/Duron27/openmw--android
 is a mirror of this repo just to clear up any confusion
 
 
+New in Version 1.0
+added shaders from 
+https://github.com/zesterer/openmw-shaders
+https://gitlab.com/glassmancody.info/omwfx-shaders
+
 
 # OpenMW for Android
 
