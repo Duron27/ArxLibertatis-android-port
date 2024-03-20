@@ -48,10 +48,10 @@ RUN wget https://dl.google.com/android/repository/commandlinetools-linux-${SDK_C
 RUN yes | ~/Android/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null
 RUN ~/Android/cmdline-tools/latest/bin/sdkmanager --install "ndk;${NDK_VERSION}" "platforms;android-28" "platform-tools" "build-tools;29.0.2" "emulator" --channel=0
 RUN yes | ~/Android/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null
-#RUN wget https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip
 
 COPY --chmod=0755 patches /root/patches
 COPY --chmod=0755 payload /root/payload
+COPY --chmod=0755 mods /root/mods
 
 #Setup ICU for the Host
 RUN mkdir -p ${HOME}/src/icu-host-build && cd $_ && ${HOME}/src/icu-release-70-1/icu4c/source/configure --disable-tests --disable-samples --disable-icuio --disable-extras CC="gcc" CXX="g++" && make -j $(nproc)
@@ -443,8 +443,11 @@ RUN rm -rf "${DST}" && mkdir -p "${DST}"
 # Copy over Resources
 RUN cp -r "${SRC}/resources" "${DST}"
 
+# Copy over Mods
+RUN cp -r "/root/mods" "${DST}/resources"
+
 # Add Zackhasacat's Controller Mod
-#RUN cd ${DST}/resources/vfs/ && git clone https://gitlab.com/zackhasacat/controller_mode && cp -r ./controller_mode/* . && rm -rf controller_mode && cat "${DST}/resources/vfs/ControllerInterface.omwscripts" >> "${DST}/resources/vfs/builtin.omwscripts"
+RUN cd ${DST}/resources/vfs/ && git clone https://gitlab.com/zackhasacat/controller_mode && cp -r ./controller_mode/* . && rm -rf controller_mode && cat "${DST}/resources/vfs/ControllerInterface.omwscripts" >> "${DST}/resources/vfs/builtin.omwscripts"
 
 # Global Config
 RUN mkdir -p "${DST}/openmw/"

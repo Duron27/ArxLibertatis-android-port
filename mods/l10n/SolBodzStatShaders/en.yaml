@@ -1,0 +1,37 @@
+name: Sol's & Bodz' Stat Shaders
+description: Different shader effects that intensify as your health, magicka, and or fatigue get low.
+group_name: Stat Shaders
+enabled_name: Enable
+enabled_desc: Turn the script on / off?
+healthIntensity_name: Health Shader Intensity
+healthIntensity_desc: How strong should the missing health shader be? (0.0 - 2.0)
+    
+    0.0 = Shader off.
+    
+    1.0 = Default.
+    
+    2.0 = Shader overload.
+magicIntensity_name: Magicka Shader Intensity
+magicIntensity_desc: How strong should the missing magicka shader be? (0.0 - 2.0)
+    
+    0.0 = Shader off.
+    
+    1.0 = Default.
+    
+    2.0 = Shader overload.
+fatigueIntensity_name: Fatigue Shader Intensity
+fatigueIntensity_desc: How strong should the missing fatigue shader be? (0.0 - 2.0)
+    
+    0.0 = Shader off.
+    
+    1.0 = Default.
+    
+    2.0 = Shader overload.
+updateInteveral_name: Update Interval
+updateInteveral_desc: Shader update frequency. Lower values may impact performance. (0.01 - 1.0)
+    
+    0.01 = Real-time. 100x per second.
+    
+    0.10 = Default. 10x per second.
+    
+    1.00 = Slow. Once per second.

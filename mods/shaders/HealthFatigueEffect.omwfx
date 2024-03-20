@@ -1,0 +1,108 @@
+shared {
+	float lerp(float min, float max, float t) {
+		return min + t * (max - min);
+	}
+}
+
+uniform_float uFatigueFactor {
+    default = 0.0;
+    min = 0.0;
+    max = 2.0;
+    step = 0.02;
+    description = "Fatigue factor.";
+    static = false;
+}
+
+uniform_float uHealthFactor {
+    default = 0.0;
+    min = 0.0;
+    max = 2.0;
+    step = 0.02;
+    description = "Health factor.";
+    static = false;
+}
+
+uniform_float uMagickaFactor {
+    default = 0.0;
+    min = 0.0;
+    max = 2.0;
+    step = 0.02;
+    description = "Magicka factor.";
+    static = false;
+}
+
+
+fragment desaturate {
+    omw_In vec2 omw_TexCoord;
+
+    void main()
+    {
+        // fetch scene texture from last shader
+        vec4 scene = omw_GetLastShader(omw_TexCoord);
+
+        // vignette
+        vec2 uvig = omw_TexCoord * (1.0 - vec2(omw_TexCoord.y, omw_TexCoord.x));
+    	float vig = uvig.x * uvig.y * 15.0;
+    	float vignetteFactor = pow(vig, 0.3);
+    	
+    	float blurVignette = pow(vignetteFactor, 10.0);
+        
+        vec4 blurCol = omw_GetLastShader( omw_TexCoord ) * (blurVignette * 0.75 + 0.5)
+			+ ((omw_GetLastShader( omw_TexCoord * 0.99 + 0.5 * 0.01 ) - 0.5) * 1.05 + 0.5) * (blurVignette * -0.33 + 0.33)
+			+ ((omw_GetLastShader( omw_TexCoord * 0.98 + 0.5 * 0.02 ) - 0.5) * 1.10 + 0.5) * (blurVignette * -0.33 + 0.33);
+		// to increase contrast at edges of screen, modify 1.05 and 1.10 in above equation
+
+        // desaturate RGB component
+        const vec3 luminance = vec3(0.299, 0.587, 0.144);
+        float gray = dot(luminance, blurCol.rgb);
+        
+	// heartbeat effect
+	float beat = 1.0 * max(atan(sin(omw.simulationTime * 3.14159 * 2.0) * 0.5), atan(sin(omw.simulationTime * 3.14159 * 2.0 + 1.15) * 0.2));
+  	beat = (beat + 3.14159 / 2.0) / 3.14159;
+
+	//gray = (gray - 0.5) * 1.0 + 0.5;
+        vec3 fatigueCol = vec3(gray);
+
+	vignetteFactor = pow(vig, 0.2 + 0.25 * beat);
+	float blackBorder = pow(clamp((vignetteFactor - 0.1) + 0.15 * (1.0 + 2.0 * beat), 0.0, 1.0), 1.5);
+        float r = 0.15 * beat * blackBorder + 0.35 * blackBorder * clamp(pow(pow(abs(gray - 0.5) * 2.0, 2.0) * (1.0 + beat), 2.0), 0.0, 1.0);
+        float g = 0.0;
+        float b = 0.0;
+        
+        vec3 healthCol = vec3(r, g, b);
+	
+        vec3 result = mix(mix(scene.rgb, fatigueCol, uFatigueFactor * 0.5), healthCol, (1.0 - vignetteFactor) * (uHealthFactor));
+		
+        // // vertical gradient // TexCoord.y is 0 at bot, 0.5 at mid, 1 at top
+    	float gradientFactor = pow(2.0*omw_TexCoord.y - 1.0,2.0); // 1 at bot, 0 at mid, 1 at top
+    	gradientFactor = pow(clamp(gradientFactor,0.0,1.0), 2.5); // sharpen gradient... pow2 is too smooth, pow3 too sharp?
+
+		// blur has to be 0.0 - 1.0 in order to be fed into gamma pow function
+        blurCol = 0.6*omw_GetLastShader(omw_TexCoord*(1.0-0.05*uMagickaFactor) + 0.5*0.05*uMagickaFactor)
+            + 0.4*omw_GetLastShader(omw_TexCoord*(1.0-0.10*uMagickaFactor) + 0.5*0.10*uMagickaFactor);
+		//result = clamp(result + 1.0*pow(uMagickaFactor,2.0)*pow(blurCol.rgb, vec3(8.0)),0.0,1.0); // additive layering
+	
+		float hourMult = 9.0; // constant lighting indoors
+		if(!omw.isInterior) {
+			hourMult = 9.0 - 3.0*cos(omw.gameHour/24.0 * 2.0 * 3.14159); // let in more light at night
+		}
+		result = clamp(result + 4.0*uMagickaFactor*pow(blurCol.rgb, vec3(hourMult)),0.0,1.0); // additive layering
+
+		// gamma is pow 1 at no effect, pow 2 at moderate, pow 5 at high, pow aymptotic infinity
+			// if coeff 1.0 below, pow 1 at 0, pow 2 at 1, pow 5 at 2
+			// if coeff 1.5 below, pow 1 at 0, pow 3.25 at 1, pow 10 at 2
+			// if coeff 2.0 below, pow 1 at 0, pow 5 at 1, pow 17 at 2
+		result = pow(result, vec3(1.0 + pow(3.0 * gradientFactor * uMagickaFactor, 2.0)));
+
+        omw_FragColor = vec4(result, scene.a);
+    }
+}
+
+technique {
+    description = "Missing Stat Shaders";
+    version = "1.0";
+    author = "Bodz, Bodz, Solthas";
+    passes = desaturate;
+    dynamic = true; 
+	flags = hidden;
+}
