@@ -87,11 +87,7 @@
             android:defaultValue="@string/pref_physicsFPS2_default"
             android:summary="%s"
             />
-
-        <CheckBoxPreference
-            android:key="pref_nohighp"
-            android:title="@string/pref_nohighp"/>
-
+        
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_graphics">
