@@ -444,7 +444,7 @@ RUN rm -rf "${DST}" && mkdir -p "${DST}"
 RUN cp -r "${SRC}/resources" "${DST}"
 
 # Copy over Mods
-RUN cp -r "/root/mods" "${DST}/resources"
+RUN cd ${DST}/resources/vfs/ && cp -r /root/mods/* .
 
 # Add Zackhasacat's Controller Mod
 RUN cd ${DST}/resources/vfs/ && git clone https://gitlab.com/zackhasacat/controller_mode && cp -r ./controller_mode/* . && rm -rf controller_mode && cat "${DST}/resources/vfs/ControllerInterface.omwscripts" >> "${DST}/resources/vfs/builtin.omwscripts"
