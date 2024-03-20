@@ -46,7 +46,7 @@ ENV PREFIX=/root/prefix
 RUN cd ${HOME}/src && wget https://github.com/unicode-org/icu/archive/refs/tags/release-${LIBICU_VERSION}.zip && unzip -o ${HOME}/src/release-${LIBICU_VERSION}.zip && rm -rf release-${LIBICU_VERSION}.zip
 RUN wget https://dl.google.com/android/repository/commandlinetools-linux-${SDK_CMDLINE_TOOLS}.zip && unzip commandlinetools-linux-${SDK_CMDLINE_TOOLS}.zip && mkdir -p ${HOME}/Android/cmdline-tools/ && mv cmdline-tools/ ${HOME}/Android/cmdline-tools/latest && rm commandlinetools-linux-${SDK_CMDLINE_TOOLS}.zip
 RUN yes | ~/Android/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null
-RUN ~/Android/cmdline-tools/latest/bin/sdkmanager --install "ndk;${NDK_VERSION}" "platforms;android-28" "ndk;21.0.6113669" "platform-tools" "build-tools;29.0.2" "emulator" --channel=0
+RUN ~/Android/cmdline-tools/latest/bin/sdkmanager --install "ndk;${NDK_VERSION}" "platforms;android-28" "platform-tools" "build-tools;29.0.2" "emulator" --channel=0
 RUN yes | ~/Android/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null
 #RUN wget https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip
 
@@ -274,6 +274,7 @@ RUN wget -c https://github.com/bulletphysics/bullet3/archive/${BULLET_VERSION}.t
 
 # Setup GL4ES_VERSION
 RUN wget -c https://github.com/Duron27/gl4es/archive/refs/tags/${GL4ES_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/
+RUN patch -d ${HOME}/src/gl4es-${GL4ES_VERSION} -p1 -t -N < /root/patches/gl4es/enable_shaders.patch
 RUN cd ${HOME}/src/gl4es-${GL4ES_VERSION} && \
     ndk-build ${NDK_BUILD_FLAGS} && \
     cp libs/${ABI}/libGL.so /root/prefix/lib/ && cp -r ${HOME}/src/gl4es-${GL4ES_VERSION}/include /root/prefix/include/gl4es/ && cp -r ${HOME}/src/gl4es-${GL4ES_VERSION}/include /root/prefix/
@@ -328,8 +329,7 @@ RUN bash -c "rm ${PREFIX}/lib/libluajit*.so*"
 
 # Setup LIBCOLLADA_VERSION
 RUN wget -c https://github.com/rdiankov/collada-dom/archive/v${COLLADA_DOM_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/ && cd ${HOME}/src/collada-dom-${COLLADA_DOM_VERSION} && \
-    wget https://raw.githubusercontent.com/Duron27/Dockers/experimental/libcollada-minizip-fix.patch && \
-    patch -ruN dom/external-libs/minizip-1.1/ioapi.h < libcollada-minizip-fix.patch && \
+    patch -ruN dom/external-libs/minizip-1.1/ioapi.h < /root/patches/libcollada-minizip-fix.patch && \
     mkdir -p ${HOME}/src/collada-dom-${COLLADA_DOM_VERSION}/build && cd $_ && \
     cmake .. \
         ${COMMON_CMAKE_ARGS} \
@@ -391,9 +391,11 @@ RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/open
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/0009-windowmanagerimp-always-show-mouse-when-possible-pat.patch
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/0010-android-fix-context-being-lost-on-app-minimize.patch
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/fix-build.patch
-RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/postprocessing1.patch
+RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/post-processing-hud-resize.patch
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/Improved_grass.patch
-RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/shaders1.patch
+RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/shaders.patch
+RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/Post_additions.patch
+RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/fix_shadows.patch
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/sdlfixreversed.patch
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/navmeshtool.patch
 RUN patch ${HOME}/src/openmw-${OPENMW_VERSION}/CMakeLists.txt < /root/patches/openmw/openmw_ignoreffmpegversion.patch
@@ -441,6 +443,9 @@ RUN rm -rf "${DST}" && mkdir -p "${DST}"
 # Copy over Resources
 RUN cp -r "${SRC}/resources" "${DST}"
 
+# Add Zackhasacat's Controller Mod
+#RUN cd ${DST}/resources/vfs/ && git clone https://gitlab.com/zackhasacat/controller_mode && cp -r ./controller_mode/* . && rm -rf controller_mode && cat "${DST}/resources/vfs/ControllerInterface.omwscripts" >> "${DST}/resources/vfs/builtin.omwscripts"
+
 # Global Config
 RUN mkdir -p "${DST}/openmw/"
 RUN cp "${SRC}/defaults.bin" "${DST}/openmw/"
@@ -448,6 +453,7 @@ RUN cp "${SRC}/gamecontrollerdb.txt" "${DST}/openmw/"
 RUN cat "${SRC}/openmw.cfg" | grep -v "data=" | grep -v "data-local=" >> "${DST}/openmw/openmw.base.cfg"
 RUN cat "/root/payload/app/openmw.base.cfg" >> "${DST}/openmw/openmw.base.cfg"
 RUN mkdir -p /root/payload/app/src/main/assets/libopenmw/resources && cd $_ && echo "${APP_VERSION}" >> version
+#RUN sed -i '4i\    <string name="version_info">OMW ${APP_VERSION}</string>' /root/payload/app/src/main/res/values/strings.xml
 
 # licensing info
 RUN cp "/root/payload/3rdparty-licenses.txt" "${DST}"
