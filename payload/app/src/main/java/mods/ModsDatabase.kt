@@ -24,7 +24,7 @@ import android.database.sqlite.SQLiteDatabase
 import org.jetbrains.anko.db.*
 
 class ModsDatabaseOpenHelper private constructor(ctx: Context)
-    : ManagedSQLiteOpenHelper(ctx, "ModsDatabase", null, 1) {
+    : ManagedSQLiteOpenHelper(ctx, "/storage/emulated/0/omw_nightly/config/modlist.xml", null, 1) {
 
     init {
         instance = this
