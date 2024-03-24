@@ -1,27 +1,28 @@
-From 962e6f3bf572123e858fcbc34bb63af307de0a9c Mon Sep 17 00:00:00 2001
+From c7a3bee4e62e42d49bf499b7f7b28e8e9cd7162d Mon Sep 17 00:00:00 2001
 From: sisah <jirielbunda@seznam.cz>
-Date: Fri, 10 Mar 2023 14:50:24 -0500
-Subject: [PATCH] hardcode
- 0014-settingswindow-save-user-settings-file-when-ok-is-pr.patch
+Date: Sat, 23 Mar 2024 07:53:29 -0400
+Subject: [PATCH] settings window changes
 
 ---
- apps/openmw/main.cpp                 | 3 +++
- apps/openmw/mwgui/settingswindow.cpp | 5 +++++
- 2 files changed, 8 insertions(+)
+ apps/openmw/main.cpp                      | 3 +++
+ apps/openmw/mwgui/settingswindow.cpp      | 8 ++++++++
+ apps/openmw/mwrender/renderingmanager.cpp | 3 ++-
+ 3 files changed, 13 insertions(+), 1 deletion(-)
 
 diff --git a/apps/openmw/main.cpp b/apps/openmw/main.cpp
-index 1f1c114e717..91bc0a2640c 100644
+index da1fcea4566..eba7b127677 100644
 --- a/apps/openmw/main.cpp
 +++ b/apps/openmw/main.cpp
-@@ -216,6 +216,7 @@ namespace
-         }
+@@ -217,6 +217,8 @@ namespace
      };
  }
-+Files::ConfigurationManager *g_cfgMgr;
  
++Files::ConfigurationManager *g_cfgMgr;
++
  int runApplication(int argc, char* argv[])
  {
-@@ -227,6 +228,7 @@ int runApplication(int argc, char* argv[])
+     Platform::init();
+@@ -229,6 +231,7 @@ int runApplication(int argc, char* argv[])
  
      osg::setNotifyHandler(new OSGLogHandler());
      Files::ConfigurationManager cfgMgr;
@@ -30,7 +31,7 @@ index 1f1c114e717..91bc0a2640c 100644
  
      // Android navmeshtool hack
 diff --git a/apps/openmw/mwgui/settingswindow.cpp b/apps/openmw/mwgui/settingswindow.cpp
-index 6c6a34595e0..e3c13ffc5e7 100644
+index 1060b3a20f4..2035dcd9e6d 100644
 --- a/apps/openmw/mwgui/settingswindow.cpp
 +++ b/apps/openmw/mwgui/settingswindow.cpp
 @@ -27,6 +27,7 @@
@@ -40,21 +41,53 @@ index 6c6a34595e0..e3c13ffc5e7 100644
 +#include <components/files/configurationmanager.hpp>
  #include <components/settings/values.hpp>
  #include <components/vfs/manager.hpp>
- #include <components/vfs/recursivedirectoryiterator.hpp>
-@@ -142,6 +143,7 @@ namespace
-             box->setIndexSelected(MyGUI::ITEM_NONE);
+ #include <components/widgets/sharedstatebutton.hpp>
+@@ -142,6 +143,8 @@ namespace
      }
  }
-+extern Files::ConfigurationManager *g_cfgMgr;
  
++extern Files::ConfigurationManager *g_cfgMgr;
++
  namespace MWGui
  {
-@@ -451,6 +453,8 @@ namespace MWGui
+     void SettingsWindow::configureWidgets(MyGUI::Widget* widget, bool init)
+@@ -450,6 +453,8 @@ namespace MWGui
  
      void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
      {
 +        const std::string settingspath = (g_cfgMgr->getUserConfigPath() / "settings.cfg").string();
 +        Settings::Manager::saveUser(settingspath);
-         setVisible(false);
+         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
      }
  
+@@ -609,6 +614,9 @@ namespace MWGui
+ 
+     void SettingsWindow::onMaxLightsChanged(MyGUI::ComboBox* _sender, size_t pos)
+     {
++        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
++            "#{OMWEngine:ChangeRequiresRestart}", { "#{Interface:OK}" }, true);
++
+         Settings::shaders().mMaxLights.set(8 * (pos + 1));
+         apply();
+         configureWidgets(mMainWidget, false);
+diff --git a/apps/openmw/mwrender/renderingmanager.cpp b/apps/openmw/mwrender/renderingmanager.cpp
+index aebbbb37229..86cce6d60db 100644
+--- a/apps/openmw/mwrender/renderingmanager.cpp
++++ b/apps/openmw/mwrender/renderingmanager.cpp
+@@ -1476,7 +1476,7 @@ namespace MWRender
+ 
+                 lightManager->processChangedSettings(Settings::shaders().mLightBoundsMultiplier,
+                     Settings::shaders().mMaximumLightDistance, Settings::shaders().mLightFadeStart);
+-
++/*
+                 if (it->second == "max lights" && !lightManager->usingFFP())
+                 {
+                     mViewer->stopThreading();
+@@ -1492,6 +1492,7 @@ namespace MWRender
+ 
+                     mViewer->startThreading();
+                 }
++*/
+             }
+             else if (it->first == "Post Processing" && it->second == "enabled")
+             {
