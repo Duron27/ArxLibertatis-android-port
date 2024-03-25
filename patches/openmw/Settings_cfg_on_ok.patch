@@ -57,7 +57,7 @@ index 1060b3a20f4..2035dcd9e6d 100644
      {
 +        const std::string settingspath = (g_cfgMgr->getUserConfigPath() / "settings.cfg").string();
 +        Settings::Manager::saveUser(settingspath);
-         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
+         setVisible(false);
      }
  
 @@ -609,6 +614,9 @@ namespace MWGui
