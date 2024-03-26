@@ -7,7 +7,7 @@ ENV BUILD_TYPE=release
 # App versions - change settings here
 ENV LIBJPEG_TURBO_VERSION=3.0.2
 ENV LIBPNG_VERSION=1.6.42
-ENV FREETYPE2_VERSION=2.13.2
+ENV FREETYPE2_VERSION=2-13-2
 ENV OPENAL_VERSION=1.23.1
 ENV BOOST_VERSION=1.83.0
 ENV LIBICU_VERSION=70-1
@@ -143,9 +143,9 @@ RUN wget -c http://prdownloads.sourceforge.net/libpng/libpng-${LIBPNG_VERSION}.t
     make install check_PROGRAMS= bin_PROGRAMS=
 
 # Setup FREETYPE2
-RUN wget -c https://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE2_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
-    mkdir -p ${HOME}/src/freetype-${FREETYPE2_VERSION}/build && cd $_ && \
-        ${HOME}/src/freetype-${FREETYPE2_VERSION}/configure \
+RUN wget -c https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-2-13-2/freetype-VER-${FREETYPE2_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
+    mkdir -p ${HOME}/src/freetype-VER-${FREETYPE2_VERSION}/build && cd $_ && \
+        ${HOME}/src/freetype-VER-${FREETYPE2_VERSION}/configure \
         ${COMMON_AUTOCONF_FLAGS} \
         --with-png=no && \
     make -j $(nproc) && make install
