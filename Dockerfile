@@ -143,7 +143,7 @@ RUN wget -c http://prdownloads.sourceforge.net/libpng/libpng-${LIBPNG_VERSION}.t
     make install check_PROGRAMS= bin_PROGRAMS=
 
 # Setup FREETYPE2
-RUN wget -c https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-2-13-2/freetype-VER-${FREETYPE2_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
+RUN wget -c https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-${FREETYPE2_VERSION}/freetype-VER-${FREETYPE2_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/freetype-VER-${FREETYPE2_VERSION}/build && cd $_ && \
         ${HOME}/src/freetype-VER-${FREETYPE2_VERSION}/configure \
         ${COMMON_AUTOCONF_FLAGS} \
