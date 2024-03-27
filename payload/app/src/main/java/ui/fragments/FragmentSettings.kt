@@ -20,32 +20,34 @@
 
 package ui.fragments
 
-import android.Manifest
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.preference.EditTextPreference
 import android.preference.Preference
 import android.preference.PreferenceFragment
 import android.preference.PreferenceGroup
-import androidx.core.content.ContextCompat
-
-import com.codekidlabs.storagechooser.StorageChooser
+import androidx.documentfile.provider.DocumentFile
 import com.libopenmw.openmw.R
 import file.GameInstaller
-
 import ui.activity.ConfigureControls
 import ui.activity.MainActivity
 import ui.activity.ModsActivity
 import ui.activity.SettingsActivity
+import android.os.Environment
 import utils.MyApp
 import java.util.*
 
+
 class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener {
+
+    companion object {
+        private const val REQUEST_CODE_OPEN_DOCUMENT_TREE = 12345 // Choose any unique request code
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,11 +74,11 @@ class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener 
             val sharedPref = preferenceScreen.sharedPreferences
             val inst = GameInstaller(sharedPref.getString("game_files", "")!!)
             if (!inst.check()) {
-            AlertDialog.Builder(getActivity())
-                .setTitle(R.string.no_data_files_title)
-                .setMessage(R.string.no_data_files_message)
-                .setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int -> }
-                .show()
+                AlertDialog.Builder(getActivity())
+                    .setTitle(R.string.no_data_files_title)
+                    .setMessage(R.string.no_data_files_message)
+                    .setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int -> }
+                    .show()
 
                 false
             }
@@ -89,54 +91,46 @@ class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener 
         }
 
         findPreference("game_files").setOnPreferenceClickListener {
-            if (ContextCompat.checkSelfPermission(activity,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                showError(R.string.permissions_error_title, R.string.permissions_error_message)
-            } else {
-                val chooser = StorageChooser.Builder()
-                    .withActivity(activity)
-                    .withFragmentManager(fragmentManager)
-                    .withMemoryBar(true)
-                    .allowCustomPath(true)
-                    .setType(StorageChooser.DIRECTORY_CHOOSER)
-                    .build()
-
-                chooser.show()
-
-                chooser.setOnSelectListener { path -> setupData(path) }
-            }
+            // Use ACTION_OPEN_DOCUMENT_TREE intent to allow the user to choose a directory
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+            startActivityForResult(intent, REQUEST_CODE_OPEN_DOCUMENT_TREE)
             true
         }
     }
 
-    /**
-     * Checks the specified path for a valid morrowind installation, generates config files
-     * and saves the path to shared prefs if it's valid.
-     * If it isn't, an error is displayed to the user.
-     */
-    private fun setupData(path: String) {
-        val sharedPref = preferenceScreen.sharedPreferences
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_OPEN_DOCUMENT_TREE && resultCode == Activity.RESULT_OK) {
+            data?.data?.also { uri ->
 
-        // reset the setting so that it's erased on error instead of keeping
-        // possibly stale value
-        var gameFiles = ""
+                val selectedDirectory = DocumentFile.fromTreeUri(activity, uri) ?: return
 
-        val inst = GameInstaller(path)
-        if (inst.check()) {
-            inst.setNomedia()
-            if (!inst.convertIni(sharedPref.getString("pref_encoding", GameInstaller.DEFAULT_CHARSET_PREF)!!)) {
-                showError(R.string.data_error_title, R.string.ini_error_message)
-            } else {
-                gameFiles = path
+                // Get the primary external storage directory
+                val storageDir = Environment.getExternalStorageDirectory()
+                val storagePath = storageDir.absolutePath
+
+                val path = storagePath + "/" + uri.lastPathSegment?.replace("primary:", "")
+                val iniFile = selectedDirectory.findFile("Morrowind.ini")
+                val dataFilesFolder = selectedDirectory.findFile("Data Files")
+                val sharedPref = preferenceScreen.sharedPreferences
+
+                if (iniFile != null && dataFilesFolder != null && dataFilesFolder.isDirectory) {
+                    val gameFilesPreference = findPreference("game_files")
+                    gameFilesPreference?.summary = path
+                    with(sharedPref.edit()) {
+                        putString("game_files", path)
+                        apply()
+                    }
+                } else {
+                    val gameFilesPreference = findPreference("game_files")
+                    gameFilesPreference?.summary = path
+                    showError(R.string.data_error_title, R.string.data_error_message)
+                    with(sharedPref.edit()) {
+                        putString("game_files", "")
+                        apply()
+                    }
+                }
             }
-        } else {
-            showError(R.string.data_error_title, R.string.data_error_message,
-                    "https://omw.xyz.is/game.html")
-        }
-
-        with(sharedPref.edit()) {
-            putString("game_files", gameFiles)
-            apply()
         }
     }
 
@@ -156,7 +150,6 @@ class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener 
                 (activity as MainActivity).openUrl(url)
             }
         }
-
         dialog.show()
     }
 
@@ -185,7 +178,7 @@ class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener 
             return
         if (preference is EditTextPreference) {
             if (key == "pref_uiScaling" && (preference.text == null || preference.text.isEmpty()))
-                // Show "Auto (1.23)"
+            // Show "Auto (1.23)"
                 preference.summary = MyApp.app.getString(R.string.uiScaling_auto)
                     .format(Locale.ROOT, MyApp.app.defaultScaling)
             else
@@ -203,19 +196,8 @@ class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener 
     private fun updateGammaState() {
         val sharedPref = preferenceScreen.sharedPreferences
         findPreference("pref_gamma").isEnabled =
-                sharedPref.getString("pref_graphicsLibrary_v2", "") != "gles1"
-                
-/*
-	var isnohighpenabled = false;
-        if(sharedPref.getString("pref_shadersDir_v2", "") == "modified")
-		isnohighpenabled = true
-        findPreference("pref_nohighp").isEnabled = isnohighpenabled
+            sharedPref.getString("pref_graphicsLibrary_v2", "") != "gles1"
 
-	var isAdditionalAnimSourcesEnabled = false;
-        if(sharedPref.getBoolean("gs_use_additional_animation_sources", false) == true) isAdditionalAnimSourcesEnabled = true
-        findPreference("gs_weapon_sheating").isEnabled = isAdditionalAnimSourcesEnabled
-        findPreference("gs_shield_sheating").isEnabled = isAdditionalAnimSourcesEnabled
-*/
     }
 
 }
