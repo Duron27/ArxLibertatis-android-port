@@ -22,7 +22,7 @@ docker-build:
   variables:
     DOCKER_IMAGE_NAME: "buildct-$CI_COMMIT_TAG"
   script:
-    - docker build -t "$DOCKER_IMAGE_NAME" . --progress=plain &> docker-build.log
+    - docker build -t "$DOCKER_IMAGE_NAME" . --progress=plain --build-arg="APP_VERSION=$CI_COMMIT_TAG" &> docker-build.log
     - CTID=$(docker create $DOCKER_IMAGE_NAME)
     - echo $CTID
     - docker cp $CTID:/openmw-0.49.apk openmw-android-$CI_COMMIT_TAG.apk
