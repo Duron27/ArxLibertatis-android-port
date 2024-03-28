@@ -29,7 +29,7 @@ ENV PLATFORM_TOOLS_VERSION=29.0.0
 ENV JAVA_VERSION=17
 
 # Version of Release
-ARG APP_VERSION=0.49
+ARG APP_VERSION=unkown
 
 RUN dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
     && dnf install -y xz p7zip bzip2 libstdc++-devel glibc-devel unzip which wget redhat-lsb-core python-devel doxygen nano gcc-c++ git java-11-openjdk java-${JAVA_VERSION}-openjdk\
@@ -469,4 +469,4 @@ RUN llvm-strip /root/payload/app/src/main/jniLibs/arm64-v8a/*.so
 
 # Build the APK!
 RUN cd /root/payload/ && ./gradlew assembleNightlyDebug -Dorg.gradle.java.home=/usr/lib/jvm/java-11-openjdk-11.0.22.0.7-1.fc39.x86_64
-RUN cp /root/payload/app/build/outputs/apk/nightly/debug/*.apk openmw-${APP_VERSION}.apk
+RUN cp /root/payload/app/build/outputs/apk/nightly/debug/*.apk openmw-android.apk
