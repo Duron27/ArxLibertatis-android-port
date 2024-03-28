@@ -29,7 +29,7 @@ ENV PLATFORM_TOOLS_VERSION=29.0.0
 ENV JAVA_VERSION=17
 
 # Version of Release
-ENV APP_VERSION=0.49
+ENV APP_VERSION=1.1
 
 RUN dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
     && dnf install -y xz p7zip bzip2 libstdc++-devel glibc-devel unzip which wget redhat-lsb-core python-devel doxygen nano gcc-c++ git java-11-openjdk java-${JAVA_VERSION}-openjdk\
@@ -456,8 +456,10 @@ RUN cp "${SRC}/defaults.bin" "${DST}/openmw/"
 RUN cp "${SRC}/gamecontrollerdb.txt" "${DST}/openmw/"
 RUN cat "${SRC}/openmw.cfg" | grep -v "data=" | grep -v "data-local=" >> "${DST}/openmw/openmw.base.cfg"
 RUN cat "/root/payload/app/openmw.base.cfg" >> "${DST}/openmw/openmw.base.cfg"
+#RUN echo 'data="/storage/emulated/0/omw_nightly/resources/vfs/"' >> "${DST}/openmw/openmw.base.cfg"
+#RUN echo 'content=ControllerInterface.omwscripts' >> "${DST}/openmw/openmw.base.cfg"
 RUN mkdir -p /root/payload/app/src/main/assets/libopenmw/resources && cd $_ && echo "${APP_VERSION}" >> version
-#RUN sed -i '4i\    <string name="version_info">OMW ${APP_VERSION}</string>' /root/payload/app/src/main/res/values/strings.xml
+RUN sed -i "4i\    <string name='version_info'>CaveBros Version ${APP_VERSION}</string>" /root/payload/app/src/main/res/values/strings.xml
 
 # licensing info
 RUN cp "/root/payload/3rdparty-licenses.txt" "${DST}"

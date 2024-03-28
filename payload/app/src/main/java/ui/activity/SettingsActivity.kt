@@ -47,19 +47,7 @@ class FragmentGameSettings : PreferenceFragment() {
         super.onCreate(savedInstanceState)
 
         addPreferencesFromResource(R.xml.game_settings)
-/*
-        findPreference("game_settings_game_mechanics").setOnPreferenceClickListener {
-            getPreferenceScreen().removeAll()
-            addPreferencesFromResource(R.xml.gs_game_mechanics)
-            true
-        }
 
-        findPreference("game_settings_visuals").setOnPreferenceClickListener {
-            getPreferenceScreen().removeAll()
-            addPreferencesFromResource(R.xml.gs_visuals)
-            true
-        }
-*/
         findPreference("game_settings_game_mechanics").setOnPreferenceClickListener {
             val intent = Intent(activity, Game_Mechanics_SettingsActivity::class.java)
             this.startActivity(intent)
@@ -114,20 +102,6 @@ class SettingsActivity : AppCompatActivity() {
 
         // Enable the "back" icon in the action bar
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-/*
-        // Switch tabs between categories
-        settings_tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab) {	
-                settings_flipper.displayedChild = tab.position
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab) {
-            }
-
-            override fun onTabReselected(tab: TabLayout.Tab) {
-            }
-        })
-*/
 
         fragmentManager.beginTransaction()
             .replace(R.id.settings_frame, FragmentGameSettings()).commit()

@@ -103,21 +103,13 @@
             android:title="Maximum visible distance"
             android:dialogTitle="Maximum visible distance"
             android:inputType="numberDecimal"
-            android:hint="2048"
-            android:defaultValue="2048"
+            android:hint="7168"
+            android:defaultValue="7168"
             android:summary="Maximum visible distance. Caution: this setting can dramatically affect performance, see documentation for details." />
 
         <CheckBoxPreference
             android:key="pref_display_cutout_area"
             android:title="@string/pref_display_cutout_area" />
-
-        <EditTextPreference
-            android:key="pref_gamma"
-            android:title="@string/pref_gamma"
-            android:dialogTitle="@string/pref_gamma"
-            android:inputType="numberDecimal"
-            android:hint="1.0"
-            />
 
         <ListPreference
             android:key="pref_textureShrinking_v2"
@@ -141,16 +133,6 @@
             android:key="envLine"
             android:title="@string/pref_envLine"
             />
-        
-        <ListPreference
-            android:key="pref_graphicsLibrary_v2"
-            android:title="@string/pref_graphicsLibrary"
-            android:dialogTitle="@string/pref_graphicsLibrary"
-            android:entries="@array/pref_graphicsLibrary_entries"
-            android:entryValues="@array/pref_graphicsLibrary_values"
-            android:defaultValue="@string/pref_graphicsLibrary_default"
-            android:summary="%s"
-        />
         
     </PreferenceCategory>
 
