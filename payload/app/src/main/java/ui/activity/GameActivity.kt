@@ -90,29 +90,11 @@ class GameActivity : SDLActivity() {
         System.loadLibrary("c++_shared")
         System.loadLibrary("openal")
         System.loadLibrary("SDL2")
-        if (graphicsLibrary != "gles1") {
-            try {
-                Os.setenv("OPENMW_GLES_VERSION", "2", true)
-                Os.setenv("LIBGL_ES", "2", true)
-            } catch (e: ErrnoException) {
-                Log.e("OpenMW", "Failed setting environment variables.")
-                e.printStackTrace()
-            }
-
-        }
 
         val textureShrinkingOption = prefs!!.getString("pref_textureShrinking_v2", "")
         if (textureShrinkingOption == "low") Os.setenv("LIBGL_SHRINK", "2", true)
         if (textureShrinkingOption == "medium") Os.setenv("LIBGL_SHRINK", "7", true)
         if (textureShrinkingOption == "high") Os.setenv("LIBGL_SHRINK", "6", true)
-
-        val shaderDirOption = prefs!!.getString("pref_shadersDir_v2", "")
-        if (shaderDirOption == "modified") Os.setenv("OPENMW_SHADERS", "modified", true)
-        if (shaderDirOption == "zesterer") Os.setenv("OPENMW_SHADERS", "zesterer", true)
-
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_nohighp", false) && shaderDirOption == "modified") {
-            Os.setenv("LIBGL_NOHIGHP", "1", true)
-        }
 
         Os.setenv("OSG_VERTEX_BUFFER_HINT", "VBO", true)
         Os.setenv("OPENMW_USER_FILE_STORAGE", Constants.USER_FILE_STORAGE + "/", true)
