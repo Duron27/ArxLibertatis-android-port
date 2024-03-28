@@ -28,9 +28,6 @@ ENV SDK_CMDLINE_TOOLS=10406996_latest
 ENV PLATFORM_TOOLS_VERSION=29.0.0
 ENV JAVA_VERSION=17
 
-# Version of Release
-ENV APP_VERSION=1.1
-
 RUN dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
     && dnf install -y xz p7zip bzip2 libstdc++-devel glibc-devel unzip which wget redhat-lsb-core python-devel doxygen nano gcc-c++ git java-11-openjdk java-${JAVA_VERSION}-openjdk\
     cmake
