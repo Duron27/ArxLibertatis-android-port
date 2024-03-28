@@ -50,8 +50,6 @@ RUN ~/Android/cmdline-tools/latest/bin/sdkmanager --install "ndk;${NDK_VERSION}"
 RUN yes | ~/Android/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null
 
 COPY --chmod=0755 patches /root/patches
-COPY --chmod=0755 payload /root/payload
-COPY --chmod=0755 mods /root/mods
 
 #Setup ICU for the Host
 RUN mkdir -p ${HOME}/src/icu-host-build && cd $_ && ${HOME}/src/icu-release-70-1/icu4c/source/configure --disable-tests --disable-samples --disable-icuio --disable-extras CC="gcc" CXX="g++" && make -j $(nproc)
@@ -424,6 +422,9 @@ RUN cd ${HOME}/src/openmw-${OPENMW_VERSION}/build && cmake .. \
         -DCMAKE_CXX_FLAGS=-I${PREFIX}/include/\ "${CXXFLAGS}" \
         -DMyGUI_LIBRARY=${PREFIX}/lib/libMyGUIEngineStatic.a && \
     make -j $(nproc)
+
+COPY --chmod=0755 payload /root/payload
+COPY --chmod=0755 mods /root/mods
 
 # Finalize
 RUN rm -rf /root/payload/app/wrap/ && rm -rf /root/payload/app/src/main/jniLibs/${ABI}/ && mkdir -p /root/payload/app/src/main/jniLibs/${ABI}/
