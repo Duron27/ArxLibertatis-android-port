@@ -91,6 +91,14 @@ class GameActivity : SDLActivity() {
         System.loadLibrary("openal")
         System.loadLibrary("SDL2")
 
+        try {
+            Os.setenv("OPENMW_GLES_VERSION", "2", true)
+            Os.setenv("LIBGL_ES", "2", true)
+        } catch (e: ErrnoException) {
+            Log.e("OpenMW", "Failed setting environment variables.")
+            e.printStackTrace()
+        }
+
         val textureShrinkingOption = prefs!!.getString("pref_textureShrinking_v2", "")
         if (textureShrinkingOption == "low") Os.setenv("LIBGL_SHRINK", "2", true)
         if (textureShrinkingOption == "medium") Os.setenv("LIBGL_SHRINK", "7", true)
