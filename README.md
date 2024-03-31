@@ -15,7 +15,7 @@ https://github.com/zesterer/openmw-shaders
 https://gitlab.com/glassmancody.info/omwfx-shaders
 
 Lot's of work done by Sisah!
-
+USE AT YOUR OWN RISK!
 
 # OpenMW for Android
 
