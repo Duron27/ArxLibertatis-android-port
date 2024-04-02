@@ -476,6 +476,7 @@ class MainActivity : AppCompatActivity() {
 	{
 		displayWidth = if(resolutionX == 0) dm.heightPixels else resolutionX
 		displayHeight = if(resolutionY == 0) dm.widthPixels else resolutionY
+        
         if( displayInCutoutArea == false && resolutionX == 0) {
             val cutoutRectTop = windowManager.defaultDisplay.getCutout()!!.getBoundingRectTop()
             val cutoutRectBottom = windowManager.defaultDisplay.getCutout()!!.getBoundingRectBottom()
@@ -487,6 +488,7 @@ class MainActivity : AppCompatActivity() {
 	{
 		displayWidth = if(resolutionX == 0) dm.widthPixels else resolutionX
 		displayHeight = if(resolutionY == 0) dm.heightPixels else resolutionY
+
         if( displayInCutoutArea == false && resolutionY == 0) {
             val cutoutRectLeft = windowManager.defaultDisplay.getCutout()!!.getBoundingRectLeft()
             val cutoutRectRight = windowManager.defaultDisplay.getCutout()!!.getBoundingRectRight()
