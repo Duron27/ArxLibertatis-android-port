@@ -21,53 +21,45 @@
 package ui.activity
 
 import android.annotation.SuppressLint
-import android.app.AlarmManager
 import android.app.AlertDialog
-import android.app.PendingIntent
 import android.app.ProgressDialog
-import android.content.*
+import android.content.ActivityNotFoundException
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.system.ErrnoException
 import android.system.Os
 import android.util.DisplayMetrics
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
-import com.bugsnag.android.Bugsnag
-
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.libopenmw.openmw.BuildConfig
 import com.libopenmw.openmw.R
 import constants.Constants
 import file.GameInstaller
-
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileInputStream
-import java.io.IOException
-import java.io.InputStreamReader
-
 import file.utils.CopyFilesFromAssets
 import mods.ModType
 import mods.ModsCollection
 import mods.ModsDatabaseOpenHelper
-import ui.fragments.FragmentSettings
 import permission.PermissionHelper
+import ui.fragments.FragmentSettings
 import utils.MyApp
 import utils.Utils.hideAndroidControls
-import java.util.*
-
-import android.util.Base64
-
-import android.view.DisplayCutout
-import android.graphics.Rect
-
-import android.content.res.Configuration
+import java.io.File
+import java.io.FileWriter
+import java.io.IOException
+import java.io.PrintWriter
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
     private lateinit var prefs: SharedPreferences
@@ -76,6 +68,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         MyApp.app.defaultScaling = determineScaling()
 
+        Thread.setDefaultUncaughtExceptionHandler(CaptureCrash())
         PermissionHelper.getWriteExternalStoragePermission(this@MainActivity)
         setContentView(R.layout.main)
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
@@ -822,3 +815,50 @@ class MainActivity : AppCompatActivity() {
         var resolutionY = 0
     }
 }
+
+class CaptureCrash : Thread.UncaughtExceptionHandler {
+        override fun uncaughtException(thread: Thread, throwable: Throwable) {
+            // Save crash log to a file
+            saveCrashLog(throwable)
+
+            // Terminate the app or perform any other necessary action
+            android.os.Process.killProcess(android.os.Process.myPid());
+            exitProcess(1)
+        }
+
+        private fun saveCrashLog(throwable: Throwable) {
+            try {
+
+                val logFile = File(Constants.USER_CONFIG + "/" + "crash.log")
+                if (!logFile.exists()) {
+                    logFile.createNewFile()
+                }
+
+                FileWriter(logFile, true).use { writer ->
+                    writer.append("${getCurrentDateTime()}:\t")
+                    printFullStackTrace(throwable,PrintWriter(writer))
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        private fun printFullStackTrace(throwable: Throwable, printWriter: PrintWriter) {
+            printWriter.println(throwable.toString())
+            throwable.stackTrace.forEach { element ->
+                printWriter.print("\t $element \n")
+            }
+            val cause = throwable.cause
+            if (cause != null) {
+                printWriter.print("Caused by:\t")
+                printFullStackTrace(cause, printWriter)
+            }
+            printWriter.print("\n")
+        }
+
+        fun getCurrentDateTime(): String {
+            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            return sdf.format(Date())
+        }
+
+    }
