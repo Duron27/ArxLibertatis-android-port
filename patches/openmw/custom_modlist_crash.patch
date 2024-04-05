@@ -1,0 +1,24 @@
+From 3279181837b92bc310efd7e2a9bead1d8ca602d1 Mon Sep 17 00:00:00 2001
+From: Jared Davenport <duron27@gmail.com>
+Date: Fri, 5 Apr 2024 16:23:17 +0000
+Subject: [PATCH] Update main.cpp
+
+---
+ apps/openmw/main.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/apps/openmw/main.cpp b/apps/openmw/main.cpp
+index adf50bea0ea..915cf3b7745 100644
+--- a/apps/openmw/main.cpp
++++ b/apps/openmw/main.cpp
+@@ -114,7 +114,7 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
+     {
+         if (!contentDedupe.insert(contentFile).second)
+         {
+-            Log(Debug::Error) << "Content file specified more than once: " << contentFile << ". Aborting...";
++            std::runtime_error("Content file specified more than once. If using custom openmw.cfg disable all mods including game files in launcher");
+             return false;
+         }
+     }
+--
+GitLab
