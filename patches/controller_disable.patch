@@ -1,0 +1,31 @@
+From 10aa305bdc5322fbd773e0da252297e4cb08d55b Mon Sep 17 00:00:00 2001
+From: Jared Davenport <duron27@gmail.com>
+Date: Mon, 1 Apr 2024 19:25:33 +0000
+Subject: [PATCH] Update ci_settings.lua
+
+---
+ scripts/ControllerInterface/ci_settings.lua | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/scripts/ControllerInterface/ci_settings.lua b/scripts/ControllerInterface/ci_settings.lua
+index e7b862c..3548e45 100644
+--- a/scripts/ControllerInterface/ci_settings.lua
++++ b/scripts/ControllerInterface/ci_settings.lua
+@@ -23,13 +23,13 @@ I.Settings.registerGroup {
+             key = "enableMod",
+             renderer = "checkbox",
+             name = "Enable Controler Interface",
+-            default = true
++            default = false
+         },
+         {
+             key = "enableQuickloot",
+             renderer = "checkbox",
+             name = "Enable QuickLoot",
+-            default = true
++            default = false
+         },
+         {
+             key = "iconSize",
+--
+GitLab
