@@ -835,6 +835,7 @@ class CaptureCrash : Thread.UncaughtExceptionHandler {
                 }
 
                 FileWriter(logFile, true).use { writer ->
+                    writer.append("Device: ${Build.MODEL} (API ${Build.VERSION.SDK_INT})\n")
                     writer.append("${getCurrentDateTime()}:\t")
                     printFullStackTrace(throwable,PrintWriter(writer))
                 }
