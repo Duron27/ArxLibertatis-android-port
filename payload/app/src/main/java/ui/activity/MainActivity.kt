@@ -388,6 +388,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun removeUserConfig() {
         deleteRecursive(File(Constants.USER_CONFIG))
+        File(Constants.USER_FILE_STORAGE + "/config").mkdirs()
     }
 
     /**
