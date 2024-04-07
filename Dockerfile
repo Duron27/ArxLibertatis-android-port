@@ -460,8 +460,6 @@ RUN cp "${SRC}/defaults.bin" "${DST}/openmw/"
 RUN cp "${SRC}/gamecontrollerdb.txt" "${DST}/openmw/"
 RUN cat "${SRC}/openmw.cfg" | grep -v "data=" | grep -v "data-local=" >> "${DST}/openmw/openmw.base.cfg"
 RUN cat "/root/payload/app/openmw.base.cfg" >> "${DST}/openmw/openmw.base.cfg"
-#RUN echo 'data="/storage/emulated/0/omw_nightly/resources/vfs/"' >> "${DST}/openmw/openmw.base.cfg"
-#RUN echo 'content=ControllerInterface.omwscripts' >> "${DST}/openmw/openmw.base.cfg"
 RUN mkdir -p /root/payload/app/src/main/assets/libopenmw/resources && cd $_ && echo "${APP_VERSION}" >> version
 RUN sed -i "4i\    <string name='version_info'>CaveBros Version ${APP_VERSION}</string>" /root/payload/app/src/main/res/values/strings.xml
 
