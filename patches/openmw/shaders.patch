@@ -3,6 +3,25 @@ From: sisah <jirielbunda@seznam.cz>
 Date: Thu, 15 Feb 2024 02:14:12 -0500
 Subject: [PATCH] shaders
 
+diff --git a/files/shaders/compatibility/objects.frag b/files/shaders/compatibility/objects.frag
+index 56c7abf27c7..8966a84bf05 100644
+--- a/files/shaders/compatibility/objects.frag
++++ b/files/shaders/compatibility/objects.frag
+@@ -109,11 +109,11 @@ uniform float softFalloffDepth;
+
+ #if @particleOcclusion
+ #include "lib/particle/occlusion.glsl"
+-uniform sampler2D orthoDepthMap;
++uniform highp sampler2D orthoDepthMap;
+ varying vec3 orthoDepthMapCoord;
+ #endif
+
+-uniform sampler2D opaqueDepthTex;
++uniform highp sampler2D opaqueDepthTex;
+
+ void main()
+ {
+
 diff --git a/files/shaders/lib/core/fragment.h.glsl b/files/shaders/lib/core/fragment.h.glsl
 index 1bc2a1f79ab..de41dbc7ab1 100644
 --- a/files/shaders/lib/core/fragment.h.glsl
