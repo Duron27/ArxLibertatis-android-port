@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:labs
+sudo# syntax=docker/dockerfile:labs
 FROM fedora:39
 
 #Set build type : release, debug
@@ -22,7 +22,7 @@ ENV COLLADA_DOM_VERSION=2.5.0
 ENV OSG_VERSION=69cfecebfb6dc703b42e8de39eed750a84a87489
 ENV LZ4_VERSION=1.9.3
 ENV LUAJIT_VERSION=2.1.ROLLING
-ENV OPENMW_VERSION=c1b9beb7632a324e7fb7569b288678a4e5f26549
+ENV OPENMW_VERSION=7d0720581545553144963e03243fae071e142793
 ENV NDK_VERSION=26.1.10909125
 ENV SDK_CMDLINE_TOOLS=10406996_latest
 ENV PLATFORM_TOOLS_VERSION=29.0.0
@@ -71,9 +71,9 @@ ENV clang=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang
 ENV clang++=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang++
 
 # Global C, CXX and LDFLAGS
-ENV CFLAGS="-fPIC -O3 -flto"
-ENV CXXFLAGS="-fPIC -O3 -frtti -fexceptions -flto"
-ENV LDFLAGS="-fPIC -Wl,--undefined-version -flto -fuse-ld=lld"
+ENV CFLAGS="-fPIC -O3"
+ENV CXXFLAGS="-fPIC -O3 -frtti -fexceptions"
+ENV LDFLAGS="-fPIC -Wl,--undefined-version -fuse-ld=lld"
 
 ENV COMMON_CMAKE_ARGS \
   "-DCMAKE_TOOLCHAIN_FILE=/root/Android/ndk/${NDK_VERSION}/build/cmake/android.toolchain.cmake" \
@@ -270,13 +270,6 @@ RUN wget -c https://github.com/bulletphysics/bullet3/archive/${BULLET_VERSION}.t
         -DBULLET2_MULTITHREADING=ON && \
     make -j $(nproc) && make install
 
-# Setup GL4ES_VERSION
-RUN wget -c https://github.com/Duron27/gl4es/archive/refs/tags/${GL4ES_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/
-RUN patch -d ${HOME}/src/gl4es-${GL4ES_VERSION} -p1 -t -N < /root/patches/gl4es/enable_shaders.patch
-RUN cd ${HOME}/src/gl4es-${GL4ES_VERSION} && \
-    ndk-build ${NDK_BUILD_FLAGS} && \
-    cp libs/${ABI}/libGL.so /root/prefix/lib/ && cp -r ${HOME}/src/gl4es-${GL4ES_VERSION}/include /root/prefix/include/gl4es/ && cp -r ${HOME}/src/gl4es-${GL4ES_VERSION}/include /root/prefix/
-
 # Setup MYGUI
 RUN wget -c https://github.com/MyGUI/mygui/archive/MyGUI${MYGUI_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/mygui-MyGUI${MYGUI_VERSION}/build && cd $_ && \
@@ -339,12 +332,9 @@ RUN wget -c https://github.com/rdiankov/collada-dom/archive/v${COLLADA_DOM_VERSI
     make -j $(nproc) && make install
 
 # Setup OPENSCENEGRAPH_VERSION
-RUN wget -c https://github.com/openmw/osg/archive/${OSG_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/ && \
-    mkdir -p ${HOME}/src/osg-${OSG_VERSION}/build && cd $_ && \
-    patch -d ${HOME}/src/osg-${OSG_VERSION} -p1 -t -N < /root/patches/osg/osgcombined.patch && \
+RUN cd /root/src && git clone https://github.com/vsgopenmw-dev/VulkanSceneGraph && mkdir -p VulkanSceneGraph/build && cd $_ && \
     cmake .. \
         ${COMMON_CMAKE_ARGS} \
-        -DOPENGL_PROFILE=GL1 \
         -DDYNAMIC_OPENTHREADS=OFF \
         -DDYNAMIC_OPENSCENEGRAPH=OFF \
         -DBUILD_OSG_PLUGIN_OSG=ON \
@@ -361,6 +351,7 @@ RUN wget -c https://github.com/openmw/osg/archive/${OSG_VERSION}.tar.gz -O - | t
         -DFREETYPE_DIR=${PREFIX}/include/ \
         -DCOLLADA_INCLUDE_DIR=${PREFIX}/include/collada-dom2.5 \
         -DCOLLADA_DIR=${PREFIX}/include/collada-dom2.5/1.4 \
+        -DVulkan_INCLUDE_DIR=/root/Android/ndk/26.1.10909125/sources/third_party/vulkan/src/include \
         -DOSG_GL1_AVAILABLE=ON \
         -DOSG_GL2_AVAILABLE=OFF \
         -DOSG_GL3_AVAILABLE=OFF \
@@ -376,30 +367,17 @@ RUN wget -c https://github.com/openmw/osg/archive/${OSG_VERSION}.tar.gz -O - | t
         -DBUILD_OSG_PLUGINS_BY_DEFAULT=OFF \
         -DBUILD_OSG_DEPRECATED_SERIALIZERS=OFF \
         -DOSG_FIND_3RD_PARTY_DEPS=OFF \
-        -DOPENGL_INCLUDE_DIR=${PREFIX}/include/gl4es/ \
         -DCMAKE_CXX_FLAGS=-Dauto_ptr=unique_ptr\ -I${PREFIX}/include/freetype2/\ "${CXXFLAGS}" && \
     make -j $(nproc) && make install
 
-# Setup OPENMW_VERSION
-RUN wget -c https://github.com/OpenMW/openmw/archive/${OPENMW_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/ && \
-    mkdir -p ${HOME}/src/openmw-${OPENMW_VERSION}/build && cd $_
-RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/cmakefix.patch
-RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/Settings_cfg_on_ok.patch
-RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/0001-loadingscreen-disable-for-now.patch
-RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/0009-windowmanagerimp-always-show-mouse-when-possible-pat.patch
-RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/0010-android-fix-context-being-lost-on-app-minimize.patch
-RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/fix-build.patch
-RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/post-processing-hud-resize.patch
-RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/Improved_grass.patch
-RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/shaders.patch
-RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/Post_additions.patch
-RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/fix_shadows.patch
-RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/sdlfixreversed.patch
-RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/navmeshtool.patch
-RUN patch ${HOME}/src/openmw-${OPENMW_VERSION}/CMakeLists.txt < /root/patches/openmw/openmw_ignoreffmpegversion.patch
-RUN cp /root/patches/openmw/android_main.cpp /root/src/openmw-${OPENMW_VERSION}/apps/openmw/android_main.cpp
+RUN pwd
 
-RUN cd ${HOME}/src/openmw-${OPENMW_VERSION}/build && cmake .. \
+
+# Setup OPENMW_VERSION
+RUN cd root/src && git clone https://github.com/vsgopenmw-dev/vsgopenmw && mkdir -p vsgopenmw/build && cd $_
+RUN cp /root/patches/openmw/android_main.cpp /root/src/vsgopenmw/apps/openmw/android_main.cpp
+
+RUN cd ${HOME}/src/vsgopenmw/build && cmake .. \
         ${COMMON_CMAKE_ARGS} \
         -DBUILD_BSATOOL=0 \
         -DBUILD_NIFTEST=0 \
@@ -443,16 +421,6 @@ RUN rm -rf "${DST}" && mkdir -p "${DST}"
 
 # Copy over Resources
 RUN cp -r "${SRC}/resources" "${DST}"
-
-# Copy over Mods
-RUN cd ${DST}/resources/vfs/ && cp -r /root/mods/* .
-
-# Add Zackhasacat's Controller Mod
-RUN cd ${DST}/resources/vfs/ && git clone https://gitlab.com/zackhasacat/controller_mode && \
-    patch -d ${DST}/resources/vfs/controller_mode -p1 -t -N < /root/patches/controller_disable.patch && \
-    cp -r ./controller_mode/* . && \
-    rm -rf controller_mode && \
-    cat "${DST}/resources/vfs/ControllerInterface.omwscripts" >> "${DST}/resources/vfs/builtin.omwscripts"
 
 # Global Config
 RUN mkdir -p "${DST}/openmw/"
