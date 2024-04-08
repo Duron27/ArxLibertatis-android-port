@@ -1,4 +1,4 @@
-sudo# syntax=docker/dockerfile:labs
+# syntax=docker/dockerfile:labs
 FROM fedora:39
 
 #Set build type : release, debug
