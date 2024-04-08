@@ -542,14 +542,14 @@ class MainActivity : AppCompatActivity() {
         writeSetting("Shaders", "auto use terrain normal maps", if(prefs.getBoolean("gs_auto_use_terrain_normal_maps", false)) "true" else "false")
         writeSetting("Shaders", "auto use terrain specular maps", if(prefs.getBoolean("gs_auto_use_terrain_specular_maps", false)) "true" else "false")
         writeSetting("Shaders", "apply lighting to environment maps", if(prefs.getBoolean("gs_bump_map_local_lighting", false)) "true" else "false")
+        writeSetting("Shaders", "soft particles", if(prefs.getBoolean("gs_soft_particles", false)) "true" else "false")
 
         // Visuals fog
         writeSetting("Fog", "radial fog", if(prefs.getBoolean("gs_radial_fog", false)) "true" else "false")
         writeSetting("Fog", "exponential fog", if(prefs.getBoolean("gs_exponential_fog", false)) "true" else "false")
         writeSetting("Fog", "sky blending", if(prefs.getBoolean("gs_sky_blending", false)) "true" else "false")
 
-        // Visuals PostProcessing
-        writeSetting("Post Processing", "soft particles", if(prefs.getBoolean("gs_soft_particles", false)) "true" else "false")
+        // Visuals PostProcessing        
         writeSetting("Post Processing", "transparent postpass", if(prefs.getBoolean("gs_transparent_postpass", false)) "true" else "false")
 
         // Animations
