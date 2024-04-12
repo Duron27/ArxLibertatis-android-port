@@ -22,7 +22,7 @@ ENV COLLADA_DOM_VERSION=2.5.0
 ENV OSG_VERSION=69cfecebfb6dc703b42e8de39eed750a84a87489
 ENV LZ4_VERSION=1.9.3
 ENV LUAJIT_VERSION=2.1.ROLLING
-ENV OPENMW_VERSION=c1b9beb7632a324e7fb7569b288678a4e5f26549
+ENV OPENMW_VERSION=c6921d529296d7a0b98bd24b87a688674300b204
 ENV NDK_VERSION=26.1.10909125
 ENV SDK_CMDLINE_TOOLS=10406996_latest
 ENV PLATFORM_TOOLS_VERSION=29.0.0
@@ -71,9 +71,9 @@ ENV clang=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang
 ENV clang++=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang++
 
 # Global C, CXX and LDFLAGS
-ENV CFLAGS="-fPIC -O3 -flto"
-ENV CXXFLAGS="-fPIC -O3 -frtti -fexceptions -flto"
-ENV LDFLAGS="-fPIC -Wl,--undefined-version -flto -fuse-ld=lld"
+ENV CFLAGS="-fPIC -O3"
+ENV CXXFLAGS="-fPIC -O3 -frtti -fexceptions"
+ENV LDFLAGS="-fPIC -Wl,--undefined-version -fuse-ld=lld"
 
 ENV COMMON_CMAKE_ARGS \
   "-DCMAKE_TOOLCHAIN_FILE=/root/Android/ndk/${NDK_VERSION}/build/cmake/android.toolchain.cmake" \

@@ -40,7 +40,7 @@ index 1bc2a1f79ab..de41dbc7ab1 100644
 +    return texture2D(reflectionMap, uv);
 +}
 
- #if @refraction_enabled
+ #if @waterRefraction
 -vec4 sampleRefractionMap(vec2 uv);
 -float sampleRefractionDepthMap(vec2 uv);
 +uniform sampler2D refractionMap;
