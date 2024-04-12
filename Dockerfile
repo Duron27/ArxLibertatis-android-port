@@ -61,6 +61,7 @@ ENV ABI=arm64-v8a
 ENV ARCH=aarch64
 ENV NDK_TRIPLET=${ARCH}-linux-android
 ENV TOOLCHAIN=/root/Android/ndk/${NDK_VERSION}/toolchains/llvm/prebuilt/linux-x86_64
+ENV NDK_SYSROOT=${TOOLCHAIN}/sysroot/
 ENV AR=${TOOLCHAIN}/bin/llvm-ar
 ENV LD=${TOOLCHAIN}/bin/ld
 ENV RANLIB=${TOOLCHAIN}/bin/llvm-ranlib
