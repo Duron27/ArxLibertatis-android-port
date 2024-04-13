@@ -123,7 +123,7 @@ index a7cccbf7876..19a6d87a0e4 100644
 @@ -17,7 +17,7 @@ vec4 applyFogAtDist(vec4 color, float euclideanDist, float linearDist, float far
      float fogValue = clamp((dist - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
  #endif
- #ifdef ADDITIVE_BLENDING
+ #if defined(ADDITIVE_BLENDING)
 -    color.xyz *= 1.0 - fogValue;
 +    color.xyz = mix(color.xyz, gl_Fog.color.xyz, fogValue);
  #else
@@ -132,7 +132,7 @@ index a7cccbf7876..19a6d87a0e4 100644
 @@ -26,7 +26,7 @@ vec4 applyFogAtDist(vec4 color, float euclideanDist, float linearDist, float far
      float fadeValue = clamp((far - dist) / (far - skyBlendingStart), 0.0, 1.0);
      fadeValue *= fadeValue;
- #ifdef ADDITIVE_BLENDING
+ #if defined(ADDITIVE_BLENDING)
 -    color.xyz *= fadeValue;
 +    color.xyz = mix(sampleSkyColor(gl_FragCoord.xy / screenRes), color.xyz, fadeValue);
  #else
