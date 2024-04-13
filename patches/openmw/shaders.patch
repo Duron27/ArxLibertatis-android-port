@@ -143,24 +143,28 @@ index 3174384212e..8510a0933c1 100644
 
  varying vec2 uv;
 
- diff --git a/files/shaders/compatibility/fog.glsl b/files/shaders/compatibility/fog.glsl
-index a7cccbf7876..19a6d87a0e4 100644
+diff --git a/files/shaders/compatibility/fog.glsl b/files/shaders/compatibility/fog.glsl
+index a7cccbf7876..a856e9f929d 100644
 --- a/files/shaders/compatibility/fog.glsl
 +++ b/files/shaders/compatibility/fog.glsl
-@@ -17,7 +17,7 @@ vec4 applyFogAtDist(vec4 color, float euclideanDist, float linearDist, float far
+@@ -16,8 +16,8 @@ vec4 applyFogAtDist(vec4 color, float euclideanDist, float linearDist, float far
+ #else
      float fogValue = clamp((dist - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
  #endif
- #if defined(ADDITIVE_BLENDING)
+-#ifdef ADDITIVE_BLENDING
 -    color.xyz *= 1.0 - fogValue;
++#if defined(ADDITIVE_BLENDING)
 +    color.xyz = mix(color.xyz, gl_Fog.color.xyz, fogValue);
  #else
      color.xyz = mix(color.xyz, gl_Fog.color.xyz, fogValue);
  #endif
-@@ -26,7 +26,7 @@ vec4 applyFogAtDist(vec4 color, float euclideanDist, float linearDist, float far
+@@ -25,8 +25,8 @@ vec4 applyFogAtDist(vec4 color, float euclideanDist, float linearDist, float far
+ #if @skyBlending
      float fadeValue = clamp((far - dist) / (far - skyBlendingStart), 0.0, 1.0);
      fadeValue *= fadeValue;
- #if defined(ADDITIVE_BLENDING)
+-#ifdef ADDITIVE_BLENDING
 -    color.xyz *= fadeValue;
++#if defined(ADDITIVE_BLENDING)
 +    color.xyz = mix(sampleSkyColor(gl_FragCoord.xy / screenRes), color.xyz, fadeValue);
  #else
      color.xyz = mix(sampleSkyColor(gl_FragCoord.xy / screenRes), color.xyz, fadeValue);
