@@ -22,6 +22,33 @@ index 56c7abf27c7..8966a84bf05 100644
  void main()
  {
 
+diff --git a/files/shaders/compatibility/debug.frag b/files/shaders/compatibility/debug.frag
+index a92b406d46b..041562fc0e2 100644
+--- a/files/shaders/compatibility/debug.frag
++++ b/files/shaders/compatibility/debug.frag
+@@ -4,7 +4,7 @@
+ 
+ varying vec3 vertexNormal;
+ 
+-uniform bool useAdvancedShader = false;
++uniform bool useAdvancedShader;
+ 
+ void main()
+ {
+diff --git a/files/shaders/compatibility/debug.vert b/files/shaders/compatibility/debug.vert
+index 47d5337a66f..a1fa462f397 100644
+--- a/files/shaders/compatibility/debug.vert
++++ b/files/shaders/compatibility/debug.vert
+@@ -6,7 +6,7 @@ uniform vec3 color;
+ uniform vec3 trans;
+ uniform vec3 scale;
+ uniform bool useNormalAsColor;
+-uniform bool useAdvancedShader = false;
++uniform bool useAdvancedShader;
+ 
+ centroid varying vec4 passColor;
+ varying vec3 vertexNormal;
+
 diff --git a/files/shaders/lib/core/fragment.h.glsl b/files/shaders/lib/core/fragment.h.glsl
 index 1bc2a1f79ab..de41dbc7ab1 100644
 --- a/files/shaders/lib/core/fragment.h.glsl
