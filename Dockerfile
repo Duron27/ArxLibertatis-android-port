@@ -50,7 +50,7 @@ RUN ~/Android/cmdline-tools/latest/bin/sdkmanager --install "ndk;${NDK_VERSION}"
 RUN yes | ~/Android/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null
 
 COPY --chmod=0755 patches /root/patches
-COPY .secure_files /
+COPY .secure_files /.secure_files
 
 #Setup ICU for the Host
 RUN mkdir -p ${HOME}/src/icu-host-build && cd $_ && ${HOME}/src/icu-release-70-1/icu4c/source/configure --disable-tests --disable-samples --disable-icuio --disable-extras CC="gcc" CXX="g++" && make -j $(nproc)
