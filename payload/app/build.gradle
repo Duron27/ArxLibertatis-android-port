@@ -3,6 +3,12 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.bugsnag.android.gradle'
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('.secure_files/release-keystore.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 ext {
     versionFile = new File(project.rootDir, 'app/src/main/assets/libopenmw/resources/version')
     calculateVersion = {
@@ -13,6 +19,15 @@ ext {
 
 android {
     compileSdkVersion 29
+
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storePassword keystoreProperties['storePassword']
+        }
+    }
 
     sourceSets {
         main {
@@ -35,7 +50,7 @@ android {
         targetSdkVersion 29
 
         ndk {
-            abiFilters "arm64-v8a", "armeabi-v7a", "x86", "x86_64"
+            abiFilters "arm64-v8a", "x86", "x86_64"
         }
     }
 
@@ -51,10 +66,12 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
         }
 
         debug {
             applicationIdSuffix ".debug"
+            signingConfig signingConfigs.debug
             debuggable false
         }
     }
