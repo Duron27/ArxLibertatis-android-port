@@ -1,18 +1,27 @@
-# This repo and the github one are based on the hard work of many people. most of the credit is not mine.
+This repo and the github one are based on the hard work of many people. most of the credit is not mine.
+USE AT YOUR OWN RISK!
 
-added shaders from 
-https://github.com/zesterer/openmw-shaders
-https://gitlab.com/glassmancody.info/omwfx-shaders
+Using shaders from:
+    https://github.com/zesterer/openmw-shaders
+    https://gitlab.com/glassmancody.info/omwfx-shaders
 
-Lot's of work done by Sisah!
+Includes:
+    https://gitlab.com/bmwinger/delta-plugin/-/tree/master
+    https://github.com/rfuzzo/plox
+
 USE AT YOUR OWN RISK!
 
 # OpenMW for Android
-
 To build the docker use the command "sudo docker build -t dockerfile . --progress=plain"
 to run it use "sudo docker run -it dockerfile"
 
 the apk will be at the root directrory
+
+# Things I plan to add in the future
+PLOX - load order sorter
+TES3MP - this is a dream...maybe way way beyond my skills
+Some kind of cloud syncing for mod list and saves
+Finish up delta shell commands in the launcher
 
 # New in version 1.3 - Not released yet
 Bug fixes:
@@ -24,6 +33,7 @@ Added:
     Better out of water View (Snells window)- Thanks Capo
     Keystone, now you can update instead of needing to uninstall the old launcher and installing the new one - Thanks Casper!
     Delta plugin, still working out the in game shell commands sections but the plugin is compiled and works.
+    Latest OpenMW build
 
 # New in version 1.2
 Bug fixes:
