@@ -101,16 +101,13 @@ class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener 
         if (requestCode == REQUEST_CODE_OPEN_DOCUMENT_TREE && resultCode == Activity.RESULT_OK) {
             data?.data?.also { uri ->
 
-                val selectedDirectory = DocumentFile.fromTreeUri(activity, uri) ?: return
-
-                // Get the primary external storage directory
-                val storageDir = Environment.getExternalStorageDirectory()
-                val storagePath = storageDir.absolutePath
-
-                val path = storagePath + "/" + uri.lastPathSegment?.replace("primary:", "")
-                val iniFile = selectedDirectory.findFile("Morrowind.ini")
-                val dataFilesFolder = selectedDirectory.findFile("Data Files")
-                val sharedPref = preferenceScreen.sharedPreferences
+            val selectedDirectory = DocumentFile.fromTreeUri(activity, uri) ?: return
+            val storageDir = Environment.getExternalStorageDirectory()
+            val storagePath = storageDir.absolutePath
+            val path = storagePath + "/" + uri.lastPathSegment?.replace("primary:", "")
+            val iniFile = selectedDirectory.findFile("Morrowind.ini")
+            val dataFilesFolder = selectedDirectory.findFile("Data Files")
+            val sharedPref = preferenceScreen.sharedPreferences
 
                 if (iniFile != null && dataFilesFolder != null && dataFilesFolder.isDirectory) {
                     val gameFilesPreference = findPreference("game_files")
@@ -120,13 +117,44 @@ class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener 
                         apply()
                     }
                 } else {
-                    val gameFilesPreference = findPreference("game_files")
-                    gameFilesPreference?.summary = path
-                    showError(R.string.data_error_title, R.string.data_error_message)
-                    with(sharedPref.edit()) {
-                        putString("game_files", "")
-                        apply()
+                    val builder = AlertDialog.Builder(activity)
+                    val input = EditText(activity)
+                    builder.setView(input)
+                    builder.setTitle("Enter a path that contains both the Morrowind.ini file and Data Files directory")
+                    builder.setPositiveButton("OK") { _, _ ->
+                    val pathtext = input.text.toString()
+                        if (pathtext != null && !pathtext.isEmpty()) {
+                            val iniFile = File(
+                                pathtext,
+                                "Morrowind.ini"
+                            ) // Assuming ini file is named iniFile.ini
+                            val dataFilesFolder = File(pathtext, "Data Files")
+                            if (iniFile.exists() && dataFilesFolder.isDirectory) {
+                                val gameFilesPreference = findPreference("game_files")
+                                gameFilesPreference?.summary = pathtext
+                                with(sharedPref.edit()) {
+                                    putString("game_files", pathtext)
+                                    apply()
+                                }
+                            } else {
+                                showError(R.string.data_error_title, R.string.data_error_message)
+                                with(sharedPref.edit()) {
+                                    putString("game_files", "")
+                                    apply()
+
+                                }
+                            }
+                        }
+                }
+                    builder.setNegativeButton("Cancel") {
+                    dialog, _ -> dialog.cancel()
+                        showError(R.string.data_error_title, R.string.data_error_message)
+                        with(sharedPref.edit()) {
+                            putString("game_files", "")
+                            apply()
+                        }
                     }
+                    builder.show()
                 }
             }
         }
