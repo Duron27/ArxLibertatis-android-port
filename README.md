@@ -44,7 +44,10 @@ Bug fixes:
 -   Fixed bug where Zackhasacat's controller mod would randomly be enabled
 
 Added:
--   android's built in directory picker and removed storagechooser
+-   android's built in directory picker
+
+Removed:
+-   Storagechooser
 
 # New in version 1.0
 Bug fixes:
