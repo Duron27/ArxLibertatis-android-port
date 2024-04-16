@@ -36,6 +36,7 @@ Added:
 -   Keystone, now you can update instead of needing to uninstall the old launcher and installing the new one - Thanks Casper!
 -   Delta plugin, still working out the in game shell commands sections but the plugin is compiled and works.
 -   Latest OpenMW build
+-   Manual directory text input if proper path isnt displayed
 
 # New in version 1.2
 Bug fixes:
