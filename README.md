@@ -41,19 +41,22 @@ Bug fixes:
 
 # New in version 1.1
 Bug fixes:
-    Fixed bug where Zackhasacat's controller mod would randomly be enabled
+-    Fixed bug where Zackhasacat's controller mod would randomly be enabled
 
 Added:
-    android's built in directory picker and removed storagechooser
+-    android's built in directory picker and removed storagechooser
 
 # New in version 1.0
 Bug fixes:
-    Fixed bug where settings in game are saved after clicking "ok" - Thanks Sisah
-    Fixed bug where screen size wouldn't display properly if cut out area wasn't used - Thanks Sisah
-    Fixed bug where if you reset user config files starting the game would be an endless loop.
+-    Fixed bug where settings in game are saved after clicking "ok" - Thanks Sisah
+-    Fixed bug where screen size wouldn't display properly if cut out area wasn't used - Thanks Sisah
+-    Fixed bug where if you reset user config files starting the game would be an endless loop.
 
 Added:
-    built in shaders in launcher enable fn keys then in game settings enable post processing, then hit F2
+-    built in shaders in launcher enable fn keys then in game settings enable post processing, then hit F2
 
 Removed:
-    old code and updated OpenMW        
+-    old code and updated OpenMW    
+
+
+     
