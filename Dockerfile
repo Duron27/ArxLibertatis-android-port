@@ -490,7 +490,7 @@ RUN wget https://sh.rustup.rs -O rustup.sh \
 ENV PATH=${PATH}:/root/.cargo/bin
 
 RUN echo "[target.aarch64-linux-android]" >> /root/.cargo/config
-RUN echo 'linker = "/root/Android/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang"' >> /root/.cargo/config
+RUN echo "linker = \"${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang\"" >> /root/.cargo/config
 
 RUN cd root/src && git clone https://gitlab.com/bmwinger/delta-plugin && cd delta-plugin && cargo build --target aarch64-linux-android --release
 RUN cp /root/src/delta-plugin/target/aarch64-linux-android/release/delta_plugin ${DST}/resources 
