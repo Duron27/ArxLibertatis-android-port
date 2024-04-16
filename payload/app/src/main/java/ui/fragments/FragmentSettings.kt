@@ -27,10 +27,12 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
+import android.os.Environment
 import android.preference.EditTextPreference
 import android.preference.Preference
 import android.preference.PreferenceFragment
 import android.preference.PreferenceGroup
+import android.widget.EditText
 import androidx.documentfile.provider.DocumentFile
 import com.libopenmw.openmw.R
 import file.GameInstaller
@@ -38,10 +40,9 @@ import ui.activity.ConfigureControls
 import ui.activity.MainActivity
 import ui.activity.ModsActivity
 import ui.activity.SettingsActivity
-import android.os.Environment
 import utils.MyApp
-import java.util.*
-
+import java.io.File
+import java.util.Locale
 
 class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener {
 
