@@ -11,11 +11,11 @@ Includes:
 
 USE AT YOUR OWN RISK!
 
-# OpenMW for Android
-To build the docker use the command "sudo docker build -t dockerfile . --progress=plain"
-to run it use "sudo docker run -it dockerfile"
+# OpenMW for Android in a docker!
 
-the apk will be at the root directrory
+-   To build the docker use the command "sudo docker build -t dockerfile . --progress=plain"
+-   To run it use "sudo docker run -it dockerfile"
+-   The apk will be at the root directory
 
 # Things I plan to add in the future
 -   PLOX - load order sorter
@@ -44,7 +44,7 @@ Bug fixes:
 -   Fixed bug where Zackhasacat's controller mod would randomly be enabled
 
 Added:
--   android's built in directory picker
+-   Android's built in directory picker
 
 Removed:
 -   Storagechooser
@@ -56,10 +56,10 @@ Bug fixes:
 -   Fixed bug where if you reset user config files starting the game would be an endless loop.
 
 Added:
--   built in shaders in launcher enable fn keys then in game settings enable post processing, then hit F2
+-   Built in shaders in launcher enable fn keys then in game settings enable post processing, then hit F2
 
 Removed:
--   old code and updated OpenMW    
+-   Old code and updated OpenMW    
 
 
      
