@@ -18,26 +18,26 @@ to run it use "sudo docker run -it dockerfile"
 the apk will be at the root directrory
 
 # Things I plan to add in the future
-PLOX - load order sorter
-TES3MP - this is a dream...maybe way way beyond my skills
-Some kind of cloud syncing for mod list and saves
-Finish up delta shell commands in the launcher
+-    PLOX - load order sorter
+-    TES3MP - this is a dream...maybe way way beyond my skills
+-    Some kind of cloud syncing for mod list and saves
+-    Finish up delta shell commands in the launcher
 
 # New in version 1.3 - Not released yet
 Bug fixes:
-    Fixed android studio not finding libc++
-    Fixed shader setting in wrong location
-    Fixed fog blending - Thanks Sisah
+-    Fixed android studio not finding libc++
+-    Fixed shader setting in wrong location
+-    Fixed fog blending - Thanks Sisah
 
 Added:
-    Better out of water View (Snells window)- Thanks Capo
-    Keystone, now you can update instead of needing to uninstall the old launcher and installing the new one - Thanks Casper!
-    Delta plugin, still working out the in game shell commands sections but the plugin is compiled and works.
-    Latest OpenMW build
+-    Better out of water View (Snells window)- Thanks Capo
+-    Keystone, now you can update instead of needing to uninstall the old launcher and installing the new one - Thanks Casper!
+-    Delta plugin, still working out the in game shell commands sections but the plugin is compiled and works.
+-    Latest OpenMW build
 
 # New in version 1.2
 Bug fixes:
-    Fixed bug where gl4es would cause a crash - Thanks Sisah
+-    Fixed bug where gl4es would cause a crash - Thanks Sisah
 
 # New in version 1.1
 Bug fixes:
