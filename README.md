@@ -11,7 +11,7 @@ Includes:
 
 USE AT YOUR OWN RISK!
 
-# OpenMW for Android in a docker!
+# Building OpenMW for Android in a docker!
 
 -   To build the docker use the command "sudo docker build -t dockerfile . --progress=plain"
 -   To run it use "sudo docker run -it dockerfile"
