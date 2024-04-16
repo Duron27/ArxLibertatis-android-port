@@ -22,6 +22,8 @@ USE AT YOUR OWN RISK!
 -   TES3MP - this is a dream...maybe way way beyond my skills
 -   Some kind of cloud syncing for mod list and saves
 -   Finish up delta shell commands in the launcher
+-   Dxt hardware support - Sisah
+-   Full texture decompression to remove need for Dxt - faster gameplay but huge storage usage
 
 # New in version 1.3 - Not released yet
 Bug fixes:
