@@ -120,7 +120,8 @@ class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener 
                     val builder = AlertDialog.Builder(activity)
                     val input = EditText(activity)
                     builder.setView(input)
-                    builder.setTitle("Enter a path that contains both the Morrowind.ini file and Data Files directory")
+                    builder.setTitle(getString(R.string.data_error_title))
+                    builder.setMessage(getString(R.string.data_error_message))
                     builder.setPositiveButton("OK") { _, _ ->
                     val pathtext = input.text.toString()
                         if (pathtext != null && !pathtext.isEmpty()) {
