@@ -24,6 +24,7 @@ USE AT YOUR OWN RISK!
 -   Finish up delta shell commands in the launcher
 -   Dxt hardware support - Sisah
 -   Full texture decompression to remove need for Dxt - faster gameplay but huge storage usage
+-   Toast for duplicate mods
 
 # New in version 1.3 - Not released yet
 Bug fixes:
