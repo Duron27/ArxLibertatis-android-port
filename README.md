@@ -24,8 +24,6 @@ USE AT YOUR OWN RISK!
 -   TES3MP - this is a dream...maybe way way beyond my skills
 -   Some kind of cloud syncing for mod list and saves
 -   Finish up delta shell commands in the launcher
--   Dxt hardware support - Sisah
--   Full texture decompression to remove need for Dxt - faster gameplay but huge storage usage
 -   Toast for duplicate mods
 
 # New in version 1.3 - Not released yet
@@ -35,11 +33,13 @@ Bug fixes:
 -   Fixed fog blending - Thanks Sisah
 
 Added:
+-   Dxt hardware support - Sisah
 -   Better out of water View (Snells window)- Thanks Capo
 -   Keystone, now you can update instead of needing to uninstall the old launcher and installing the new one - Thanks Casper!
 -   Delta plugin, still working out the in game shell commands sections but the plugin is compiled and works.
 -   Latest OpenMW build
 -   Manual directory text input if proper path isnt displayed
+-   Updated NDK version
 
 # New in version 1.2
 Bug fixes:
