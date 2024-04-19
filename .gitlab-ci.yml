@@ -22,7 +22,7 @@ docker-build:
   variables:
     DOCKER_IMAGE_NAME: "buildct-$CI_COMMIT_TAG"
   before_script:
-    - apk add curl
+    - apk add curl bash
     - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
   script:
     - docker build -t "$DOCKER_IMAGE_NAME" . --progress=plain --build-arg="APP_VERSION=$CI_COMMIT_TAG" &> docker-build.log
