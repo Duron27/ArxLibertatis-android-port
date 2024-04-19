@@ -23,7 +23,7 @@ USE AT YOUR OWN RISK!
 -   PLOX - load order sorter
 -   TES3MP - this is a dream...maybe way way beyond my skills
 -   Some kind of cloud syncing for mod list and saves
--   Finish up delta shell commands in the launcher
+-   Finish up delta shell commands in the launcher for now use this as a guide https://www.nexusmods.com/morrowind/mods/50970?tab=description
 -   Toast for duplicate mods
 
 # New in version 1.3 - Not released yet
