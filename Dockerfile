@@ -32,10 +32,10 @@ ENV JAVA_VERSION=17
 ARG APP_VERSION=unkown
 
 RUN dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
-    && dnf install -y xz p7zip bzip2 libstdc++-devel glibc-devel unzip which wget redhat-lsb-core python-devel doxygen nano gcc-c++ git java-11-openjdk java-${JAVA_VERSION}-openjdk\
+    && dnf install -y xz p7zip bzip2 libstdc++-devel glibc-devel unzip libcurl-devel curl which wget redhat-lsb-core python-devel doxygen nano gcc-c++ git java-${JAVA_VERSION}-openjdk\
     cmake
 
-ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-17.0.9.0.9-3.fc39.x86_64
+RUN JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which java)))))
 ENV ANDROID_SDK_ROOT=/root/Android/cmdline-tools/latest/bin
 ENV ANDROID_HOME=/root/Android
 RUN mkdir -p ${HOME}/prefix
@@ -54,7 +54,7 @@ COPY .secure_files /.secure_files
 
 #Setup ICU for the Host
 RUN mkdir -p ${HOME}/src/icu-host-build && cd $_ && ${HOME}/src/icu-release-70-1/icu4c/source/configure --disable-tests --disable-samples --disable-icuio --disable-extras CC="gcc" CXX="g++" && make -j $(nproc)
-ENV PATH=$PATH:/root/Android/cmdline-tools/latest/bin/:/root/Android/ndk/${NDK_VERSION}/:/root/Android/ndk/${NDK_VERSION}/toolchains/llvm/prebuilt/linux-x86_64:/root/Android/ndk/${NDK_VERSION}/toolchains/llvm/prebuilt/linux-x86_64/bin:/root/prefix/include:/root/prefix/lib:/root/prefix/
+ENV PATH=$PATH:/root/Android/cmdline-tools/latest/bin/:/root/Android/ndk/${NDK_VERSION}/:/root/Android/ndk/${NDK_VERSION}/toolchains/llvm/prebuilt/linux-x86_64:/root/Android/ndk/${NDK_VERSION}/toolchains/llvm/prebuilt/linux-x86_64/bin:/root/prefix/include:/root/prefix/lib:/root/prefix/:/root/.cargo/bin
 
 # NDK Settings
 ENV API=21
@@ -74,9 +74,9 @@ ENV clang=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang
 ENV clang++=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang++
 
 # Global C, CXX and LDFLAGS
-ENV CFLAGS="-fPIC -O3 -flto"
-ENV CXXFLAGS="-fPIC -O3 -frtti -fexceptions -flto"
-ENV LDFLAGS="-fPIC -Wl,--undefined-version -flto -fuse-ld=lld"
+ENV CFLAGS="-fPIC -O3"
+ENV CXXFLAGS="-fPIC -O3 -frtti -fexceptions"
+ENV LDFLAGS="-fPIC -Wl,--undefined-version -fuse-ld=lld"
 
 ENV COMMON_CMAKE_ARGS \
   "-DCMAKE_TOOLCHAIN_FILE=/root/Android/ndk/${NDK_VERSION}/build/cmake/android.toolchain.cmake" \
@@ -489,14 +489,13 @@ RUN wget https://sh.rustup.rs -O rustup.sh \
         i686-linux-android \
         x86_64-linux-android
 
-ENV PATH=${PATH}:/root/.cargo/bin
-
 RUN echo "[target.aarch64-linux-android]" >> /root/.cargo/config
 RUN echo "linker = \"${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang\"" >> /root/.cargo/config
 
 RUN cd root/src && git clone https://gitlab.com/bmwinger/delta-plugin && cd delta-plugin && cargo build --target aarch64-linux-android --release
-RUN cp /root/src/delta-plugin/target/aarch64-linux-android/release/delta_plugin ${DST}/resources 
+RUN cp /root/src/delta-plugin/target/aarch64-linux-android/release/delta_plugin ${DST}/resources
 
 # Build the APK!
+RUN dnf install -y java-11-openjdk
 RUN cd /root/payload/ && ./gradlew assembleNightlyDebug -Dorg.gradle.java.home=/usr/lib/jvm/java-11-openjdk-11.0.22.0.7-1.fc39.x86_64
 RUN cp /root/payload/app/build/outputs/apk/nightly/debug/*.apk openmw-android.apk
