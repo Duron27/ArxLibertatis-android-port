@@ -26,7 +26,7 @@ USE AT YOUR OWN RISK!
 -   Finish up delta shell commands in the launcher for now use this as a guide https://www.nexusmods.com/morrowind/mods/50970?tab=description
 -   Toast for duplicate mods
 
-# New in version 1.3 - Not released yet
+# New in version 1.3
 Bug fixes:
 -   Fixed android studio not finding libc++
 -   Fixed shader setting in wrong location
