@@ -35,7 +35,7 @@ Bug fixes:
 Added:
 -   Dxt hardware support - Sisah
 -   Better out of water View (Snells window)- Thanks Capo
--   Keystone, now you can update instead of needing to uninstall the old launcher and installing the new one - Thanks Casper!
+-   Keystone, going forward you'll be able to update instead of needing to uninstall the old launcher and installing the new one - Thanks Casper!
 -   Delta plugin, still working out the in game shell commands sections but the plugin is compiled and works.
 -   Latest OpenMW build
 -   Manual directory text input if proper path isnt displayed
