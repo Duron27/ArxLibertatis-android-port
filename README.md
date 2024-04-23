@@ -1,3 +1,5 @@
+If you have any issues find me on discord at @Duron27.
+
 Looking for help with adding features to the launcher. If you can offer any improvements please let me know or push an MR.
 
 This repo and the github one are based on the hard work of many people. most of the credit is not mine.
