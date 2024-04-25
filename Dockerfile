@@ -465,25 +465,14 @@ RUN cp "/root/payload/3rdparty-licenses.txt" "${DST}"
 # Remove Debug Symbols
 RUN llvm-strip /root/payload/app/src/main/jniLibs/arm64-v8a/*.so
 
-RUN wget https://sh.rustup.rs -O rustup.sh \
-    && sha256sum rustup.sh \
-    && echo "7b826d2c84318cf44897da29225cb9bc0b4e859b05568b5979bf2cc264840d05  rustup.sh" | sha256sum -c - \
-    && sh rustup.sh -y \
-    && rm rustup.sh \
-&& ${HOME}/.cargo/bin/rustup target add \
-        aarch64-linux-android \
-        armv7-linux-androideabi \
-        i686-linux-android \
-        x86_64-linux-android \
-    && ${HOME}/.cargo/bin/rustup toolchain install nightly \
-    && ${HOME}/.cargo/bin/rustup target add --toolchain nightly \
-        aarch64-linux-android \
-        armv7-linux-androideabi \
-        i686-linux-android \
-        x86_64-linux-android
-
-RUN echo "[target.aarch64-linux-android]" >> /root/.cargo/config
-RUN echo "linker = \"${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang\"" >> /root/.cargo/config
+RUN wget https://sh.rustup.rs -O rustup.sh && sha256sum rustup.sh && \
+    echo "7b826d2c84318cf44897da29225cb9bc0b4e859b05568b5979bf2cc264840d05  rustup.sh" | sha256sum -c - && \
+    sh rustup.sh -y && rm rustup.sh && \
+    ${HOME}/.cargo/bin/rustup target add aarch64-linux-android && \
+    ${HOME}/.cargo/bin/rustup toolchain install nightly && \
+    ${HOME}/.cargo/bin/rustup target add --toolchain nightly aarch64-linux-android && \
+    echo "[target.aarch64-linux-android]" >> /root/.cargo/config && \
+    echo "linker = \"${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang\"" >> /root/.cargo/config
 
 RUN cd root/src && git clone https://gitlab.com/bmwinger/delta-plugin && cd delta-plugin && cargo build --target aarch64-linux-android --release
 RUN cp /root/src/delta-plugin/target/aarch64-linux-android/release/delta_plugin ${DST}/resources
