@@ -28,6 +28,13 @@ USE AT YOUR OWN RISK!
 -   Finish up delta shell commands in the launcher for now use this as a guide https://www.nexusmods.com/morrowind/mods/50970?tab=description
 -   Toast for duplicate mods
 
+# New in version 1.4
+Added:
+-   Changed from Debug to Release build
+
+Removed:
+-   Zacks controller mod until it's finshed
+
 # New in version 1.3
 Bug fixes:
 -   Fixed android studio not finding libc++
