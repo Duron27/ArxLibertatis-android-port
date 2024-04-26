@@ -73,9 +73,9 @@ ENV clang=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang
 ENV clang++=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang++
 
 # Global C, CXX and LDFLAGS
-ENV CFLAGS="-fPIC -O3 -flto"
-ENV CXXFLAGS="-fPIC -O3 -frtti -fexceptions -flto"
-ENV LDFLAGS="-fPIC -Wl,--undefined-version -flto -fuse-ld=lld"
+ENV CFLAGS="-fPIC -O3 -flto=thin"
+ENV CXXFLAGS="-fPIC -O3 -frtti -fexceptions -flto=thin"
+ENV LDFLAGS="-fPIC -Wl,--undefined-version -flto=thin -fuse-ld=lld"
 
 ENV COMMON_CMAKE_ARGS \
   "-DCMAKE_TOOLCHAIN_FILE=/root/Android/ndk/${NDK_VERSION}/build/cmake/android.toolchain.cmake" \
@@ -478,5 +478,7 @@ RUN cp /root/src/delta-plugin/target/aarch64-linux-android/release/delta_plugin 
 
 # Build the APK!
 RUN dnf install -y java-11-openjdk
-RUN cd /root/payload/ && ./gradlew assembleNightlyDebug -Dorg.gradle.java.home=/usr/lib/jvm/java-11-openjdk-11.0.22.0.7-1.fc39.x86_64
-RUN cp /root/payload/app/build/outputs/apk/nightly/debug/*.apk openmw-android.apk
+RUN cd /root/payload/ && ./gradlew assembleRelease -Dorg.gradle.java.home=/usr/lib/jvm/java-11-openjdk-11.0.22.0.7-1.fc39.x86_64
+
+RUN cp /root/payload/app/build/outputs/apk/mainline/release/*.apk openmw-android.apk
+# RUN cp /root/payload/app/build/outputs/apk/nightly/debug/*.apk openmw-android.apk
