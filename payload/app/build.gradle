@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.bugsnag.android.gradle'
 
 def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file('/.secure_files/release-keystore.properties')
+def keystorePropertiesFile = rootProject.file('release-keystore.properties')
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
