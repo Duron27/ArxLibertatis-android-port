@@ -41,7 +41,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "is.xyz.omw"
+        applicationId "is.cavebros.omw"
         versionCode 49
         versionName calculateVersion()
 
@@ -85,7 +85,7 @@ android {
 
         nightly {
             dimension "version"
-            applicationId "is.xyz.omw_nightly"
+            applicationId "is.cavebros.omw_nightly"
             versionNameSuffix "-nightly"
         }
     }
