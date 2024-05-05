@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:labs
-FROM fedora:39
+FROM fedora:40
 
 #Set build type : release, debug
 ENV BUILD_TYPE=release
