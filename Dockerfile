@@ -477,7 +477,9 @@ RUN cp /root/src/delta-plugin/target/aarch64-linux-android/release/delta_plugin 
 
 # Build the APK!
 RUN dnf install -y java-11-openjdk
-RUN cd /root/payload/ && ./gradlew assembleRelease -Dorg.gradle.java.home=/usr/lib/jvm/java-11-openjdk-11.0.22.0.7-1.fc39.x86_64
+RUN sudo alternatives --set java java-11-openjdk.x86_64
+RUN JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which java)))))
+RUN cd /root/payload/ && ./gradlew assembleRelease
 
 RUN cp /root/payload/app/build/outputs/apk/mainline/release/*.apk openmw-android.apk
 # RUN cp /root/payload/app/build/outputs/apk/nightly/debug/*.apk openmw-android.apk
