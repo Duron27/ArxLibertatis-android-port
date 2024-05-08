@@ -464,7 +464,7 @@ RUN cp "/root/payload/3rdparty-licenses.txt" "${DST}"
 RUN llvm-strip /root/payload/app/src/main/jniLibs/arm64-v8a/*.so
 
 RUN wget https://sh.rustup.rs -O rustup.sh && sha256sum rustup.sh && \
-    echo "7b826d2c84318cf44897da29225cb9bc0b4e859b05568b5979bf2cc264840d05  rustup.sh" | sha256sum -c - && \
+    echo "32a680a84cf76014915b3f8aa44e3e40731f3af92cd45eb0fcc6264fd257c428  rustup.sh" | sha256sum -c - && \
     sh rustup.sh -y && rm rustup.sh && \
     ${HOME}/.cargo/bin/rustup target add aarch64-linux-android && \
     ${HOME}/.cargo/bin/rustup toolchain install nightly && \
