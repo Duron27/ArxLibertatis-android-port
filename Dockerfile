@@ -343,6 +343,7 @@ RUN wget -c https://github.com/rdiankov/collada-dom/archive/v${COLLADA_DOM_VERSI
 RUN wget -c https://github.com/openmw/osg/archive/${OSG_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/ && \
     mkdir -p ${HOME}/src/osg-${OSG_VERSION}/build && cd $_ && \
     patch -d ${HOME}/src/osg-${OSG_VERSION} -p1 -t -N < /root/patches/osg/osgcombined.patch && \
+    patch -d ${HOME}/src/osg-${OSG_VERSION} -p1 -t -N < /root/patches/osg/mipmaps.patch && \
     cmake .. \
         ${COMMON_CMAKE_ARGS} \
         -DOPENGL_PROFILE=GL1 \
