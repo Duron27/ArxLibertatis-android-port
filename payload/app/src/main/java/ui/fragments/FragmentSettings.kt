@@ -37,6 +37,7 @@ import androidx.documentfile.provider.DocumentFile
 import com.libopenmw.openmw.R
 import file.GameInstaller
 import ui.activity.ConfigureControls
+import ui.activity.DeltaPluginActivity
 import ui.activity.MainActivity
 import ui.activity.ModsActivity
 import ui.activity.SettingsActivity
@@ -93,6 +94,13 @@ class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener 
             // Use ACTION_OPEN_DOCUMENT_TREE intent to allow the user to choose a directory
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
             startActivityForResult(intent, REQUEST_CODE_OPEN_DOCUMENT_TREE)
+            true
+        }
+        val deltaPluginPreference: Preference? = findPreference("delta_plugin")
+        deltaPluginPreference?.setOnPreferenceClickListener {
+            // Start DeltaPluginActivity when the preference is clicked
+            val intent = Intent(activity, DeltaPluginActivity::class.java)
+            startActivity(intent)
             true
         }
     }
