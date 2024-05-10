@@ -85,7 +85,7 @@ class DeltaPluginActivity : AppCompatActivity() {
                         .getString("game_files", "")!!
                         prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
-                        val configFilePath = Constants.USER_CONFIG + "/openmw.cfg"
+
                         val newFilePath = Constants.USER_CONFIG + "/delta.cfg" // Create a new path for delta.cfg
                         val addonFilePath = gamePath + "/'Data Files'" + "/delta-merged.omwaddon"
 
@@ -102,6 +102,7 @@ class DeltaPluginActivity : AppCompatActivity() {
 
                         val deltaoutput = "data=\"$gamePath/Data Files\""
                         File(newFilePath).appendText("\n" + deltaoutput) // Append data to the copied delta.cfg
+                    
 
                         try {
                             val processBuilder = ProcessBuilder()
@@ -114,6 +115,10 @@ class DeltaPluginActivity : AppCompatActivity() {
                             processBuilder.command(*commandToExecute)
                             processBuilder.redirectErrorStream(true) // Merge stderr into stdout
                             val process = processBuilder.start()
+
+                            val deltamergeoutput = "data=\"$gamePath/Data Files/delta-merged.omwaddon\""
+                            File(Constants.USER_CONFIG + "/openmw.cfg").appendText("\n" + deltamergeoutput) // Append data to the copied delta.cfg
+
 
                             inputStreamReader = BufferedReader(InputStreamReader(process.inputStream))
                             errorStreamReader = BufferedReader(InputStreamReader(process.errorStream))
