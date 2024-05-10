@@ -320,15 +320,7 @@ class MainActivity : AppCompatActivity() {
                 .forEach { output += "groundcover=${it.filename}\n" }
 
                 // write everything to openmw.cfg
-                val gamePath = PreferenceManager.getDefaultSharedPreferences(ctx)
-                .getString("game_files", "")!!
                 File(Constants.OPENMW_CFG).writeText(output)
-                val deltaoutput = "data=\"$gamePath/Data Files\""
-                File(Constants.USER_CONFIG + "/delta.cfg").appendText("\n" + deltaoutput)
-                val lines = File(Constants.USER_CONFIG + "/delta.cfg").readLines().toMutableList()
-                lines.removeAll { it.contains("content=builtin.omwscripts") }
-                File(Constants.USER_CONFIG + "/delta.cfg").writeText(lines.joinToString("\n"))
-
         } catch (e: IOException) {
             Log.e(TAG, "Failed to generate openmw.cfg.", e)
         }
