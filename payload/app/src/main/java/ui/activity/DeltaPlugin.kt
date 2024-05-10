@@ -22,116 +22,135 @@ import java.io.File
 import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 
 class DeltaPluginActivity : AppCompatActivity() {
 
     private lateinit var shellOutputTextView: TextView
-    private lateinit var deltaPluginButton: Button
-    private lateinit var copyButton: Button // New Button for copying
-    private val handler = Handler(Looper.getMainLooper())
-    private var prefs: SharedPreferences? = null
-    private val updateTextRunnable = Runnable { updateTextView() }
+        private lateinit var deltaPluginButton: Button
+            private lateinit var copyButton: Button // New Button for copying
+                private val handler = Handler(Looper.getMainLooper())
+                private var prefs: SharedPreferences? = null
+                    private val updateTextRunnable = Runnable { updateTextView() }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.delta_plugin_view)
-        val commandInput = findViewById<EditText>(R.id.command_input)
+                    override fun onCreate(savedInstanceState: Bundle?) {
+                        super.onCreate(savedInstanceState)
+                        setContentView(R.layout.delta_plugin_view)
+                        val commandInput = findViewById<EditText>(R.id.command_input)
 
-        shellOutputTextView = findViewById(R.id.myTextView)
-        deltaPluginButton = findViewById(R.id.delta_plugin_button)
-        copyButton = findViewById(R.id.copy_button) // Reference the new button
+                        shellOutputTextView = findViewById(R.id.myTextView)
+                        deltaPluginButton = findViewById(R.id.delta_plugin_button)
+                        copyButton = findViewById(R.id.copy_button) // Reference the new button
 
-        commandInput.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                executeCommand()
-                return@setOnEditorActionListener true
-            }
-            false
-        }
+                        commandInput.setOnEditorActionListener { _, actionId, _ ->
+                            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                                executeCommand()
+                                return@setOnEditorActionListener true
+                            }
+                            false
+                        }
 
-        deltaPluginButton.setOnClickListener {
-            executeCommand()
-        }
+                        deltaPluginButton.setOnClickListener {
+                            executeCommand()
+                        }
 
-        copyButton.setOnClickListener {
-            copyTextToClipboard()
-        }
-    }
+                        copyButton.setOnClickListener {
+                            copyTextToClipboard()
+                        }
+                    }
 
-    private fun executeCommand() {
-        val command = findViewById<EditText>(R.id.command_input).text.toString()
-        val workingDir = "/data/data/$packageName/files/resources/"
+                    private fun executeCommand() {
+                        val command = findViewById<EditText>(R.id.command_input).text.toString()
+                        val workingDir = "/data/data/$packageName/files/resources/"
 
-        val output = shellExec(command, workingDir)
-        shellOutputTextView.text = output // Set the entire text view content
-    }
+                        val output = shellExec(command, workingDir)
+                        shellOutputTextView.text = output // Set the entire text view content
+                    }
 
-    private fun updateTextView() {
-        val output = shellExec()
-        // Append the new output to the existing text
-        shellOutputTextView.append(output)
-        // Schedule another update after a short delay (e.g., 1 second)
-        handler.postDelayed(updateTextRunnable, 1000)
-    }
+                    private fun updateTextView() {
+                        val output = shellExec()
+                        // Append the new output to the existing text
+                        shellOutputTextView.append(output)
+                        // Schedule another update after a short delay (e.g., 1 second)
+                        handler.postDelayed(updateTextRunnable, 1000)
+                    }
 
-    private fun shellExec(cmd: String? = null, workingDir: String? = null): String {
-        var output = ""
-        var inputStreamReader: BufferedReader? = null
-        var errorStreamReader: BufferedReader? = null
-        val gamePath = PreferenceManager.getDefaultSharedPreferences(ctx)
-                .getString("game_files", "")!!
-        prefs = PreferenceManager.getDefaultSharedPreferences(this)
+                    private fun shellExec(cmd: String? = null, workingDir: String? = null): String {
+                        var output = ""
+                        var inputStreamReader: BufferedReader? = null
+                        var errorStreamReader: BufferedReader? = null
+                        val gamePath = PreferenceManager.getDefaultSharedPreferences(ctx)
+                        .getString("game_files", "")!!
+                        prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
-        val configFilePath = Constants.USER_CONFIG + "/delta.cfg"
-        val addonFilePath = gamePath + "/'Data Files'" + "/delta-merged.omwaddon"
+                        val configFilePath = Constants.USER_CONFIG + "/openmw.cfg"
+                        val newFilePath = Constants.USER_CONFIG + "/delta.cfg" // Create a new path for delta.cfg
+                        val addonFilePath = gamePath + "/'Data Files'" + "/delta-merged.omwaddon"
 
-        try {
-            val processBuilder = ProcessBuilder()
-            if (workingDir != null) {
-                processBuilder.directory(File(workingDir))
-            }
-            System.setProperty("HOME", "/data/data/$packageName/files/")
-            // Build the command with relative path
-            val commandToExecute = arrayOf("/system/bin/sh", "-c", "export HOME=/data/data/$packageName/files/; chmod u+x ./delta_plugin; ./delta_plugin -c $configFilePath $cmd $addonFilePath")
-            processBuilder.command(*commandToExecute)
-            processBuilder.redirectErrorStream(true) // Merge stderr into stdout
-            val process = processBuilder.start()
+                        // Copy openmw.cfg to delta.cfg
+                        val sourcePath = Paths.get("Constants.USER_CONFIG + \"/openmw.cfg\"")
+                        val destinationPath = Paths.get("Constants.USER_CONFIG + \"/delta.cfg\"")
 
-            inputStreamReader = BufferedReader(InputStreamReader(process.inputStream))
-            errorStreamReader = BufferedReader(InputStreamReader(process.errorStream))
+                        try {
+                            Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING)
+                            println("File copied successfully.")
+                        } catch (e: Exception) {
+                            println("An error occurred: ${e.message}")
+                        }
 
-            var line: String?
-            while (inputStreamReader.readLine().also { line = it } != null) {
-                output += line + "\n" // Add newline for better formatting
-            }
+                        val deltaoutput = "data=\"$gamePath/Data Files\""
+                        File(newFilePath).appendText("\n" + deltaoutput) // Append data to the copied delta.cfg
 
-            // Check for errors in the error stream
-            while (errorStreamReader.readLine().also { line = it } != null) {
-                output += "Rust Error: $line\n" // Prefix Rust errors for clarity
-            }
+                        try {
+                            val processBuilder = ProcessBuilder()
+                            if (workingDir != null) {
+                                processBuilder.directory(File(workingDir))
+                            }
+                            System.setProperty("HOME", "/data/data/$packageName/files/")
+                            // Build the command with relative path (use the copied delta.cfg)
+                            val commandToExecute = arrayOf("/system/bin/sh", "-c", "export HOME=/data/data/$packageName/files/; chmod u+x ./delta_plugin; ./delta_plugin -c $newFilePath $cmd $addonFilePath")
+                            processBuilder.command(*commandToExecute)
+                            processBuilder.redirectErrorStream(true) // Merge stderr into stdout
+                            val process = processBuilder.start()
 
-            process.waitFor() // Wait for the process to finish
-        } catch (e: Exception) {
-            val sw = StringWriter()
-            val pw = PrintWriter(sw)
-            e.printStackTrace(pw)
-            output = "Error executing command: ${e.message}\nStacktrace:\n${sw.toString()}"
-        } finally {
-            inputStreamReader?.close() // Close the reader even if there's an exception
-            errorStreamReader?.close() // Close the reader even if there's an exception
-        }
-        // Clear the command after execution (optional)
-        findViewById<EditText>(R.id.command_input).text.clear()
-        return output
-    }
+                            inputStreamReader = BufferedReader(InputStreamReader(process.inputStream))
+                            errorStreamReader = BufferedReader(InputStreamReader(process.errorStream))
 
-    private fun copyTextToClipboard() {
-        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clipData = ClipData.newPlainText("Shell Output", shellOutputTextView.text.toString())
-        clipboard.setPrimaryClip(clipData)
+                            var line: String?
+                            while (inputStreamReader.readLine().also { line = it } != null) {
+                                output += line + "\n" // Add newline for better formatting
+                            }
 
-        // Optional: Show a toast message to indicate successful copy
-        Toast.makeText(this, "Shell Output Copied", Toast.LENGTH_SHORT).show()
-    }
+                            // Check for errors in the error stream
+                            while (errorStreamReader.readLine().also { line = it } != null) {
+                                output += "Rust Error: $line\n" // Prefix Rust errors for clarity
+                            }
+
+                            process.waitFor() // Wait for the process to finish
+                        } catch (e: Exception) {
+                            val sw = StringWriter()
+                            val pw = PrintWriter(sw)
+                            e.printStackTrace(pw)
+                            output = "Error executing command: ${e.message}\nStacktrace:\n${sw.toString()}"
+                        } finally {
+                            inputStreamReader?.close() // Close the reader even if there's an exception
+                            errorStreamReader?.close() // Close the reader even if there's an exception
+                        }
+                        // Clear the command after execution (optional)
+                        findViewById<EditText>(R.id.command_input).text.clear()
+                        return output
+                    }
+
+                    private fun copyTextToClipboard() {
+                        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clipData = ClipData.newPlainText("Shell Output", shellOutputTextView.text.toString())
+                        clipboard.setPrimaryClip(clipData)
+
+                        // Optional: Show a toast message to indicate successful copy
+                        Toast.makeText(this, "Shell Output Copied", Toast.LENGTH_SHORT).show()
+                    }
+
 
 }
