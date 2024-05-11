@@ -25,8 +25,11 @@ USE AT YOUR OWN RISK!
 -   PLOX - load order sorter
 -   TES3MP - this is a dream...maybe way way beyond my skills
 -   Some kind of cloud syncing for mod list and saves
--   Finish up delta shell commands in the launcher for now use this as a guide https://www.nexusmods.com/morrowind/mods/50970?tab=description
--   Toast for duplicate mods
+-   groundcoverify
+
+# New in version 1.5 (comming soon!)
+Added:
+-   Delta_plugin - fully scripted to run in launcher. just place custom openmw.cfg and in the launcher run delta. mod is created and automatically added to the cfg
 
 # New in version 1.4
 Added:
