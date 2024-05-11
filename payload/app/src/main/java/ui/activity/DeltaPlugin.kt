@@ -100,7 +100,7 @@ class DeltaPluginActivity : AppCompatActivity() {
                             println("An error occurred: ${e.message}")
                         }
 
-                        val deltaoutput = "data=\"$gamePath/Data Files\""
+                        val deltaoutput = "content=\"$gamePath/Data Files\""
                         File(newFilePath).appendText("\n" + deltaoutput) // Append data to the copied delta.cfg
                     
 
