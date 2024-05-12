@@ -111,7 +111,7 @@ class DeltaPluginActivity : AppCompatActivity() {
                             }
                             System.setProperty("HOME", "/data/data/$packageName/files/")
                             // Build the command with relative path (use the copied delta.cfg)
-                            val commandToExecute = arrayOf("/system/bin/sh", "-c", "export HOME=/data/data/$packageName/files/; chmod u+x ./delta_plugin; ./delta_plugin -c $newFilePath merge $cmd $addonFilePath")
+                            val commandToExecute = arrayOf("/system/bin/sh", "-c", "export HOME=/data/data/$packageName/files/; chmod u+x ./delta_plugin; ./delta_plugin -c $newFilePath merge --skip-cells $cmd $addonFilePath")
                             processBuilder.command(*commandToExecute)
                             processBuilder.redirectErrorStream(true) // Merge stderr into stdout
                             val process = processBuilder.start()
