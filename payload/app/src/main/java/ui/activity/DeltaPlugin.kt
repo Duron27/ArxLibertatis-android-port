@@ -22,9 +22,6 @@ import java.io.File
 import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.io.StringWriter
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
 
 class DeltaPluginActivity : AppCompatActivity() {
 
@@ -85,24 +82,15 @@ class DeltaPluginActivity : AppCompatActivity() {
                         .getString("game_files", "")!!
                         prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
+                        val lines = File(Constants.USER_CONFIG + "/delta.cfg").readLines().toMutableList()
+                        lines.removeAll { it.contains("content=delta-merged.omwaddon") }
 
                         val newFilePath = Constants.USER_CONFIG + "/delta.cfg" // Create a new path for delta.cfg
                         val addonFilePath = gamePath + "/'Data Files'" + "/delta-merged.omwaddon"
 
-                        // Copy openmw.cfg to delta.cfg
-                        val sourcePath = Paths.get("Constants.USER_CONFIG + \"/openmw.cfg\"")
-                        val destinationPath = Paths.get("Constants.USER_CONFIG + \"/delta.cfg\"")
-
-                        try {
-                            Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING)
-                            println("File copied successfully.")
-                        } catch (e: Exception) {
-                            println("An error occurred: ${e.message}")
-                        }
-
-                        val deltaoutput = "content=\"$gamePath/Data Files\""
+                        val deltaoutput = "data=\"$gamePath/Data Files\""
                         File(newFilePath).appendText("\n" + deltaoutput) // Append data to the copied delta.cfg
-                    
+
 
                         try {
                             val processBuilder = ProcessBuilder()
@@ -116,7 +104,7 @@ class DeltaPluginActivity : AppCompatActivity() {
                             processBuilder.redirectErrorStream(true) // Merge stderr into stdout
                             val process = processBuilder.start()
 
-                            val deltamergeoutput = "data=\"$gamePath/Data Files/delta-merged.omwaddon\""
+                            val deltamergeoutput = "content=\"$gamePath/Data Files/delta-merged.omwaddon\""
                             File(Constants.USER_CONFIG + "/openmw.cfg").appendText("\n" + deltamergeoutput) // Append data to the copied delta.cfg
 
 
@@ -156,6 +144,4 @@ class DeltaPluginActivity : AppCompatActivity() {
                         // Optional: Show a toast message to indicate successful copy
                         Toast.makeText(this, "Shell Output Copied", Toast.LENGTH_SHORT).show()
                     }
-
-
 }
