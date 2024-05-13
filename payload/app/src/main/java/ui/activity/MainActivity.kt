@@ -327,6 +327,78 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun generateDeltaCfg() {
+        // contents of openmw.base.cfg
+        val base: String
+        // contents of openmw.fallback.cfg
+        val fallback: String
+
+        // try to read the files
+        try {
+            base = File(Constants.OPENMW_BASE_CFG).readText()
+            // TODO: support user custom options
+            fallback = File(Constants.OPENMW_FALLBACK_CFG).readText()
+        } catch (e: IOException) {
+            Log.e(TAG, "Failed to read openmw.base.cfg or openmw.fallback.cfg", e)
+            return
+        }
+
+        val db = ModsDatabaseOpenHelper.getInstance(this)
+
+        var dataFilesList = ArrayList<String>()
+        var dataDirsPath = ArrayList<String>()
+        dataFilesList.add(GameInstaller.getDataFiles(this))
+        dataDirsPath.add(GameInstaller.getDataFiles(this).dropLast(10))
+
+        File(GameInstaller.getDataFiles(this).dropLast(10)).listFiles().forEach {
+            if (!it.isFile())
+                dataFilesList.add(GameInstaller.getDataFiles(this).dropLast(10) + it.getName())
+        }
+
+        val resources = ModsCollection(ModType.Resource, dataFilesList, db)
+        val dirs = ModsCollection(ModType.Dir, dataDirsPath, db)
+        val plugins = ModsCollection(ModType.Plugin, dataFilesList, db)
+        val groundcovers = ModsCollection(ModType.Groundcover, dataFilesList, db)
+
+        try {
+            // generate final output.cfg
+            var output = base + "\n"
+
+            // output resources
+            resources.mods
+            .filter { it.enabled }
+            .forEach { output += "fallback-archive=${it.filename}\n" }
+
+            // output data dirs
+            dirs.mods
+            .filter { it.enabled }
+            .forEach { output += "data=" + '"' + GameInstaller.getDataFiles(this).dropLast(10) + it.filename + '"' + "\n" }
+
+            // output plugins
+            plugins.mods
+            .filter { it.enabled }
+            .forEach { output += "content=${it.filename}\n" }
+
+            // output groundcovers
+            groundcovers.mods
+            .filter { it.enabled }
+            .forEach { output += "groundcover=${it.filename}\n" }
+
+            // write everything to openmw.cfg
+            File(Constants.OPENMW_CFG).writeText(output)
+
+            val usercfg = File(Constants.USER_CONFIG + "/openmw.cfg").readText()
+
+            output += usercfg
+
+            File(Constants.USER_CONFIG + "/delta.cfg").writeText(output)
+
+
+        } catch (e: IOException) {
+            Log.e(TAG, "Failed to generate delta.cfg.", e)
+        }
+    }
+
     /**
      * Determines required screen scaling based on resolution and physical size of the device
      */
@@ -637,6 +709,7 @@ class MainActivity : AppCompatActivity() {
                 inst.convertIni(prefs.getString("pref_encoding", GameInstaller.DEFAULT_CHARSET_PREF)!!)
 
                 generateOpenmwCfg()
+                generateDeltaCfg()
 
                 // openmw.cfg: data, resources
                 file.Writer.write(Constants.OPENMW_CFG, "resources", Constants.RESOURCES)
