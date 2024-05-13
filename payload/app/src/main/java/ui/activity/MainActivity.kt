@@ -529,39 +529,76 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    private fun writeSetting(category: String, name: String, value: String) {
+        var lineList = mutableListOf<String>()
+        var lineNumber = 0
+        var categoryFound = 0
+        var categoryLine = 0
+        var nameFound = 0
+        var nameLine = 0
+        var currentCategory = ""
+
+        File(Constants.USER_CONFIG + "/settings.cfg").useLines {
+	    lines -> lines.forEach {
+		lineList.add(it)
+                if (it.contains("[") && it.contains("]")) currentCategory = it.replace("[", "").replace("]", "").replace(" ", "")
+                if (currentCategory == category.replace(" ", "") && categoryFound == 0 ) { categoryLine = lineNumber; categoryFound = 1 } 
+                if (currentCategory == category.replace(" ", "") && it.substringBefore("=").replace(" ", "") == name.replace(" ", ""))
+		    { nameLine = lineNumber; nameFound = 1 }
+
+                lineNumber++
+	    }
+	}
+
+        if(nameFound == 1)
+            lineList.set(nameLine, name + " = " + value)
+        if(categoryFound == 1 && nameFound == 0)
+            lineList.add(categoryLine + 1, name + " = " + value)
+        if(categoryFound == 0 && nameFound == 0) 
+            lineList.add(lineNumber, "\n" + "[" + category + "]" + "\n" + name + " = " + value)
+
+        var output = ""
+        lineList.forEach { output += it + "\n" }
+
+        File(Constants.USER_CONFIG + "/settings.cfg").writeText(output)
+    }
+
+
     private fun writeUserSettings() {
         File(Constants.USER_CONFIG + "/settings.cfg").createNewFile()
 
 	// Write resolution to prevent issues if incorect one is set, probably need to account notch size too
-        val displayInCutoutArea = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_display_cutout_area", false)
-        val dm = DisplayMetrics()
-        windowManager.defaultDisplay.getRealMetrics(dm)
-        val orientation = this.getResources().getConfiguration().orientation
-        var displayWidth = 0
-        var displayHeight = 0
-        val cutout = windowManager.defaultDisplay.getCutout()
+    val displayInCutoutArea = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_display_cutout_area", false)
+	val dm = DisplayMetrics()
+	windowManager.defaultDisplay.getRealMetrics(dm)
+	val orientation = this.getResources().getConfiguration().orientation
+	var displayWidth = 0
+	var displayHeight = 0
 
-        if (cutout != null) {
-            if (orientation == Configuration.ORIENTATION_PORTRAIT)
-            {
-                displayWidth = if(resolutionX == 0) dm.heightPixels else resolutionX
-                displayHeight = if(resolutionY == 0) dm.widthPixels else resolutionY
-                if( displayInCutoutArea == false && resolutionX == 0) {
-                    val cutoutRectTop = cutout.getBoundingRectTop()
-                    val cutoutRectBottom = cutout.getBoundingRectBottom()
-                    displayWidth = dm.heightPixels - maxOf(cutoutRectTop.bottom, cutoutRectBottom.bottom - cutoutRectBottom.top)
-                }
-            }
-            else
-            {
-                displayWidth = if(resolutionX == 0) dm.widthPixels else resolutionX
-                displayHeight = if(resolutionY == 0) dm.heightPixels else resolutionY
-                if( displayInCutoutArea == false && resolutionY == 0) {
-                    val cutoutRectLeft = cutout.getBoundingRectLeft()
-                    val cutoutRectRight = cutout.getBoundingRectRight()
-                    displayWidth = dm.widthPixels - maxOf(cutoutRectLeft.right, cutoutRectRight.right - cutoutRectRight.left)
-                }
-            }
+	if (orientation == Configuration.ORIENTATION_PORTRAIT)
+	{
+		displayWidth = if(resolutionX == 0) dm.heightPixels else resolutionX
+		displayHeight = if(resolutionY == 0) dm.widthPixels else resolutionY
+        
+        if( displayInCutoutArea == false && resolutionX == 0) {
+            val cutoutRectTop = windowManager.defaultDisplay.getCutout()!!.getBoundingRectTop()
+            val cutoutRectBottom = windowManager.defaultDisplay.getCutout()!!.getBoundingRectBottom()
+            if (cutoutRectTop != null && cutoutRectBottom != null)
+                displayWidth = dm.heightPixels - maxOf(cutoutRectTop.bottom, cutoutRectBottom.bottom - cutoutRectBottom.top)
+        }
+	}
+	else
+	{
+		displayWidth = if(resolutionX == 0) dm.widthPixels else resolutionX
+		displayHeight = if(resolutionY == 0) dm.heightPixels else resolutionY
+
+        if( displayInCutoutArea == false && resolutionY == 0) {
+            val cutoutRectLeft = windowManager.defaultDisplay.getCutout()!!.getBoundingRectLeft()
+            val cutoutRectRight = windowManager.defaultDisplay.getCutout()!!.getBoundingRectRight()
+            if (cutoutRectLeft != null && cutoutRectRight != null)
+                displayWidth = dm.widthPixels - maxOf(cutoutRectLeft.right, cutoutRectRight.right - cutoutRectRight.left)
+        }
+	}
 
 	writeSetting("Video", "resolution x", displayWidth.toString())
 	writeSetting("Video", "resolution y", displayHeight.toString())
