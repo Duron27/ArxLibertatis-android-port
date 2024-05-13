@@ -49,7 +49,6 @@ import file.utils.CopyFilesFromAssets
 import mods.ModType
 import mods.ModsCollection
 import mods.ModsDatabaseOpenHelper
-import org.jetbrains.anko.ctx
 import permission.PermissionHelper
 import ui.fragments.FragmentSettings
 import utils.MyApp
@@ -319,9 +318,8 @@ class MainActivity : AppCompatActivity() {
                 .filter { it.enabled }
                 .forEach { output += "groundcover=${it.filename}\n" }
 
-                // write everything to openmw.cfg
-                File(Constants.OPENMW_CFG).writeText(output)
-                File(Constants.USER_CONFIG + "/modlistbackup.cfg").writeText(output)
+            // write everything to openmw.cfg
+            File(Constants.OPENMW_CFG).writeText(output)	   
         } catch (e: IOException) {
             Log.e(TAG, "Failed to generate openmw.cfg.", e)
         }
@@ -493,41 +491,6 @@ class MainActivity : AppCompatActivity() {
         val encoded = android.util.Base64.encodeToString(data.toByteArray(), android.util.Base64.NO_WRAP)
         File(Constants.DEFAULTS_BIN).writeText(encoded)
     }
-
-    private fun writeSetting(category: String, name: String, value: String) {
-        var lineList = mutableListOf<String>()
-        var lineNumber = 0
-        var categoryFound = 0
-        var categoryLine = 0
-        var nameFound = 0
-        var nameLine = 0
-        var currentCategory = ""
-
-        File(Constants.USER_CONFIG + "/settings.cfg").useLines {
-	    lines -> lines.forEach {
-		lineList.add(it)
-                if (it.contains("[") && it.contains("]")) currentCategory = it.replace("[", "").replace("]", "").replace(" ", "")
-                if (currentCategory == category.replace(" ", "") && categoryFound == 0 ) { categoryLine = lineNumber; categoryFound = 1 } 
-                if (currentCategory == category.replace(" ", "") && it.substringBefore("=").replace(" ", "") == name.replace(" ", ""))
-		    { nameLine = lineNumber; nameFound = 1 }
-
-                lineNumber++
-	    }
-	}
-
-        if(nameFound == 1)
-            lineList.set(nameLine, name + " = " + value)
-        if(categoryFound == 1 && nameFound == 0)
-            lineList.add(categoryLine + 1, name + " = " + value)
-        if(categoryFound == 0 && nameFound == 0) 
-            lineList.add(lineNumber, "\n" + "[" + category + "]" + "\n" + name + " = " + value)
-
-        var output = ""
-        lineList.forEach { output += it + "\n" }
-
-        File(Constants.USER_CONFIG + "/settings.cfg").writeText(output)
-    }
-
 
     private fun writeSetting(category: String, name: String, value: String) {
         var lineList = mutableListOf<String>()
