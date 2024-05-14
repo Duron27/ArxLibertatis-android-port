@@ -279,70 +279,6 @@ class MainActivity : AppCompatActivity() {
 
         val db = ModsDatabaseOpenHelper.getInstance(this)
 
-	var dataFilesList = ArrayList<String>()
-	var dataDirsPath = ArrayList<String>()
-	dataFilesList.add(GameInstaller.getDataFiles(this))
-        dataDirsPath.add(GameInstaller.getDataFiles(this).dropLast(10))
-
-	File(GameInstaller.getDataFiles(this).dropLast(10)).listFiles().forEach {
-	    if (!it.isFile())
-	        dataFilesList.add(GameInstaller.getDataFiles(this).dropLast(10) + it.getName())
-	}
-
-        val resources = ModsCollection(ModType.Resource, dataFilesList, db)
-        val dirs = ModsCollection(ModType.Dir, dataDirsPath, db)
-        val plugins = ModsCollection(ModType.Plugin, dataFilesList, db)
-        val groundcovers = ModsCollection(ModType.Groundcover, dataFilesList, db)
-
-        try {
-            // generate final output.cfg
-            var output = base + "\n" + fallback + "\n"
-
-            // output resources
-            resources.mods
-                .filter { it.enabled }
-                .forEach { output += "fallback-archive=${it.filename}\n" }
-
-            // output data dirs
-            dirs.mods
-                .filter { it.enabled }
-                .forEach { output += "data=" + '"' + GameInstaller.getDataFiles(this).dropLast(10) + it.filename + '"' + "\n" }
-
-            // output plugins
-            plugins.mods
-                .filter { it.enabled }
-                .forEach { output += "content=${it.filename}\n" }
-
-            // output groundcovers
-            groundcovers.mods
-                .filter { it.enabled }
-                .forEach { output += "groundcover=${it.filename}\n" }
-
-            // write everything to openmw.cfg
-            File(Constants.OPENMW_CFG).writeText(output)	   
-        } catch (e: IOException) {
-            Log.e(TAG, "Failed to generate openmw.cfg.", e)
-        }
-    }
-
-    private fun generateDeltaCfg() {
-        // contents of openmw.base.cfg
-        val base: String
-        // contents of openmw.fallback.cfg
-        val fallback: String
-
-        // try to read the files
-        try {
-            base = File(Constants.OPENMW_BASE_CFG).readText()
-            // TODO: support user custom options
-            fallback = File(Constants.OPENMW_FALLBACK_CFG).readText()
-        } catch (e: IOException) {
-            Log.e(TAG, "Failed to read openmw.base.cfg or openmw.fallback.cfg", e)
-            return
-        }
-
-        val db = ModsDatabaseOpenHelper.getInstance(this)
-
         var dataFilesList = ArrayList<String>()
         var dataDirsPath = ArrayList<String>()
         dataFilesList.add(GameInstaller.getDataFiles(this))
@@ -360,27 +296,27 @@ class MainActivity : AppCompatActivity() {
 
         try {
             // generate final output.cfg
-            var output = base + "\n"
+            var output = base + "\n" + fallback + "\n"
 
             // output resources
             resources.mods
-            .filter { it.enabled }
-            .forEach { output += "fallback-archive=${it.filename}\n" }
+                    .filter { it.enabled }
+                    .forEach { output += "fallback-archive=${it.filename}\n" }
 
             // output data dirs
             dirs.mods
-            .filter { it.enabled }
-            .forEach { output += "data=" + '"' + GameInstaller.getDataFiles(this).dropLast(10) + it.filename + '"' + "\n" }
+                    .filter { it.enabled }
+                    .forEach { output += "data=" + '"' + GameInstaller.getDataFiles(this).dropLast(10) + it.filename + '"' + "\n" }
 
             // output plugins
             plugins.mods
-            .filter { it.enabled }
-            .forEach { output += "content=${it.filename}\n" }
+                    .filter { it.enabled }
+                    .forEach { output += "content=${it.filename}\n" }
 
             // output groundcovers
             groundcovers.mods
-            .filter { it.enabled }
-            .forEach { output += "groundcover=${it.filename}\n" }
+                    .filter { it.enabled }
+                    .forEach { output += "groundcover=${it.filename}\n" }
 
             // write everything to openmw.cfg
             File(Constants.OPENMW_CFG).writeText(output)
@@ -390,7 +326,6 @@ class MainActivity : AppCompatActivity() {
             output += usercfg
 
             File(Constants.USER_CONFIG + "/delta.cfg").writeText(output)
-
 
         } catch (e: IOException) {
             Log.e(TAG, "Failed to generate delta.cfg.", e)
@@ -530,40 +465,41 @@ class MainActivity : AppCompatActivity() {
     private fun writeUserSettings() {
         File(Constants.USER_CONFIG + "/settings.cfg").createNewFile()
 
-	// Write resolution to prevent issues if incorect one is set, probably need to account notch size too
-    val displayInCutoutArea = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_display_cutout_area", false)
-	val dm = DisplayMetrics()
-	windowManager.defaultDisplay.getRealMetrics(dm)
-	val orientation = this.getResources().getConfiguration().orientation
-	var displayWidth = 0
-	var displayHeight = 0
+        // Write resolution to prevent issues if incorect one is set, probably need to account notch size too
+        val displayInCutoutArea = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_display_cutout_area", false)
+        val dm = DisplayMetrics()
+        windowManager.defaultDisplay.getRealMetrics(dm)
+        val orientation = this.getResources().getConfiguration().orientation
+        var displayWidth = 0
+        var displayHeight = 0
 
-	if (orientation == Configuration.ORIENTATION_PORTRAIT)
-	{
-		displayWidth = if(resolutionX == 0) dm.heightPixels else resolutionX
-		displayHeight = if(resolutionY == 0) dm.widthPixels else resolutionY
-        
-        if( displayInCutoutArea == false && resolutionX == 0) {
-            val cutoutRectTop = windowManager.defaultDisplay.getCutout()!!.getBoundingRectTop()
-            val cutoutRectBottom = windowManager.defaultDisplay.getCutout()!!.getBoundingRectBottom()
-            if (cutoutRectTop != null && cutoutRectBottom != null)
-                displayWidth = dm.heightPixels - maxOf(cutoutRectTop.bottom, cutoutRectBottom.bottom - cutoutRectBottom.top)
+        if (orientation == Configuration.ORIENTATION_PORTRAIT)
+        {
+            displayWidth = if(resolutionX == 0) dm.heightPixels else resolutionX
+            displayHeight = if(resolutionY == 0) dm.widthPixels else resolutionY
+
+            if( displayInCutoutArea == false && resolutionX == 0) {
+                val cutoutRectTop = windowManager.defaultDisplay.getCutout()!!.getBoundingRectTop()
+                val cutoutRectBottom = windowManager.defaultDisplay.getCutout()!!.getBoundingRectBottom()
+                if (cutoutRectTop != null && cutoutRectBottom != null)
+                    displayWidth = dm.heightPixels - maxOf(cutoutRectTop.bottom, cutoutRectBottom.bottom - cutoutRectBottom.top)
+            }
         }
-	}
-	else
-	{
-		displayWidth = if(resolutionX == 0) dm.widthPixels else resolutionX
-		displayHeight = if(resolutionY == 0) dm.heightPixels else resolutionY
+        else
+        {
+            displayWidth = if(resolutionX == 0) dm.widthPixels else resolutionX
+            displayHeight = if(resolutionY == 0) dm.heightPixels else resolutionY
 
-        if( displayInCutoutArea == false && resolutionY == 0) {
-            val cutoutRectLeft = windowManager.defaultDisplay.getCutout()!!.getBoundingRectLeft()
-            val cutoutRectRight = windowManager.defaultDisplay.getCutout()!!.getBoundingRectRight()
-            if (cutoutRectLeft != null && cutoutRectRight != null)
-                displayWidth = dm.widthPixels - maxOf(cutoutRectLeft.right, cutoutRectRight.right - cutoutRectRight.left)
+            if( displayInCutoutArea == false && resolutionY == 0) {
+                val cutoutRectLeft = windowManager.defaultDisplay.getCutout()!!.getBoundingRectLeft()
+                val cutoutRectRight = windowManager.defaultDisplay.getCutout()!!.getBoundingRectRight()
+                if (cutoutRectLeft != null && cutoutRectRight != null)
+                    displayWidth = dm.widthPixels - maxOf(cutoutRectLeft.right, cutoutRectRight.right - cutoutRectRight.left)
+            }
         }
-	}
 
-	writeSetting("Video", "resolution x", displayWidth.toString())
+
+        writeSetting("Video", "resolution x", displayWidth.toString())
 	writeSetting("Video", "resolution y", displayHeight.toString())
 
         // Game Mechanics
@@ -709,7 +645,6 @@ class MainActivity : AppCompatActivity() {
                 inst.convertIni(prefs.getString("pref_encoding", GameInstaller.DEFAULT_CHARSET_PREF)!!)
 
                 generateOpenmwCfg()
-                generateDeltaCfg()
 
                 // openmw.cfg: data, resources
                 file.Writer.write(Constants.OPENMW_CFG, "resources", Constants.RESOURCES)
@@ -935,5 +870,4 @@ class CaptureCrash : Thread.UncaughtExceptionHandler {
             val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             return sdf.format(Date())
         }
-
     }
