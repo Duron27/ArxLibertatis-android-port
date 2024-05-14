@@ -61,7 +61,6 @@ class DeltaPluginActivity : AppCompatActivity() {
                     private fun executeCommand() {
                         val command = findViewById<EditText>(R.id.command_input).text.toString()
                         val workingDir = "/data/data/$packageName/files/resources/"
-
                         val output = shellExec(command, workingDir)
                         shellOutputTextView.text = output // Set the entire text view content
                     }
@@ -82,15 +81,19 @@ class DeltaPluginActivity : AppCompatActivity() {
                         .getString("game_files", "")!!
                         prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
-                        val lines = File(Constants.USER_CONFIG + "/delta.cfg").readLines().toMutableList()
+                        var lines = File(Constants.USER_CONFIG + "/delta.cfg").readLines().toMutableList()
                         lines.removeAll { it.contains("content=delta-merged.omwaddon") }
+                        lines.removeAll { it.contains("content=builtin.omwscripts") }
+                        lines.removeAll { it.contains("fallback=") }
+
+                        // Write the modified lines back to the file
+                        File(Constants.USER_CONFIG + "/delta.cfg").writeText(lines.joinToString("\n"))
 
                         val newFilePath = Constants.USER_CONFIG + "/delta.cfg" // Create a new path for delta.cfg
                         val addonFilePath = gamePath + "/'Data Files'" + "/delta-merged.omwaddon"
 
                         val deltaoutput = "data=\"$gamePath/Data Files\""
                         File(newFilePath).appendText("\n" + deltaoutput) // Append data to the copied delta.cfg
-
 
                         try {
                             val processBuilder = ProcessBuilder()
