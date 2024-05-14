@@ -10,11 +10,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Run Delta Plugin" />
+    <Button
+        android:id="@+id/delta_grass_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Grasscoverify" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+
 
         <Button
             android:id="@+id/copy_button"
@@ -22,6 +28,12 @@
             android:layout_height="wrap_content"
             android:text="Copy Output"  />
 
+        <Button
+            android:id="@+id/delta_query_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Query"
+            />
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -51,7 +63,4 @@
 
     </ScrollView>
 
-
 </LinearLayout>
-
-
