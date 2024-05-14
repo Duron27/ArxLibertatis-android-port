@@ -36,7 +36,7 @@
         android:id="@+id/command_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter args for delta plugin (hint = --skip-cells)" />
+        android:hint="Enter args for delta plugin (Optional Flags)" />
 
     <ScrollView
         android:layout_width="match_parent"
