@@ -27,7 +27,7 @@ USE AT YOUR OWN RISK!
 -   Some kind of cloud syncing for mod list and saves
 -   groundcoverify
 
-# New in version 1.5 (comming soon!)
+# New in version 1.5
 Added:
 -   Delta_plugin - fully scripted to run in launcher. just place custom openmw.cfg and in the launcher run delta. mod is created and automatically added to the cfg
 
