@@ -58,11 +58,7 @@ class DeltaPluginActivity : AppCompatActivity() {
         deltaQueryButton.setOnClickListener {
             executeQueryCommand()
         }
-
-        copyButton.setOnClickListener {
-            copyTextToClipboard()
-        }
-
+        
         copyButton.setOnClickListener {
             copyTextToClipboard()
         }
