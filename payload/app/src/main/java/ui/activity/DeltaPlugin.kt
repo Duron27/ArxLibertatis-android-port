@@ -35,7 +35,6 @@ class DeltaPluginActivity : AppCompatActivity() {
     private var prefs: SharedPreferences? = null
     private val updateTextRunnable = Runnable { updateTextView() }
 
-    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.delta_plugin_view)
@@ -47,24 +46,28 @@ class DeltaPluginActivity : AppCompatActivity() {
         deltaQueryButton = findViewById(R.id.delta_query_button)
         copyButton = findViewById(R.id.copy_button) // Reference the new button
 
-        commandInput.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                executeCommand()
-                return@setOnEditorActionListener true
-            }
-            false
-        }
-
-        deltaPluginButton.setOnClickListener {
-            executeCommand()
-        }
+        var lastButtonClicked = ""
 
         deltaGrassButton.setOnClickListener {
+            lastButtonClicked = "deltaGrassButton"
             executeSpecialCommand()
         }
 
         deltaQueryButton.setOnClickListener {
+            lastButtonClicked = "deltaQueryButton"
             executeQueryCommand()
+        }
+
+        commandInput.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                when (lastButtonClicked) {
+                    "deltaGrassButton" -> executeSpecialCommand()
+                    "deltaQueryButton" -> executeQueryCommand()
+                    else -> executeCommand()
+                }
+                return@setOnEditorActionListener true
+            }
+            false
         }
 
         copyButton.setOnClickListener {
