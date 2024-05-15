@@ -46,6 +46,7 @@ class DeltaPluginActivity : AppCompatActivity() {
         deltaQueryButton = findViewById(R.id.delta_query_button)
         copyButton = findViewById(R.id.copy_button) // Reference the new button
 
+
         deltaPluginButton.setOnClickListener {
             executeCommand()
         }
@@ -56,6 +57,10 @@ class DeltaPluginActivity : AppCompatActivity() {
 
         deltaQueryButton.setOnClickListener {
             executeQueryCommand()
+        }
+
+        copyButton.setOnClickListener {
+            copyTextToClipboard()
         }
 
         copyButton.setOnClickListener {
@@ -83,12 +88,12 @@ class DeltaPluginActivity : AppCompatActivity() {
         val command = "-c " + Constants.USER_CONFIG + "/delta.cfg merge --skip-cells " + findViewById<EditText>(R.id.command_input).text.toString() + " " + gamePath + "/'Data Files'/delta-merged.omwaddon"
 
         var lines2 = File(Constants.USER_CONFIG + "/openmw.cfg").readLines().toMutableList()
-        lines2.removeAll { it.contains("content=\"$gamePath/Data Files/delta-merged.omwaddon\"") }
+        lines2.removeAll { it.contains("content=delta-merged.omwaddon") }
 
         // Write the modified lines back to the file
         File(Constants.USER_CONFIG + "/openmw.cfg").writeText(lines2.joinToString("\n"))
 
-        val deltamergeoutput = "content=\"$gamePath/Data Files/delta-merged.omwaddon\""
+        val deltamergeoutput = "content=delta-merged.omwaddon"
         File(Constants.USER_CONFIG + "/openmw.cfg").appendText("\n" + deltamergeoutput) // Append data to the copied delta.cfg
 
         val workingDir = "/data/data/$packageName/files/resources/"
@@ -103,8 +108,8 @@ class DeltaPluginActivity : AppCompatActivity() {
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
         var lines = File(Constants.USER_CONFIG + "/openmw.cfg").readLines().toMutableList()
-        lines.removeAll { it.contains("content=\"$gamePath/Data Files/output_groundcover.omwaddon\"") }
-        lines.removeAll { it.contains("content=\"$gamePath/Data Files/output_deleted.omwaddon\"") }
+        lines.removeAll { it.contains("groundcover=output_groundcover.omwaddon") }
+        lines.removeAll { it.contains("content=output_deleted.omwaddon") }
 
         // Write the modified lines back to the file
         File(Constants.USER_CONFIG + "/openmw.cfg").writeText(lines.joinToString("\n"))
@@ -113,10 +118,10 @@ class DeltaPluginActivity : AppCompatActivity() {
         val Command = "-c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output $gamePath/'Data Files'/output_groundcover.omwaddon --desc \"Generated groundcover plugin from your local cavebros\" match Static --id \"grass|kelp|lilypad\" --modify model \"^\" \"grass\\\\\" match Cell --cellref-object-id \"grass|kelp|lilypad\"" + " && " + "./delta_plugin -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output $gamePath/'Data Files'/output_deleted.omwaddon match Static --id \"grass|kelp|lilypad\" --modify model \"^\" \"grass\\\\\" match Cell --cellref-object-id \"grass|kelp|lilypad\" --delete"
         val specialWorkingDir = "/data/data/$packageName/files/resources/"
 
-        val deltagroundoutput = "content=\"$gamePath/Data Files/output_groundcover.omwaddon\""
-        File(Constants.USER_CONFIG + "/openmw.cfg").appendText("\n" + deltagroundoutput)
-        val deltagrounddeleteoutput = "content=\"$gamePath/Data Files/output_deleted.omwaddon\""
+        val deltagrounddeleteoutput = "content=output_deleted.omwaddon"
         File(Constants.USER_CONFIG + "/openmw.cfg").appendText("\n" + deltagrounddeleteoutput)
+        val deltagroundoutput = "groundcover=output_groundcover.omwaddon"
+        File(Constants.USER_CONFIG + "/openmw.cfg").appendText("\n" + deltagroundoutput)
 
         val output = shellExec(Command, specialWorkingDir)
         shellOutputTextView.text = output // Set the entire text view content (optional, can append if preferred)
@@ -191,5 +196,5 @@ class DeltaPluginActivity : AppCompatActivity() {
 
     // Optional: Show a toast message to indicate successful copy
     Toast.makeText(this, "Shell Output Copied", Toast.LENGTH_SHORT).show()
-}
+    }
 }
