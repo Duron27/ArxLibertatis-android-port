@@ -46,28 +46,16 @@ class DeltaPluginActivity : AppCompatActivity() {
         deltaQueryButton = findViewById(R.id.delta_query_button)
         copyButton = findViewById(R.id.copy_button) // Reference the new button
 
-        var lastButtonClicked = ""
+        deltaPluginButton.setOnClickListener {
+            executeCommand()
+        }
 
         deltaGrassButton.setOnClickListener {
-            lastButtonClicked = "deltaGrassButton"
             executeSpecialCommand()
         }
 
         deltaQueryButton.setOnClickListener {
-            lastButtonClicked = "deltaQueryButton"
             executeQueryCommand()
-        }
-
-        commandInput.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                when (lastButtonClicked) {
-                    "deltaGrassButton" -> executeSpecialCommand()
-                    "deltaQueryButton" -> executeQueryCommand()
-                    else -> executeCommand()
-                }
-                return@setOnEditorActionListener true
-            }
-            false
         }
 
         copyButton.setOnClickListener {
