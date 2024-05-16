@@ -110,6 +110,10 @@ class DeltaPluginActivity : AppCompatActivity() {
         // Write the modified lines back to the file
         File(Constants.USER_CONFIG + "/openmw.cfg").writeText(lines.joinToString("\n"))
 
+        val newFilePath = Constants.USER_CONFIG + "/delta.cfg" // Create a new path for delta.cfg
+        val deltaoutput = "data=\"$gamePath/Data Files\""
+        File(newFilePath).appendText("\n" + deltaoutput) // Append data to the copied delta.cfg
+
         // Define the specific commands to execute for this button here
         val Command = "-c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output $gamePath/'Data Files'/output_groundcover.omwaddon --desc \"Generated groundcover plugin from your local cavebros\" match Static --id \"grass|kelp|lilypad\" --modify model \"^\" \"grass\\\\\" match Cell --cellref-object-id \"grass|kelp|lilypad\"" + " && " + "./delta_plugin -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output $gamePath/'Data Files'/output_deleted.omwaddon match Static --id \"grass|kelp|lilypad\" --modify model \"^\" \"grass\\\\\" match Cell --cellref-object-id \"grass|kelp|lilypad\" --delete"
         val specialWorkingDir = "/data/data/$packageName/files/resources/"
