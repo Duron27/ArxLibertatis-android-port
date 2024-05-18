@@ -115,7 +115,7 @@ class DeltaPluginActivity : AppCompatActivity() {
         File(newFilePath).appendText("\n" + deltaoutput) // Append data to the copied delta.cfg
 
         // Define the specific commands to execute for this button here
-        val Command = "-c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output $gamePath/'Data Files'/output_groundcover.omwaddon --desc \"Generated groundcover plugin from your local cavebros\" match Static --id \"grass|kelp|lilypad\" --modify model \"^\" \"grass\\\\\" match Cell --cellref-object-id \"grass|kelp|lilypad\"" + " && " + "./delta_plugin -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output $gamePath/'Data Files'/output_deleted.omwaddon match Static --id \"grass|kelp|lilypad\" --modify model \"^\" \"grass\\\\\" match Cell --cellref-object-id \"grass|kelp|lilypad\" --delete"
+        val Command = "-c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output $gamePath/'Data Files'/output_groundcover.omwaddon --desc \"Generated groundcover plugin from your local cavebros\" match Static --id \"grass|kelp|lilypad\" --modify model \"^\" \"grass\\\\" match Cell --cellref-object-id \"grass|kelp|lilypad\"" + " && " + "./delta_plugin -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output $gamePath/'Data Files'/output_deleted.omwaddon match Static --id \"grass|kelp|lilypad\" --modify model \"^\" \"grass\\\\" match Cell --cellref-object-id \"grass|kelp|lilypad\" --delete"
         val specialWorkingDir = "/data/data/$packageName/files/resources/"
 
         val deltagrounddeleteoutput = "content=output_deleted.omwaddon"
