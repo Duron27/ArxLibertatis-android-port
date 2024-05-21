@@ -134,7 +134,7 @@ class DeltaPluginActivity : AppCompatActivity() {
             val filename = path.substringAfterLast("/")
             val correctedPath = path.substringBeforeLast("/").trim()
 
-            Command = "mkdir -p $gamePath/'Data Files'/Meshes/$correctedPath" + " && " + "NUM_RAYON_THREADS=1 ./delta_plugin -c " + Constants.USER_CONFIG + "/delta.cfg vfs-extract \"Meshes$correctedPath/$filename\" $gamePath/'Data Files'/Meshes/$correctedPath/$filename"
+            Command = "mkdir -p $gamePath/'Data Files'/Meshes/grass/$correctedPath" + " && " + "NUM_RAYON_THREADS=1 ./delta_plugin -c " + Constants.USER_CONFIG + "/delta.cfg vfs-extract \"Meshes$correctedPath/$filename\" $gamePath/'Data Files'/Meshes/grass/$correctedPath/$filename"
 
             output = shellExec(Command, specialWorkingDir)
             shellOutputTextView.append(output)
