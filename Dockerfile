@@ -33,7 +33,7 @@ ARG APP_VERSION=unknown
 
 RUN dnf install -y dnf-plugins-core && dnf config-manager --set-enabled crb && dnf install -y epel-release
 RUN dnf install -y https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm \
-    && dnf install -y xz p7zip bzip2 libstdc++-devel glibc-devel unzip libcurl-devel which wget python-devel doxygen nano gcc-c++ git java-${JAVA_VERSION}-openjdk cmake patch
+    && dnf install -y xz p7zip bzip2 libstdc++-devel glibc-devel zip unzip libcurl-devel which wget python-devel doxygen nano gcc-c++ git java-${JAVA_VERSION}-openjdk cmake patch
 
 RUN JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which java)))))
 ENV ANDROID_SDK_ROOT=/root/Android/cmdline-tools/latest/bin
@@ -475,6 +475,9 @@ RUN wget https://sh.rustup.rs -O rustup.sh && sha256sum rustup.sh && \
 
 RUN cd root/src && git clone https://gitlab.com/bmwinger/delta-plugin && cd delta-plugin && cargo build --target aarch64-linux-android --release
 RUN cp /root/src/delta-plugin/target/aarch64-linux-android/release/delta_plugin ${DST}/resources
+
+# Create Package for external Editing
+RUN zip -r Package.zip /root/payload
 
 # Build the APK!
 RUN dnf install -y java-11-openjdk
