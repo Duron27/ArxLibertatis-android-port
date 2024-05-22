@@ -79,7 +79,7 @@ class DeltaPluginActivity : AppCompatActivity() {
         val deltaoutput = "data=\"$gamePath/Data Files\""
         File(newFilePath).appendText("\n" + deltaoutput) // Append data to the copied delta.cfg
 
-        val command = "NUM_RAYON_THREADS=1 ./delta_plugin -c " + Constants.USER_CONFIG + "/delta.cfg merge --skip-cells " + findViewById<EditText>(R.id.command_input).text.toString() + " " + gamePath + "/'Data Files'/delta-merged.omwaddon"
+        val command = "./delta_plugin -c " + Constants.USER_CONFIG + "/delta.cfg merge --skip-cells " + findViewById<EditText>(R.id.command_input).text.toString() + " " + gamePath + "/'Data Files'/delta-merged.omwaddon"
 
         var lines2 = File(Constants.USER_CONFIG + "/openmw.cfg").readLines().toMutableList()
         lines2.removeAll { it.contains("content=delta-merged.omwaddon") }
@@ -114,7 +114,7 @@ class DeltaPluginActivity : AppCompatActivity() {
         File(newFilePath).appendText("\n" + deltaoutput) // Append data to the copied delta.cfg
 
         // Define the specific commands to execute for this button here
-        var Command = "NUM_RAYON_THREADS=1 ./delta_plugin -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output $gamePath/'Data Files'/output_groundcover.omwaddon --desc \"Generated groundcover plugin from your local cavebros\" match Static --id \"grass|kelp|lilypad\" --modify model \"^\" \"grass\\\\\" match Cell --cellref-object-id \"grass|kelp|lilypad\"" + " && " + "NUM_RAYON_THREADS=1 ./delta_plugin -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output $gamePath/'Data Files'/output_deleted.omwaddon match Cell --cellref-object-id \"grass|kelp|lilypad\" --delete" + " && " + "NUM_RAYON_THREADS=1 ./delta_plugin -c \" + Constants.USER_CONFIG + \"/delta.cfg query --input $gamePath/'Data Files'/output_groundcover.omwaddon --ignore $gamePath/'Data Files'/deleted_groundcover.omwaddon match Static"
+        var Command = "./delta_plugin -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output $gamePath/'Data Files'/output_groundcover.omwaddon --desc \"Generated groundcover plugin from your local cavebros\" match Static --id \"grass|kelp|lilypad\" --modify model \"^\" \"grass\\\\\" match Cell --cellref-object-id \"grass|kelp|lilypad\"" + " && " + "./delta_plugin -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output $gamePath/'Data Files'/output_deleted.omwaddon match Cell --cellref-object-id \"grass|kelp|lilypad\" --delete" + " && " + "./delta_plugin -c \" + Constants.USER_CONFIG + \"/delta.cfg query --input $gamePath/'Data Files'/output_groundcover.omwaddon --ignore $gamePath/'Data Files'/deleted_groundcover.omwaddon match Static"
 
 
         val deltagrounddeleteoutput = "content=output_deleted.omwaddon"
@@ -134,7 +134,7 @@ class DeltaPluginActivity : AppCompatActivity() {
             val filename = path.substringAfterLast("/")
             val correctedPath = path.substringBeforeLast("/").trim()
 
-            Command = "mkdir -p $gamePath/'Data Files'/Meshes/grass/$correctedPath" + " && " + "NUM_RAYON_THREADS=1 ./delta_plugin -c " + Constants.USER_CONFIG + "/delta.cfg vfs-extract \"Meshes$correctedPath/$filename\" $gamePath/'Data Files'/Meshes/grass/$correctedPath/$filename"
+            Command = "mkdir -p $gamePath/'Data Files'/Meshes/grass/$correctedPath" + " && " + "./delta_plugin -c " + Constants.USER_CONFIG + "/delta.cfg vfs-extract \"Meshes$correctedPath/$filename\" $gamePath/'Data Files'/Meshes/grass/$correctedPath/$filename"
 
             output = shellExec(Command, specialWorkingDir)
             shellOutputTextView.append(output)
@@ -147,7 +147,7 @@ class DeltaPluginActivity : AppCompatActivity() {
     // New function for the second button
     private fun executeQueryCommand() {
         // Define the specific commands to execute for this button here
-        val Command = "NUM_RAYON_THREADS=1 ./delta_plugin -c " + Constants.USER_CONFIG + "/delta.cfg query " + findViewById<EditText>(R.id.command_input).text.toString()
+        val Command = "./delta_plugin -c " + Constants.USER_CONFIG + "/delta.cfg query " + findViewById<EditText>(R.id.command_input).text.toString()
         val specialWorkingDir = "/data/data/$packageName/files/resources/" // Optional, use same if not needed
         val output = shellExec(Command, specialWorkingDir)
         shellOutputTextView.append(output + "\n\n")
