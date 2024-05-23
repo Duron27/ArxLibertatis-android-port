@@ -33,17 +33,17 @@ class DeltaPluginActivity : AppCompatActivity() {
     private var prefs: SharedPreferences? = null
     private val updateTextRunnable = Runnable { updateTextView() }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.delta_plugin_view)       
+        setContentView(R.layout.delta_plugin_view)
+
+        File(Constants.USER_FILE_STORAGE + "/delta").mkdirs()
 
         shellOutputTextView = findViewById(R.id.myTextView)
         deltaPluginButton = findViewById(R.id.delta_plugin_button)
         deltaGrassButton = findViewById(R.id.delta_grass_button)
         deltaQueryButton = findViewById(R.id.delta_query_button)
         copyButton = findViewById(R.id.copy_button) // Reference the new button
-
 
         deltaPluginButton.setOnClickListener {
             executeCommand()
@@ -76,37 +76,35 @@ class DeltaPluginActivity : AppCompatActivity() {
 
         var lines = File(Constants.USER_CONFIG + "/delta.cfg").readLines().toMutableList()
         lines.removeAll { it.contains("content=delta-merged.omwaddon") }
-        lines.removeAll { it.contains("content=builtin.omwscripts") }
+        lines.removeAll { it.contains("data=" + Constants.USER_DELTA) }
         lines.removeAll { it.contains("data=\"$gamePath/Data Files\"") }
 
         // Write the modified lines back to the file
         File(Constants.USER_CONFIG + "/delta.cfg").writeText(lines.joinToString("\n"))
 
-        val newFilePath = Constants.USER_CONFIG + "/delta.cfg" // Create a new path for delta.cfg
-        val deltaoutput = "data=\"$gamePath/Data Files\""
-        File(newFilePath).appendText("\n" + deltaoutput) // Append data to the copied delta.cfg
-
-        val command = "./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg merge --skip-cells " + findViewById<EditText>(R.id.command_input).text.toString() + " " + gamePath + "/'Data Files'/delta-merged.omwaddon"
-
         var lines2 = File(Constants.USER_CONFIG + "/openmw.cfg").readLines().toMutableList()
         lines2.removeAll { it.contains("content=delta-merged.omwaddon") }
+        lines2.removeAll { it.contains("data=" + Constants.USER_DELTA) }
 
         // Write the modified lines back to the file
         File(Constants.USER_CONFIG + "/openmw.cfg").writeText(lines2.joinToString("\n"))
 
-        val deltamergeoutput = "content=delta-merged.omwaddon"
-        File(Constants.USER_CONFIG + "/openmw.cfg").appendText("\n" + deltamergeoutput) // Append data to the copied delta.cfg
+        val newFilePath = Constants.USER_CONFIG + "/delta.cfg" // Create a new path for delta.cfg
+        val deltaoutput = "data=\"$gamePath/Data Files\""
+        File(newFilePath).appendText("\n" + deltaoutput) // Append data to the copied delta.cfg
 
-        
+        val command = "./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg merge --skip-cells " + findViewById<EditText>(R.id.command_input).text.toString() + " " + Constants.USER_DELTA + "/delta-merged.omwaddon"
+
+        val deltamergeoutput = "content=delta-merged.omwaddon"
+        val deltapath = "data=" + Constants.USER_DELTA
+        File(Constants.USER_CONFIG + "/openmw.cfg").appendText("\n" + deltamergeoutput + "\n" + deltapath) // Append data to the copied delta.cfg
+
         val output = shellExec(command, WorkingDir)
         shellOutputTextView.append(output + "\n\n")
     }
 
     // New function for the second button
     private fun executeSpecialCommand() {
-        val gamePath = PreferenceManager.getDefaultSharedPreferences(ctx)
-                .getString("game_files", "")!!
-        prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
         // Get the Application Context
         val context = getApplicationContext()
@@ -114,7 +112,7 @@ class DeltaPluginActivity : AppCompatActivity() {
         // Get the nativeLibraryDir (might not be suitable for this case)
         val applicationInfo = context.applicationInfo
         val WorkingDir = applicationInfo.nativeLibraryDir
-        
+
         var lines = File(Constants.USER_CONFIG + "/openmw.cfg").readLines().toMutableList()
         lines.removeAll { it.contains("groundcover=output_groundcover.omwaddon") }
         lines.removeAll { it.contains("content=output_deleted.omwaddon") }
@@ -122,19 +120,13 @@ class DeltaPluginActivity : AppCompatActivity() {
         // Write the modified lines back to the file
         File(Constants.USER_CONFIG + "/openmw.cfg").writeText(lines.joinToString("\n"))
 
-        val newFilePath = Constants.USER_CONFIG + "/delta.cfg" // Create a new path for delta.cfg
-        val deltaoutput = "data=\"$gamePath/Data Files\""
-        File(newFilePath).appendText("\n" + deltaoutput) // Append data to the copied delta.cfg
-
         // Define the specific commands to execute for this button here
-        var Command = "./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output $gamePath/'Data Files'/output_groundcover.omwaddon --desc \"Generated groundcover plugin from your local cavebros\" match Static --id \"grass|kelp|lilypad\" --modify model \"^\" \"grass\\\\\" match Cell --cellref-object-id \"grass|kelp|lilypad\"" + " && " + "./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output $gamePath/'Data Files'/output_deleted.omwaddon match Cell --cellref-object-id \"grass|kelp|lilypad\" --delete" + " && " + "./libdelta_plugin.so -c \" + Constants.USER_CONFIG + \"/delta.cfg query --input $gamePath/'Data Files'/output_groundcover.omwaddon --ignore $gamePath/'Data Files'/deleted_groundcover.omwaddon match Static"
-
+        var Command = "./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output " + Constants.USER_DELTA + "/output_groundcover.omwaddon --desc \"Generated groundcover plugin from your local cavebros\" match Static --id \"grass|kelp|lilypad\" --modify model \"^\" \"grass\\\\\" match Cell --cellref-object-id \"grass|kelp|lilypad\"" + " && " + "./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output " + Constants.USER_DELTA + "/output_deleted.omwaddon match Cell --cellref-object-id \"grass|kelp|lilypad\" --delete" + " && " + "./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg query --input " + Constants.USER_DELTA + "/output_groundcover.omwaddon --ignore " + Constants.USER_DELTA + "/deleted_groundcover.omwaddon match Static"
 
         val deltagrounddeleteoutput = "content=output_deleted.omwaddon"
         File(Constants.USER_CONFIG + "/openmw.cfg").appendText("\n" + deltagrounddeleteoutput)
         val deltagroundoutput = "groundcover=output_groundcover.omwaddon"
         File(Constants.USER_CONFIG + "/openmw.cfg").appendText("\n" + deltagroundoutput)
-
 
         var output = shellExec(Command, WorkingDir)
         val outputlines = output.split("\n") // Split the output into lines
@@ -147,14 +139,11 @@ class DeltaPluginActivity : AppCompatActivity() {
             val filename = path.substringAfterLast("/")
             val correctedPath = path.substringBeforeLast("/").trim()
 
-            Command = "mkdir -p $gamePath/'Data Files'/Meshes/grass/$correctedPath" + " && " + "./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg vfs-extract \"Meshes$correctedPath/$filename\" $gamePath/'Data Files'/Meshes/grass/$correctedPath/$filename"
+            Command = "mkdir -p " + Constants.USER_DELTA + "/Meshes/grass/$correctedPath" + " && " + "./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg vfs-extract \"Meshes$correctedPath/$filename\" " + Constants.USER_DELTA + "/Meshes/grass/$correctedPath/$filename"
 
             output = shellExec(Command, WorkingDir)
-            shellOutputTextView.append(output)
+            shellOutputTextView.append(output + "\n\n")
         }
-
-        output = shellExec(Command, WorkingDir)
-        shellOutputTextView.append(output + "\n\n")
     }
 
     private fun executeQueryCommand() {
