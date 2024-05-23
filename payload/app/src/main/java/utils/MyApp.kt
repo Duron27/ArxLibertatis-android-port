@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.os.Environment
 import android.preference.PreferenceManager
 import android.util.Base64
-import android.util.Log
 import com.bugsnag.android.Bugsnag
 import com.bugsnag.android.Configuration
 import com.libopenmw.openmw.BuildConfig
@@ -27,9 +26,11 @@ class MyApp : Application() {
         val slug = BuildConfig.APPLICATION_ID.split(".")[2]
         Constants.USER_FILE_STORAGE = Environment.getExternalStorageDirectory().toString() + "/$slug/"
         Constants.USER_CONFIG = "${Constants.USER_FILE_STORAGE}/config"
+        Constants.USER_DELTA = "${Constants.USER_FILE_STORAGE}/delta"
         Constants.USER_OPENMW_CFG =  "${Constants.USER_CONFIG}/openmw.cfg"
         Constants.DEFAULTS_BIN = File(filesDir, "config/defaults.bin").absolutePath
         Constants.OPENMW_CFG = File(filesDir, "config/openmw.cfg").absolutePath
+        Constants.USER_DELTA_CFG =  "${Constants.USER_DELTA}/delta.cfg"
         Constants.OPENMW_BASE_CFG = File(filesDir, "config/openmw.base.cfg").absolutePath
         Constants.OPENMW_FALLBACK_CFG = File(filesDir, "config/openmw.fallback.cfg").absolutePath
         Constants.RESOURCES = File(filesDir, "resources").absolutePath
