@@ -474,7 +474,7 @@ RUN wget https://sh.rustup.rs -O rustup.sh && sha256sum rustup.sh && \
     echo "linker = \"${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang\"" >> /root/.cargo/config
 
 RUN cd root/src && git clone https://gitlab.com/bmwinger/delta-plugin && cd delta-plugin && cargo build --target aarch64-linux-android --release
-RUN cp /root/src/delta-plugin/target/aarch64-linux-android/release/delta_plugin ${DST}/resources
+RUN cp /root/src/delta-plugin/target/aarch64-linux-android/release/delta_plugin /root/payload/app/src/main/jniLibs/arm64-v8a/libdelta_plugin.so
 
 # Create Package for external Editing
 RUN zip -r Package.zip /root/payload
