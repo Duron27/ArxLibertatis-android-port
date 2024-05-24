@@ -123,6 +123,10 @@ class DeltaPluginActivity : AppCompatActivity() {
     }
 
     private fun executeSpecialCommand(pretend: Boolean = false) {
+        val gamePath = PreferenceManager.getDefaultSharedPreferences(this)
+                .getString("game_files", "")!!
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val context = getApplicationContext()
         val applicationInfo = context.applicationInfo
         val WorkingDir = applicationInfo.nativeLibraryDir
@@ -150,6 +154,10 @@ class DeltaPluginActivity : AppCompatActivity() {
             lines.add(deltagroundoutput)
 
             File(Constants.USER_CONFIG + "/openmw.cfg").writeText(lines.joinToString("\n"))
+
+            val newFilePath = Constants.USER_CONFIG + "/delta.cfg" // Create a new path for delta.cfg
+            val deltaoutput = "data=\"$gamePath/Data Files\""
+            File(newFilePath).appendText("\n" + deltaoutput) // Append data to the copied delta.cfg
 
             val grassIds = "grass|kelp|lilypad|fern|thirrlily|spartium|in_cave_plant|reedgroup"
             val excludeIds = "refernce|infernace|planter|_furn_|_skelp|t_glb_var_skeleton|cliffgrass|terr|grassplane|flora_s_m_10_grass|cave_mud_rocks_fern|ab_in_cavemold|rp_mh_rock|ex_cave_grass00|secret_fern"
