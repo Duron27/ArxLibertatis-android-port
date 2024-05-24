@@ -434,6 +434,9 @@ RUN wget https://sh.rustup.rs -O rustup.sh && sha256sum rustup.sh && \
     echo "[target.${NDK_TRIPLET}]" >> /root/.cargo/config && \
     echo "linker = \"${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang\"" >> /root/.cargo/config
 
+RUN cd root/src && git clone https://gitlab.com/bmwinger/delta-plugin && cd delta-plugin && cargo build --target ${NDK_TRIPLET} --release
+RUN cp /root/src/delta-plugin/target/${NDK_TRIPLET}/release/delta_plugin ${PREFIX}/lib/libdelta_plugin.so
+
 COPY --chmod=0755 payload /root/payload
 COPY --chmod=0755 mods /root/mods
 
@@ -444,7 +447,7 @@ RUN rm -rf /root/payload/app/wrap/ && rm -rf /root/payload/app/src/main/jniLibs/
 RUN find /root/src/openmw-${OPENMW_VERSION}/ -iname "libopenmw.so" -exec cp "{}" /root/payload/app/src/main/jniLibs/${ABI}/libopenmw.so \;
 
 # copy over libs we compiled
-RUN cp ${PREFIX}/lib/{libopenal,libSDL2,libGL,libcollada-dom2.5-dp}.so /root/payload/app/src/main/jniLibs/${ABI}/
+RUN cp ${PREFIX}/lib/{libopenal,libSDL2,libGL,libcollada-dom2.5-dp,libdelta_plugin}.so /root/payload/app/src/main/jniLibs/${ABI}/
 
 # copy over libc++_shared
 RUN find ${TOOLCHAIN}/sysroot/usr/lib/${NDK_TRIPLET} -iname "libc++_shared.so" -exec cp "{}" /root/payload/app/src/main/jniLibs/${ABI}/ \;
@@ -466,16 +469,13 @@ RUN cat "${SRC}/openmw.cfg" | grep -v "data=" | grep -v "data-local=" >> "${DST}
 RUN cat "/root/payload/app/openmw.base.cfg" >> "${DST}/openmw/openmw.base.cfg"
 RUN mkdir -p /root/payload/app/src/main/assets/libopenmw/resources && cd $_ && echo "${APP_VERSION}" >> version
 RUN sed -i "4i\    <string name='version_info'>CaveBros Version ${APP_VERSION}</string>" /root/payload/app/src/main/res/values/strings.xml
-RUN sed -i "92i\    ndkVersion\"${NDK_VERSION}\"" /root/payload/app/build.gradle
+RUN sed -i "92i\    ndkVersion \"${NDK_VERSION}\"" /root/payload/app/build.gradle
 
 # licensing info
 RUN cp "/root/payload/3rdparty-licenses.txt" "${DST}"
 
 # Remove Debug Symbols
 RUN llvm-strip /root/payload/app/src/main/jniLibs/arm64-v8a/*.so
-
-RUN cd root/src && git clone https://gitlab.com/bmwinger/delta-plugin && cd delta-plugin && cargo build --target aarch64-linux-android --release
-RUN cp /root/src/delta-plugin/target/aarch64-linux-android/release/delta_plugin /root/payload/app/src/main/jniLibs/arm64-v8a/libdelta_plugin.so
 
 # Create Package for external Editing
 RUN zip -r Package.zip /root/payload
