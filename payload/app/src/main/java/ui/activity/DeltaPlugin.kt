@@ -117,7 +117,7 @@ class DeltaPluginActivity : AppCompatActivity() {
             val output = shellExec(command, WorkingDir)
             runOnUiThread {
                 progressDialog.dismiss()
-                shellOutputTextView.append(output + "\n\n")
+                shellOutputTextView.append(output + "\n")
             }
         }.start()
     }
@@ -153,14 +153,15 @@ class DeltaPluginActivity : AppCompatActivity() {
 
             val grassIds = "grass|kelp|lilypad|fern|thirrlily|spartium|in_cave_plant|reedgroup"
             val excludeIds = "refernce|infernace|planter|_furn_|_skelp|t_glb_var_skeleton|cliffgrass|terr|grassplane|flora_s_m_10_grass|cave_mud_rocks_fern|ab_in_cavemold|rp_mh_rock|ex_cave_grass00|secret_fern"
+            val ids_expr = "^(?!.*($excludeIds).*).*($grassIds).*$"
             val exteriorCellRegex = "^[0-9\\-]+x[0-9\\-]+$"
 
             val Command = StringBuilder("./libdelta_plugin.so -c ")
             Command.append(Constants.USER_CONFIG + "/delta.cfg filter --all --output ")
-            Command.append(Constants.USER_DELTA + "/output_groundcover.omwaddon --desc \"Generated groundcover plugin from your local cavebros\" match Static --id \"$grassIds\" --modify model \"^\" \"grass\\\\\" match Cell --cellref-object-id \"$grassIds\"")
+            Command.append(Constants.USER_DELTA + "/output_groundcover.omwaddon --desc \"Generated groundcover plugin from your local cavebros\" match Static --id \"$ids_expr\" --modify model \"^\" \"grass\\\\\" match Cell --cellref-object-id \"$ids_expr\"")
             if (!pretend) {
                 Command.append(" && ")
-                Command.append("./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output " + Constants.USER_DELTA + "/output_deleted.omwaddon match Cell --cellref-object-id \"$grassIds\" --id \"$exteriorCellRegex\" --delete")
+                Command.append("./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output " + Constants.USER_DELTA + "/output_deleted.omwaddon match Cell --cellref-object-id \"$ids_expr\" --id \"$exteriorCellRegex\" --delete")
             }
             Command.append(" && ")
             Command.append("./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg query --input " + Constants.USER_DELTA + "/output_groundcover.omwaddon --ignore " + Constants.USER_DELTA + "/deleted_groundcover.omwaddon match Static")
@@ -170,7 +171,7 @@ class DeltaPluginActivity : AppCompatActivity() {
             val modelLines = outputlines.filter { it.trim().startsWith("model:") }
             val paths = modelLines.map { it.substringAfter("model: \"grass").replace("\\\\", "/").trim().replace("\"", "") }
             runOnUiThread {
-                shellOutputTextView.append((paths + "\n\n").toString())
+                shellOutputTextView.append((paths + "\n").toString())
             }
 
             paths.forEach { path ->
@@ -186,7 +187,7 @@ class DeltaPluginActivity : AppCompatActivity() {
 
                 val output2 = shellExec(Command2.toString(), WorkingDir)
                 runOnUiThread {
-                    shellOutputTextView.append(output2 + "\n\n")
+                    shellOutputTextView.append(output2 + "\n")
                 }
             }
 
