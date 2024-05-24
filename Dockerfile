@@ -425,6 +425,15 @@ RUN cd ${HOME}/src/openmw-${OPENMW_VERSION}/build && cmake .. \
         -DMyGUI_LIBRARY=${PREFIX}/lib/libMyGUIEngineStatic.a && \
     make -j $(nproc)
 
+RUN wget https://sh.rustup.rs -O rustup.sh && sha256sum rustup.sh && \
+    echo "32a680a84cf76014915b3f8aa44e3e40731f3af92cd45eb0fcc6264fd257c428  rustup.sh" | sha256sum -c - && \
+    sh rustup.sh -y && rm rustup.sh && \
+    ${HOME}/.cargo/bin/rustup target add ${NDK_TRIPLET} && \
+    ${HOME}/.cargo/bin/rustup toolchain install nightly && \
+    ${HOME}/.cargo/bin/rustup target add --toolchain nightly ${NDK_TRIPLET} && \
+    echo "[target.${NDK_TRIPLET}]" >> /root/.cargo/config && \
+    echo "linker = \"${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang\"" >> /root/.cargo/config
+
 COPY --chmod=0755 payload /root/payload
 COPY --chmod=0755 mods /root/mods
 
@@ -457,21 +466,13 @@ RUN cat "${SRC}/openmw.cfg" | grep -v "data=" | grep -v "data-local=" >> "${DST}
 RUN cat "/root/payload/app/openmw.base.cfg" >> "${DST}/openmw/openmw.base.cfg"
 RUN mkdir -p /root/payload/app/src/main/assets/libopenmw/resources && cd $_ && echo "${APP_VERSION}" >> version
 RUN sed -i "4i\    <string name='version_info'>CaveBros Version ${APP_VERSION}</string>" /root/payload/app/src/main/res/values/strings.xml
+RUN sed -i "92i\    ndkVersion\"${NDK_VERSION}\"" /root/payload/app/build.gradle
 
 # licensing info
 RUN cp "/root/payload/3rdparty-licenses.txt" "${DST}"
 
 # Remove Debug Symbols
 RUN llvm-strip /root/payload/app/src/main/jniLibs/arm64-v8a/*.so
-
-RUN wget https://sh.rustup.rs -O rustup.sh && sha256sum rustup.sh && \
-    echo "32a680a84cf76014915b3f8aa44e3e40731f3af92cd45eb0fcc6264fd257c428  rustup.sh" | sha256sum -c - && \
-    sh rustup.sh -y && rm rustup.sh && \
-    ${HOME}/.cargo/bin/rustup target add aarch64-linux-android && \
-    ${HOME}/.cargo/bin/rustup toolchain install nightly && \
-    ${HOME}/.cargo/bin/rustup target add --toolchain nightly aarch64-linux-android && \
-    echo "[target.aarch64-linux-android]" >> /root/.cargo/config && \
-    echo "linker = \"${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang\"" >> /root/.cargo/config
 
 RUN cd root/src && git clone https://gitlab.com/bmwinger/delta-plugin && cd delta-plugin && cargo build --target aarch64-linux-android --release
 RUN cp /root/src/delta-plugin/target/aarch64-linux-android/release/delta_plugin /root/payload/app/src/main/jniLibs/arm64-v8a/libdelta_plugin.so
