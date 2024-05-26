@@ -99,7 +99,7 @@ class DeltaPluginActivity : AppCompatActivity() {
 
         val progressDialog = ProgressDialog(this)
         progressDialog.setMessage("Running Delta Plugin...") // Set the message
-        progressDialog.setCancelable(false) // Set cancelable to false
+        progressDialog.setCancelable(true) // Set cancelable to false
         progressDialog.show() // Show the ProgressDialog
 
         val newFilePath = Constants.USER_CONFIG + "/delta.cfg" // Create a new path for delta.cfg
@@ -140,7 +140,7 @@ class DeltaPluginActivity : AppCompatActivity() {
         // Initialize the ProgressDialog
         val progressDialog = ProgressDialog(this)
         progressDialog.setMessage("Running Groundcoverify...") // Set the message
-        progressDialog.setCancelable(false) // Set cancelable to false
+        progressDialog.setCancelable(true) // Set cancelable to false
         progressDialog.show() // Show the ProgressDialog
 
         // Execute the command in a separate thread
@@ -230,9 +230,10 @@ class DeltaPluginActivity : AppCompatActivity() {
         // Execute the shell command in a separate thread
         Thread {
             try {
-                val output = shellExec()
+                
                 // Update the TextView on the main thread
                 runOnUiThread {
+                	val output = shellExec()
                     // Append the new output to the existing text
                     shellOutputTextView.append(output)
                 }
@@ -247,36 +248,44 @@ class DeltaPluginActivity : AppCompatActivity() {
     }
 
     private fun shellExec(cmd: String? = null, WorkingDir: String? = null): String {
-        val output = StringBuilder()
-        try {
-            val processBuilder = ProcessBuilder()
-            if (WorkingDir != null) {
-                processBuilder.directory(File(WorkingDir))
-            }
-            System.setProperty("HOME", "/data/data/$packageName/files/")
-            val commandToExecute = arrayOf("/system/bin/sh", "-c", "export HOME=/data/data/$packageName/files/; $cmd")
-            processBuilder.command(*commandToExecute)
-            processBuilder.redirectErrorStream(true)
-            val process = processBuilder.start()
+    val output = StringBuilder()
+    try {
+        val processBuilder = ProcessBuilder()
+        if (WorkingDir != null) {
+            processBuilder.directory(File(WorkingDir))
+        }
+        System.setProperty("HOME", "/data/data/$packageName/files/")
+        
+        
+// Check if the delta_logcat.txt file exists
+val logcatFile = File(Constants.USER_CONFIG + "/delta_logcat.txt")
+if (logcatFile.exists()) {
+    logcatFile.delete()
+}
 
-            process.inputStream.bufferedReader().use { inputStreamReader ->
-                var line: String?
-                while (inputStreamReader.readLine().also { line = it } != null) {
-                    output.append(line).append("\n")
-                }
-            }
+        val commandToExecute = arrayOf("/system/bin/sh", "-c", "export HOME=/data/data/$packageName/files/; logcat *:W -d -f ${Constants.USER_CONFIG}/delta_logcat.txt & $cmd; pkill -f 'logcat'")
+        processBuilder.command(*commandToExecute)
+        processBuilder.redirectErrorStream(true)
+        val process = processBuilder.start()
 
-            process.waitFor()
-        } catch (e: Exception) {
-            val sw = StringWriter()
-            val pw = PrintWriter(sw)
-            e.printStackTrace(pw)
-            output.append("Error executing command: ").append(e.message).append("\nStacktrace:\n").append(sw.toString())
+        process.inputStream.bufferedReader().use { inputStreamReader ->
+            var line: String?
+            while (inputStreamReader.readLine().also { line = it } != null) {
+                output.append(line).append("\n")
+            }
         }
 
-        findViewById<EditText>(R.id.command_input).text.clear()
-        return output.toString()
+        process.waitFor()
+    } catch (e: Exception) {
+        val sw = StringWriter()
+        val pw = PrintWriter(sw)
+        e.printStackTrace(pw)
+        output.append("Error executing command: ").append(e.message).append("\nStacktrace:\n").append(sw.toString())
     }
+
+    findViewById<EditText>(R.id.command_input).text.clear()
+    return output.toString()
+}
 
     private fun copyTextToClipboard() {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
