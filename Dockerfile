@@ -33,8 +33,9 @@ ARG APP_VERSION=unknown
 
 RUN dnf install -y dnf-plugins-core && dnf config-manager --set-enabled crb && dnf install -y epel-release
 RUN dnf install -y https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm \
-    && dnf install -y xz p7zip bzip2 libstdc++-devel glibc-devel zip unzip libcurl-devel which wget python-devel doxygen nano gcc-c++ git java-${JAVA_VERSION}-openjdk cmake patch
+    && dnf install -y xz p7zip bzip2 libstdc++-devel glibc-devel zip unzip libcurl-devel java-11-openjdk which wget python-devel doxygen nano gcc-c++ git java-${JAVA_VERSION}-openjdk cmake patch
 
+RUN alternatives --set java java-17-openjdk.x86_64
 RUN JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which java)))))
 ENV ANDROID_SDK_ROOT=/root/Android/cmdline-tools/latest/bin
 ENV ANDROID_HOME=/root/Android
@@ -481,7 +482,6 @@ RUN llvm-strip /root/payload/app/src/main/jniLibs/arm64-v8a/*.so
 RUN zip -r Package.zip /root/payload
 
 # Build the APK!
-RUN dnf install -y java-11-openjdk
 RUN alternatives --set java java-11-openjdk.x86_64
 RUN JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which java)))))
 RUN cd /root/payload/ && ./gradlew assembleRelease
