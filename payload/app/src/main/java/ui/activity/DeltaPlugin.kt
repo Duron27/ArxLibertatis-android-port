@@ -169,7 +169,7 @@ class DeltaPluginActivity : AppCompatActivity() {
 
             val Command = StringBuilder("./libdelta_plugin.so -c ")
             Command.append(Constants.USER_CONFIG + "/delta.cfg filter --all --output ")
-            Command.append(Constants.USER_DELTA + "/output_groundcover.omwaddon --desc \"Generated groundcover plugin from your local cavebros\" match Cell --cellref-object-id \"$ids_expr\" --id \"$exteriorCellRegex\" match Static --id \"$ids_expr\" --modify model  \"^\" \"grass\\\\\"")
+            Command.append(Constants.USER_DELTA + "/output_groundcover.omwaddon --desc \"Generated groundcover plugin from your local cavebros\" match Cell --cellref-object-id \"$ids_expr\" --id \"$exteriorCellRegex\" match Static --id \"$ids_expr\" --modify model \"^\" \"grass\\\\\"")
             if (!pretend) {
                 Command.append(" && ")
                 Command.append("./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output " + Constants.USER_DELTA + "/output_deleted.omwaddon match Cell --cellref-object-id \"$ids_expr\" --id \"$exteriorCellRegex\" --delete")
