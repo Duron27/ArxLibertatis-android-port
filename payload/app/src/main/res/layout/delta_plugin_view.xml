@@ -51,6 +51,7 @@
         android:hint="Enter args for delta plugin (Optional Flags)" />
 
     <ScrollView
+        android:id="@+id/shellOutputTextView"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
