@@ -9,8 +9,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.preference.PreferenceManager
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -46,6 +48,7 @@ class DeltaPluginActivity : AppCompatActivity() {
         deltaGrassButton = findViewById(R.id.delta_grass_button)
         deltaQueryButton = findViewById(R.id.delta_query_button)
         copyButton = findViewById(R.id.copy_button) // Reference the new button
+
 
         deltaPluginButton.setOnClickListener {
             executeCommand()
@@ -99,7 +102,7 @@ class DeltaPluginActivity : AppCompatActivity() {
 
         val progressDialog = ProgressDialog(this)
         progressDialog.setMessage("Running Delta Plugin...") // Set the message
-        progressDialog.setCancelable(true) // Set cancelable to false
+        progressDialog.setCancelable(false) // Set cancelable to false
         progressDialog.show() // Show the ProgressDialog
 
         val newFilePath = Constants.USER_CONFIG + "/delta.cfg" // Create a new path for delta.cfg
@@ -140,7 +143,7 @@ class DeltaPluginActivity : AppCompatActivity() {
         // Initialize the ProgressDialog
         val progressDialog = ProgressDialog(this)
         progressDialog.setMessage("Running Groundcoverify...") // Set the message
-        progressDialog.setCancelable(true) // Set cancelable to false
+        progressDialog.setCancelable(false) // Set cancelable to false
         progressDialog.show() // Show the ProgressDialog
 
         // Execute the command in a separate thread
@@ -166,7 +169,7 @@ class DeltaPluginActivity : AppCompatActivity() {
 
             val Command = StringBuilder("./libdelta_plugin.so -c ")
             Command.append(Constants.USER_CONFIG + "/delta.cfg filter --all --output ")
-            Command.append(Constants.USER_DELTA + "/output_groundcover.omwaddon --desc \"Generated groundcover plugin from your local cavebros\" match Static --id \"$ids_expr\" --modify model \"^\" \"grass\\\\\" match Cell --cellref-object-id \"$ids_expr\"")
+            Command.append(Constants.USER_DELTA + "/output_groundcover.omwaddon --desc \"Generated groundcover plugin from your local cavebros\" match Cell --cellref-object-id \"$ids_expr\" --id \"$exteriorCellRegex\" match Static --id \"$ids_expr\" --modify model  \"^\" \"grass\\\\\"")
             if (!pretend) {
                 Command.append(" && ")
                 Command.append("./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output " + Constants.USER_DELTA + "/output_deleted.omwaddon match Cell --cellref-object-id \"$ids_expr\" --id \"$exteriorCellRegex\" --delete")
@@ -236,6 +239,8 @@ class DeltaPluginActivity : AppCompatActivity() {
                 	val output = shellExec()
                     // Append the new output to the existing text
                     shellOutputTextView.append(output)
+                    val scrollView: ScrollView = findViewById(R.id.scrollView)
+                    scrollView.fullScroll(View.FOCUS_DOWN)
                 }
             } catch (e: Exception) {
                 // Handle any exceptions
