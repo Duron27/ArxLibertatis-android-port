@@ -9,10 +9,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.preference.PreferenceManager
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -48,7 +46,6 @@ class DeltaPluginActivity : AppCompatActivity() {
         deltaGrassButton = findViewById(R.id.delta_grass_button)
         deltaQueryButton = findViewById(R.id.delta_query_button)
         copyButton = findViewById(R.id.copy_button) // Reference the new button
-
 
         deltaPluginButton.setOnClickListener {
             executeCommand()
@@ -109,15 +106,15 @@ class DeltaPluginActivity : AppCompatActivity() {
         val deltaoutput = "data=\"$gamePath/Data Files\""
         File(newFilePath).appendText("\n" + deltaoutput) // Append data to the copied delta.cfg
 
-        val command = "./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg merge --skip-cells " + findViewById<EditText>(R.id.command_input).text.toString() + " " + Constants.USER_DELTA + "/delta-merged.omwaddon"
+        val Command = "./libdelta_plugin.so -v --verbose -c " + Constants.USER_CONFIG + "/delta.cfg merge --skip-cells " + findViewById<EditText>(R.id.command_input).text.toString() + " " + Constants.USER_DELTA + "/delta-merged.omwaddon"
 
         val deltamergeoutput = "content=delta-merged.omwaddon"
         val deltapath = "data=" + Constants.USER_DELTA
-        File(Constants.USER_CONFIG + "/openmw.cfg").appendText("\n" + deltamergeoutput + "\n" + deltapath) // Append data to the copied delta.cfg
+        File(Constants.USER_CONFIG + "/openmw.cfg").appendText("\n" + deltapath + "\n" + deltamergeoutput) // Append data to the copied delta.cfg
 
         // Execute the command in a separate thread
         Thread {
-            val output = shellExec(command, WorkingDir)
+            val output = shellExec(Command, WorkingDir)
             runOnUiThread {
                 progressDialog.dismiss()
                 shellOutputTextView.append(output + "\n")
@@ -167,15 +164,15 @@ class DeltaPluginActivity : AppCompatActivity() {
             val ids_expr = "^(?!.*($excludeIds).*).*($grassIds).*$"
             val exteriorCellRegex = "^[0-9\\-]+x[0-9\\-]+$"
 
-            val Command = StringBuilder("./libdelta_plugin.so -c ")
+            val Command = StringBuilder("./libdelta_plugin.so -v --verbose -c ")
             Command.append(Constants.USER_CONFIG + "/delta.cfg filter --all --output ")
             Command.append(Constants.USER_DELTA + "/output_groundcover.omwaddon --desc \"Generated groundcover plugin from your local cavebros\" match Cell --cellref-object-id \"$ids_expr\" --id \"$exteriorCellRegex\" match Static --id \"$ids_expr\" --modify model \"^\" \"grass\\\\\"")
             if (!pretend) {
                 Command.append(" && ")
-                Command.append("./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output " + Constants.USER_DELTA + "/output_deleted.omwaddon match Cell --cellref-object-id \"$ids_expr\" --id \"$exteriorCellRegex\" --delete")
+                Command.append("./libdelta_plugin.so -v --verbose -c " + Constants.USER_CONFIG + "/delta.cfg filter --all --output " + Constants.USER_DELTA + "/output_deleted.omwaddon match Cell --cellref-object-id \"$ids_expr\" --id \"$exteriorCellRegex\" --delete")
             }
             Command.append(" && ")
-            Command.append("./libdelta_plugin.so -c " + Constants.USER_CONFIG + "/delta.cfg query --input " + Constants.USER_DELTA + "/output_groundcover.omwaddon --ignore " + Constants.USER_DELTA + "/deleted_groundcover.omwaddon match Static")
+            Command.append("./libdelta_plugin.so -v --verbose -c " + Constants.USER_CONFIG + "/delta.cfg query --input " + Constants.USER_DELTA + "/output_groundcover.omwaddon --ignore " + Constants.USER_DELTA + "/deleted_groundcover.omwaddon match Static")
 
             val output = shellExec(Command.toString(), WorkingDir)
             val outputlines = output.split("\n")
@@ -192,7 +189,7 @@ class DeltaPluginActivity : AppCompatActivity() {
                 val Command2 = StringBuilder("mkdir -p ")
                 Command2.append(Constants.USER_DELTA + "/Meshes/grass/$correctedPath")
                 Command2.append(" && ")
-                Command2.append("./libdelta_plugin.so -c ")
+                Command2.append("./libdelta_plugin.so -v --verbose -c ")
                 Command2.append(Constants.USER_CONFIG + "/delta.cfg vfs-extract \"Meshes$correctedPath/$filename\" ")
                 Command2.append(Constants.USER_DELTA + "/Meshes/grass/$correctedPath/$filename")
 
@@ -223,7 +220,7 @@ class DeltaPluginActivity : AppCompatActivity() {
 
         // Define the specific commands to execute for this button here
         val commandInput = findViewById<EditText>(R.id.command_input).text.toString()
-        val Command = "./libdelta_plugin.so -c ${Constants.USER_CONFIG}/delta.cfg query $commandInput"
+        val Command = "./libdelta_plugin.so -v --verbose -c ${Constants.USER_CONFIG}/delta.cfg query $commandInput"
 
         val output = shellExec(Command, WorkingDir)
         shellOutputTextView.append("$output\n\n")
@@ -233,14 +230,11 @@ class DeltaPluginActivity : AppCompatActivity() {
         // Execute the shell command in a separate thread
         Thread {
             try {
-                
+                val output = shellExec()
                 // Update the TextView on the main thread
                 runOnUiThread {
-                	val output = shellExec()
                     // Append the new output to the existing text
                     shellOutputTextView.append(output)
-                    val scrollView: ScrollView = findViewById(R.id.scrollView)
-                    scrollView.fullScroll(View.FOCUS_DOWN)
                 }
             } catch (e: Exception) {
                 // Handle any exceptions
@@ -253,44 +247,36 @@ class DeltaPluginActivity : AppCompatActivity() {
     }
 
     private fun shellExec(cmd: String? = null, WorkingDir: String? = null): String {
-    val output = StringBuilder()
-    try {
-        val processBuilder = ProcessBuilder()
-        if (WorkingDir != null) {
-            processBuilder.directory(File(WorkingDir))
-        }
-        System.setProperty("HOME", "/data/data/$packageName/files/")
-        
-        
-// Check if the delta_logcat.txt file exists
-val logcatFile = File(Constants.USER_CONFIG + "/delta_logcat.txt")
-if (logcatFile.exists()) {
-    logcatFile.delete()
-}
-
-        val commandToExecute = arrayOf("/system/bin/sh", "-c", "export HOME=/data/data/$packageName/files/; logcat *:W -d -f ${Constants.USER_CONFIG}/delta_logcat.txt & $cmd; pkill -f 'logcat'")
-        processBuilder.command(*commandToExecute)
-        processBuilder.redirectErrorStream(true)
-        val process = processBuilder.start()
-
-        process.inputStream.bufferedReader().use { inputStreamReader ->
-            var line: String?
-            while (inputStreamReader.readLine().also { line = it } != null) {
-                output.append(line).append("\n")
+        val output = StringBuilder()
+        try {
+            val processBuilder = ProcessBuilder()
+            if (WorkingDir != null) {
+                processBuilder.directory(File(WorkingDir))
             }
+            System.setProperty("HOME", "/data/data/$packageName/files/")
+            val commandToExecute = arrayOf("/system/bin/sh", "-c", "export HOME=/data/data/$packageName/files/; $cmd")
+            processBuilder.command(*commandToExecute)
+            processBuilder.redirectErrorStream(true)
+            val process = processBuilder.start()
+
+            process.inputStream.bufferedReader().use { inputStreamReader ->
+                var line: String?
+                while (inputStreamReader.readLine().also { line = it } != null) {
+                    output.append(line).append("\n")
+                }
+            }
+
+            process.waitFor()
+        } catch (e: Exception) {
+            val sw = StringWriter()
+            val pw = PrintWriter(sw)
+            e.printStackTrace(pw)
+            output.append("Error executing command: ").append(e.message).append("\nStacktrace:\n").append(sw.toString())
         }
 
-        process.waitFor()
-    } catch (e: Exception) {
-        val sw = StringWriter()
-        val pw = PrintWriter(sw)
-        e.printStackTrace(pw)
-        output.append("Error executing command: ").append(e.message).append("\nStacktrace:\n").append(sw.toString())
+        findViewById<EditText>(R.id.command_input).text.clear()
+        return output.toString()
     }
-
-    findViewById<EditText>(R.id.command_input).text.clear()
-    return output.toString()
-}
 
     private fun copyTextToClipboard() {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
