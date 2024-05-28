@@ -37,7 +37,7 @@
         <activity
             android:name="ui.activity.DeltaPluginActivity"
             android:configChanges="keyboardHidden|orientation"
-            android:screenOrientation="fullUser"
+            android:screenOrientation="portrait"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.FullScreen" />
         <activity
