@@ -145,6 +145,16 @@ class DeltaPluginActivity : AppCompatActivity() {
 
         // Execute the command in a separate thread
         Thread {
+            val gamePath = PreferenceManager.getDefaultSharedPreferences(ctx)
+                .getString("game_files", "")!!
+            prefs = PreferenceManager.getDefaultSharedPreferences(this)
+
+            var lines2 = File(Constants.USER_CONFIG + "/delta.cfg").readLines().toMutableList()
+            lines2.removeAll { it.contains("data=\"$gamePath/Data Files\"") }
+
+            // Write the modified lines back to the file
+            File(Constants.USER_CONFIG + "/delta.cfg").writeText(lines2.joinToString("\n"))
+
             val lines = File(Constants.USER_CONFIG + "/openmw.cfg").readLines().toMutableList()
             lines.removeAll { it.contains("groundcover=output_groundcover.omwaddon") || it.contains("content=output_deleted.omwaddon") }
 
