@@ -69,6 +69,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         MyApp.app.defaultScaling = determineScaling()
 
+        val logcatFile = File(Constants.USER_CONFIG + "/openmw_logcat.txt")
+        if (logcatFile.exists()) {
+            logcatFile.delete()
+        }
+
+        val processBuilder = ProcessBuilder()
+        val commandToExecute = arrayOf("/system/bin/sh", "-c", "logcat :W -d -f ${Constants.USER_CONFIG}/openmw_logcat.txt")
+        processBuilder.command(commandToExecute)
+        processBuilder.redirectErrorStream(true)
+        processBuilder.start()
+        }
+
         Thread.setDefaultUncaughtExceptionHandler(CaptureCrash())
         PermissionHelper.getWriteExternalStoragePermission(this@MainActivity)
         setContentView(R.layout.main)
