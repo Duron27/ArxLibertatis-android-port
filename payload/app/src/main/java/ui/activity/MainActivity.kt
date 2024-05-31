@@ -406,12 +406,6 @@ class MainActivity : AppCompatActivity() {
         if (!File(Constants.USER_OPENMW_CFG).exists())
             File(Constants.USER_OPENMW_CFG).writeText("# This is the user openmw.cfg. Feel free to modify it as you wish.\n")
 
-        // create user custom icon folder as a hint
-        File(Constants.USER_FILE_STORAGE + "/icons").mkdirs()
-        if (!File(Constants.USER_FILE_STORAGE + "/icons/paste custom icons here.txt").exists())
-            File(Constants.USER_FILE_STORAGE + "/icons/paste custom icons here.txt").writeText(
-"attack.png \ninventory.png \njournal.png \njump.png \nkeyboard.png \nmouse.png \npause.png \npointer_arrow.png \nrun.png \nsave.png \nsneak.png \nthird_person.png \ntoggle_magic.png \ntoggle_weapon.png \ntoggle.png \nuse.png \nwait.png")
-
         // set version stamp
         File(Constants.VERSION_STAMP).writeText(BuildConfig.VERSION_CODE.toString())
     }
