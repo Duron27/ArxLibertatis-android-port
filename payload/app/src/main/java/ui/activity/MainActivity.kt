@@ -69,18 +69,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         MyApp.app.defaultScaling = determineScaling()
 
-        val logcatFile = File(Constants.USER_CONFIG + "/openmw_logcat.txt")
-        if (logcatFile.exists()) {
-            logcatFile.delete()
-        }
-
-        val processBuilder = ProcessBuilder()
-        val commandToExecute = arrayOf("/system/bin/sh", "-c", "logcat :W -d -f ${Constants.USER_CONFIG}/openmw_logcat.txt")
-        processBuilder.command(commandToExecute)
-        processBuilder.redirectErrorStream(true)
-        processBuilder.start()
-        }
-
         Thread.setDefaultUncaughtExceptionHandler(CaptureCrash())
         PermissionHelper.getWriteExternalStoragePermission(this@MainActivity)
         setContentView(R.layout.main)
@@ -103,6 +91,16 @@ class MainActivity : AppCompatActivity() {
         if (prefs.getString("bugsnag_consent", "")!! == "") {
             askBugsnagConsent()
         }
+        val logcatFile = File(Constants.USER_CONFIG + "/openmw_logcat.txt")
+        if (logcatFile.exists()) {
+            logcatFile.delete()
+        }
+
+        val processBuilder = ProcessBuilder()
+        val commandToExecute = arrayOf("/system/bin/sh", "-c", "logcat *:W -d -f ${Constants.USER_CONFIG}/openmw_logcat.txt")
+        processBuilder.command(*commandToExecute)
+        processBuilder.redirectErrorStream(true)
+        processBuilder.start()
     }
 
     /**
@@ -408,6 +406,7 @@ class MainActivity : AppCompatActivity() {
     private fun removeUserConfig() {
         deleteRecursive(File(Constants.USER_CONFIG))
         File(Constants.USER_FILE_STORAGE + "/config").mkdirs()
+        File(Constants.USER_OPENMW_CFG).writeText("# This is the user openmw.cfg. Feel free to modify it as you wish.\n")
     }
 
     /**
@@ -631,11 +630,7 @@ class MainActivity : AppCompatActivity() {
             scaling = MyApp.app.defaultScaling
         }
 
-        val dialog = ProgressDialog.show(
-            this, "", "Preparing for launch...", true)
-
         val activity = this
-
         // hide the controls so that ScreenResolutionHelper can get the right resolution
         hideAndroidControls(this)
 
@@ -730,7 +725,6 @@ class MainActivity : AppCompatActivity() {
 
                 runOnUiThread {
                     obtainFixedScreenResolution()
-                    dialog.hide()
                     runGame()
                 }
             } catch (e: IOException) {
