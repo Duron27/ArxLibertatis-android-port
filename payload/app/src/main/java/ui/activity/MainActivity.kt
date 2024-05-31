@@ -570,6 +570,9 @@ class MainActivity : AppCompatActivity() {
         writeSetting("Terrain", "distant terrain", if(prefs.getBoolean("gs_distant_land", false)) "true" else "false")
         writeSetting("Terrain", "object paging active grid", if(prefs.getBoolean("gs_active_grid_object_paging", true)) "true" else "false")
 
+        // Camera
+        writeSetting("Camera", "viewing distance", prefs.getString("gs_viewing_distance", "7168").toString())
+
         // Visuals graphics
         writeSetting("Video", "framerate limit", prefs.getString("gs_framerate_limit", "60").toString())
 
