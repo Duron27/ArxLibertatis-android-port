@@ -21,7 +21,9 @@
 package ui.activity
 
 import android.annotation.SuppressLint
+import android.app.AlarmManager
 import android.app.AlertDialog
+import android.app.PendingIntent
 import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.DialogInterface
@@ -32,19 +34,28 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.system.ErrnoException
 import android.system.Os
 import android.util.DisplayMetrics
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.bugsnag.android.Bugsnag
 import com.libopenmw.openmw.BuildConfig
 import com.libopenmw.openmw.R
 import constants.Constants
 import file.GameInstaller
+
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
+import java.io.InputStreamReader
+
 import file.utils.CopyFilesFromAssets
 import mods.ModType
 import mods.ModsCollection
@@ -53,14 +64,20 @@ import permission.PermissionHelper
 import ui.fragments.FragmentSettings
 import utils.MyApp
 import utils.Utils.hideAndroidControls
-import java.io.File
+
 import java.io.FileWriter
-import java.io.IOException
+
 import java.io.PrintWriter
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.system.exitProcess
+import android.util.Base64
+
+import android.view.DisplayCutout
+import android.graphics.Rect
+
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var prefs: SharedPreferences
@@ -91,6 +108,16 @@ class MainActivity : AppCompatActivity() {
         if (prefs.getString("bugsnag_consent", "")!! == "") {
             askBugsnagConsent()
         }
+
+        // create user dirs
+        File(Constants.USER_CONFIG).mkdirs()
+        File(Constants.USER_FILE_STORAGE + "/launcher/icons").mkdirs()
+
+        // create icons files hint
+        if (!File(Constants.USER_FILE_STORAGE + "/launcher/icons/paste custom icons here.txt").exists())
+            File(Constants.USER_FILE_STORAGE + "/launcher/icons/paste custom icons here.txt").writeText(
+                "attack.png \ninventory.png \njournal.png \njump.png \nkeyboard.png \nmouse.png \npause.png \npointer_arrow.png \nrun.png \nsave.png \nsneak.png \nthird_person.png \ntoggle_magic.png \ntoggle_weapon.png \ntoggle.png \nuse.png \nwait.png")
+        
         val logcatFile = File(Constants.USER_CONFIG + "/openmw_logcat.txt")
         if (logcatFile.exists()) {
             logcatFile.delete()
@@ -406,6 +433,7 @@ class MainActivity : AppCompatActivity() {
     private fun removeUserConfig() {
         deleteRecursive(File(Constants.USER_CONFIG))
         File(Constants.USER_FILE_STORAGE + "/config").mkdirs()
+        File(Constants.USER_OPENMW_CFG).writeText("# This is the user openmw.cfg. Feel free to modify it as you wish.\n")
     }
 
     /**
@@ -447,22 +475,22 @@ class MainActivity : AppCompatActivity() {
         var currentCategory = ""
 
         File(Constants.USER_CONFIG + "/settings.cfg").useLines {
-	    lines -> lines.forEach {
-		lineList.add(it)
-                if (it.contains("[") && it.contains("]")) currentCategory = it.replace("[", "").replace("]", "").replace(" ", "")
-                if (currentCategory == category.replace(" ", "") && categoryFound == 0 ) { categoryLine = lineNumber; categoryFound = 1 } 
-                if (currentCategory == category.replace(" ", "") && it.substringBefore("=").replace(" ", "") == name.replace(" ", ""))
-		    { nameLine = lineNumber; nameFound = 1 }
+                lines -> lines.forEach {
+            lineList.add(it)
+            if (it.contains("[") && it.contains("]")) currentCategory = it.replace("[", "").replace("]", "").replace(" ", "")
+            if (currentCategory == category.replace(" ", "") && categoryFound == 0 ) { categoryLine = lineNumber; categoryFound = 1 }
+            if (currentCategory == category.replace(" ", "") && it.substringBefore("=").replace(" ", "") == name.replace(" ", ""))
+            { nameLine = lineNumber; nameFound = 1 }
 
-                lineNumber++
-	    }
-	}
+            lineNumber++
+        }
+        }
 
         if(nameFound == 1)
             lineList.set(nameLine, name + " = " + value)
         if(categoryFound == 1 && nameFound == 0)
             lineList.add(categoryLine + 1, name + " = " + value)
-        if(categoryFound == 0 && nameFound == 0) 
+        if(categoryFound == 0 && nameFound == 0)
             lineList.add(lineNumber, "\n" + "[" + category + "]" + "\n" + name + " = " + value)
 
         var output = ""
@@ -470,7 +498,6 @@ class MainActivity : AppCompatActivity() {
 
         File(Constants.USER_CONFIG + "/settings.cfg").writeText(output)
     }
-
 
     private fun writeUserSettings() {
         File(Constants.USER_CONFIG + "/settings.cfg").createNewFile()
@@ -482,39 +509,54 @@ class MainActivity : AppCompatActivity() {
         val orientation = this.getResources().getConfiguration().orientation
         var displayWidth = 0
         var displayHeight = 0
+        val cutout = windowManager.defaultDisplay.getCutout()
 
-        if (orientation == Configuration.ORIENTATION_PORTRAIT)
-        {
-            displayWidth = if(resolutionX == 0) dm.heightPixels else resolutionX
-            displayHeight = if(resolutionY == 0) dm.widthPixels else resolutionY
-
-            if( displayInCutoutArea == false && resolutionX == 0) {
-                val cutoutRectTop = windowManager.defaultDisplay.getCutout()!!.getBoundingRectTop()
-                val cutoutRectBottom = windowManager.defaultDisplay.getCutout()!!.getBoundingRectBottom()
-                if (cutoutRectTop != null && cutoutRectBottom != null)
+        if (cutout != null) {
+            if (orientation == Configuration.ORIENTATION_PORTRAIT)
+            {
+                displayWidth = if(resolutionX == 0) dm.heightPixels else resolutionX
+                displayHeight = if(resolutionY == 0) dm.widthPixels else resolutionY
+                if( displayInCutoutArea == false && resolutionX == 0) {
+                    val cutoutRectTop = cutout.getBoundingRectTop()
+                    val cutoutRectBottom = cutout.getBoundingRectBottom()
                     displayWidth = dm.heightPixels - maxOf(cutoutRectTop.bottom, cutoutRectBottom.bottom - cutoutRectBottom.top)
+                }
             }
-        }
-        else
-        {
-            displayWidth = if(resolutionX == 0) dm.widthPixels else resolutionX
-            displayHeight = if(resolutionY == 0) dm.heightPixels else resolutionY
-
-            if( displayInCutoutArea == false && resolutionY == 0) {
-                val cutoutRectLeft = windowManager.defaultDisplay.getCutout()!!.getBoundingRectLeft()
-                val cutoutRectRight = windowManager.defaultDisplay.getCutout()!!.getBoundingRectRight()
-                if (cutoutRectLeft != null && cutoutRectRight != null)
+            else
+            {
+                displayWidth = if(resolutionX == 0) dm.widthPixels else resolutionX
+                displayHeight = if(resolutionY == 0) dm.heightPixels else resolutionY
+                if( displayInCutoutArea == false && resolutionY == 0) {
+                    val cutoutRectLeft = cutout.getBoundingRectLeft()
+                    val cutoutRectRight = cutout.getBoundingRectRight()
                     displayWidth = dm.widthPixels - maxOf(cutoutRectLeft.right, cutoutRectRight.right - cutoutRectRight.left)
+                }
+            }
+
+            writeSetting("Video", "resolution x", displayWidth.toString())
+            writeSetting("Video", "resolution y", displayHeight.toString())
+        }
+        else {
+            if (resolutionX != 0 && resolutionY != 0) {
+                writeSetting("Video", "resolution x", displayWidth.toString())
+                writeSetting("Video", "resolution y", displayHeight.toString())
+            }
+            else {
+                if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    writeSetting("Video", "resolution x", dm.heightPixels.toString())
+                    writeSetting("Video", "resolution y", dm.widthPixels.toString())
+                }
+                else {
+                    writeSetting("Video", "resolution x", dm.widthPixels.toString())
+                    writeSetting("Video", "resolution y", dm.heightPixels.toString())
+                }
             }
         }
-
-
-        writeSetting("Video", "resolution x", displayWidth.toString())
-	writeSetting("Video", "resolution y", displayHeight.toString())
 
         // Game Mechanics
         writeSetting("Game", "toggle sneak", if(prefs.getBoolean("gs_toggle_sneak", true)) "true" else "false")
         writeSetting("Game", "uncapped damage fatigue", if(prefs.getBoolean("gs_uncapped_damage_fatigue", false)) "true" else "false")
+
         writeSetting("Game", "rebalance soul gem values", if(prefs.getBoolean("gs_soulgem_values_rebalance", false)) "true" else "false")
         writeSetting("Game", "followers attack on sight", if(prefs.getBoolean("gs_followers_defend_immediately", false)) "true" else "false")
         writeSetting("Game", "barter disposition change is permanent", if(prefs.getBoolean("gs_permanent_barter_disposition_changes", false)) "true" else "false")
@@ -529,26 +571,10 @@ class MainActivity : AppCompatActivity() {
         writeSetting("Game", "allow actors to follow over water surface", if(prefs.getBoolean("gs_always_allow_npc_to_follow_over_water_surface", true)) "true" else "false")
         writeSetting("Game", "strength influences hand to hand", prefs.getString("gs_factor_strength_into_hand-to-hand_combat", "0").toString())
 
-        // Visuals Shadows
-        writeSetting("Shadows", "enable shadows", if(prefs.getBoolean("gs_shadows", false)) "true" else "false")
-        writeSetting("Shadows", "actor shadows", if(prefs.getBoolean("gs_shadows_actor", false)) "true" else "false")
-        writeSetting("Shadows", "player shadows", if(prefs.getBoolean("gs_shadows_player", false)) "true" else "false")
-        writeSetting("Shadows", "terrain shadows", if(prefs.getBoolean("gs_shadows_terrain", false)) "true" else "false")
-        writeSetting("Shadows", "object shadows", if(prefs.getBoolean("gs_shadows_object", false)) "true" else "false")
-        writeSetting("Shadows", "enable indoor shadows", if(prefs.getBoolean("gs_shadows_indoor", false)) "true" else "false")
-        writeSetting("Shadows", "number of shadow maps", prefs.getString("gs_shadow_maps", "4").toString())
-        writeSetting("Shadows", "maximum shadow rendering distance", prefs.getString("gs_shadow_distance", "3000").toString())
-        writeSetting("Shadows", "shadow map resolution", prefs.getString("gs_shadow_map_resolution", "1024").toString())
-        writeSetting("Shadows", "split point uniform logarithmic ratio", prefs.getString("gs_shadow_split_point", "0.5").toString())
-        writeSetting("Shadows", "percentage closer filtering", prefs.getString("gs_shadow_pcf", "1").toString())
-
         // Visuals terrain
         writeSetting("Terrain", "object paging min size", prefs.getString("gs_object_paging_min_size", "0.01").toString())
         writeSetting("Terrain", "distant terrain", if(prefs.getBoolean("gs_distant_land", false)) "true" else "false")
         writeSetting("Terrain", "object paging active grid", if(prefs.getBoolean("gs_active_grid_object_paging", true)) "true" else "false")
-
-        // Camera
-        writeSetting("Camera", "viewing distance", prefs.getString("gs_viewing_distance", "7168").toString())
 
         // Visuals graphics
         writeSetting("Video", "framerate limit", prefs.getString("gs_framerate_limit", "60").toString())
@@ -559,15 +585,36 @@ class MainActivity : AppCompatActivity() {
         writeSetting("Shaders", "auto use terrain normal maps", if(prefs.getBoolean("gs_auto_use_terrain_normal_maps", false)) "true" else "false")
         writeSetting("Shaders", "auto use terrain specular maps", if(prefs.getBoolean("gs_auto_use_terrain_specular_maps", false)) "true" else "false")
         writeSetting("Shaders", "apply lighting to environment maps", if(prefs.getBoolean("gs_bump_map_local_lighting", false)) "true" else "false")
-        writeSetting("Shaders", "soft particles", if(prefs.getBoolean("gs_soft_particles", false)) "true" else "false")
 
         // Visuals fog
         writeSetting("Fog", "radial fog", if(prefs.getBoolean("gs_radial_fog", false)) "true" else "false")
         writeSetting("Fog", "exponential fog", if(prefs.getBoolean("gs_exponential_fog", false)) "true" else "false")
         writeSetting("Fog", "sky blending", if(prefs.getBoolean("gs_sky_blending", false)) "true" else "false")
 
-        // Visuals PostProcessing        
+        // Visuals PostProcessing
+        writeSetting("Shaders", "soft particles", if(prefs.getBoolean("gs_soft_particles", false)) "true" else "false")
         writeSetting("Post Processing", "transparent postpass", if(prefs.getBoolean("gs_transparent_postpass", false)) "true" else "false")
+
+        // Visuals Shadows
+        if(File(Constants.USER_FILE_STORAGE + "/launcher/extensions.log").exists() &&
+            File(Constants.USER_FILE_STORAGE + "/launcher/extensions.log").readText().contains("GL_EXT_depth_clamp")) {
+
+            writeSetting("Shadows", "enable shadows",
+                if(prefs.getBoolean("gs_object_shadows", false) || prefs.getBoolean("gs_terrain_shadows", false) ||
+                    prefs.getBoolean("gs_actor_shadows", false) || prefs.getBoolean("gs_player_shadows", false))
+                    "true" else "false")
+
+            writeSetting("Shadows", "object shadows", if(prefs.getBoolean("gs_object_shadows", false)) "true" else "false")
+            writeSetting("Shadows", "terrain shadows", if(prefs.getBoolean("gs_terrain_shadows", false)) "true" else "false")
+            writeSetting("Shadows", "actor shadows", if(prefs.getBoolean("gs_actor_shadows", false)) "true" else "false")
+            writeSetting("Shadows", "player shadows", if(prefs.getBoolean("gs_player_shadows", false)) "true" else "false")
+            writeSetting("Shadows", "indoor shadows", if(prefs.getBoolean("gs_indoor_shadows", true)) "true" else "false")
+            writeSetting("Shadows", "shadow map resolution", prefs.getString("gs_shadow_map_resolution", "1024").toString())
+            writeSetting("Shadows", "compute scene bounds", prefs.getString("gs_shadow_computation_method", "bounds").toString())
+            writeSetting("Shadows", "maximum shadow map distance", prefs.getString("gs_shadows_distance", "8192").toString())
+            writeSetting("Shadows", "shadow fade start", prefs.getString("gs_shadows_fade_start", "0.9").toString())
+            writeSetting("Shadows", "percentage closer filtering", prefs.getString("gs_shadows_pcf", "1").toString())
+        }
 
         // Animations
         writeSetting("Game", "use magic item animations", if(prefs.getBoolean("gs_use_magic_item_animation", false)) "true" else "false")
@@ -584,7 +631,7 @@ class MainActivity : AppCompatActivity() {
         writeSetting("Game", "show enchant chance", if(prefs.getBoolean("gs_show_enchant_chance", false)) "true" else "false")
         writeSetting("Game", "show melee info", if(prefs.getBoolean("gs_show_melee_info", false)) "true" else "false")
         writeSetting("Game", "show projectile damage", if(prefs.getBoolean("gs_show_projectile_damage", false)) "true" else "false")
-        writeSetting("GUI", "color topic enable", if(prefs.getBoolean("gs_change_dialogue_topic_color", true)) "true" else "false")
+        writeSetting("GUI", "color topic enable", if(prefs.getBoolean("gs_change_dialogue_topic_color", false)) "true" else "false")
         writeSetting("GUI", "stretch menu background", if(prefs.getBoolean("gs_stretch_menu_background", false)) "true" else "false")
         writeSetting("Map", "allow zooming", if(prefs.getBoolean("gs_can_zoom_on_maps", false)) "true" else "false")
 
@@ -597,17 +644,13 @@ class MainActivity : AppCompatActivity() {
         writeSetting("Saves", "max quicksaves", prefs.getString("gs_maximum_quicksaves", "1").toString())
 
         // Engine Settings
-        writeSetting("Groundcover", "enabled", if (prefs.getString("gs_groundcover_handling", "0") == "1") "true" else "false")
+        writeSetting("Groundcover", "enabled", if(prefs.getString("gs_groundcover_handling", "0") == "2") "true" else "false")
         writeSetting("Groundcover", "paging", if(prefs.getString("gs_groundcover_handling", "0") == "1") "true" else "false")
-        writeSetting("Groundcover", "instancing", if(prefs.getString("gs_groundcover_handling", "0") == "2") "true" else "false")
-        writeSetting("Groundcover", "density", prefs.getString("gs_groundcover_density", "10").toString())
-        writeSetting("Groundcover", "rendering distance", prefs.getString("gs_groundcover_distance", "3000").toString())
         writeSetting("Navigator", "enable", if(prefs.getBoolean("gs_build_navmesh", true)) "true" else "false")
         writeSetting("Navigator", "write to navmeshdb", if(prefs.getBoolean("gs_write_navmesh", false)) "true" else "false")
         writeSetting("Navigator", "async nav mesh updater threads", prefs.getString("gs_navmesh_threads", "1").toString())
         writeSetting("Physics", "async num threads", prefs.getString("gs_physics_threads", "1").toString())
         writeSetting("Cells", "preload num threads", prefs.getString("gs_preload_threads", "1").toString())
-
     }
 
     private fun startGame() {
@@ -628,11 +671,6 @@ class MainActivity : AppCompatActivity() {
         if (scaling == 0f) {
             scaling = MyApp.app.defaultScaling
         }
-
-        val dialog = ProgressDialog.show(
-            this, "", "Preparing for launch...", true)
-
-        val activity = this
 
         // hide the controls so that ScreenResolutionHelper can get the right resolution
         hideAndroidControls(this)
@@ -728,7 +766,6 @@ class MainActivity : AppCompatActivity() {
 
                 runOnUiThread {
                     obtainFixedScreenResolution()
-                    dialog.hide()
                     runGame()
                 }
             } catch (e: IOException) {

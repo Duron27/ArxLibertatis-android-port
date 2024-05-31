@@ -5,6 +5,14 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <TextView
+        android:id="@+id/memory_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="15sp"
+        android:padding="10dp" />
+
     <Button
         android:id="@+id/delta_plugin_button"
         android:layout_width="match_parent"
@@ -51,7 +59,6 @@
         android:hint="Enter args for delta plugin (Optional Flags)" />
 
     <ScrollView
-        android:id="@+id/shellOutputTextView"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 

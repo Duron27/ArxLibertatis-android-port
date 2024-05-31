@@ -89,6 +89,7 @@ android {
             versionNameSuffix "-nightly"
         }
     }
+    ndkVersion"26.3.11579264"
 
     
     applicationVariants.all { variant ->

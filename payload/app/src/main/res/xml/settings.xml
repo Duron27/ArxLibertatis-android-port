@@ -115,6 +115,12 @@
             android:key="pref_display_cutout_area"
             android:title="@string/pref_display_cutout_area" />
 
+        <CheckBoxPreference
+            android:key="pref_avoid16bits"
+            android:title="@string/pref_avoid16bits"
+            android:summary="Disabling should help with memory usage if software decompression is used, may increase loading times? decrease visual quality? need testing"
+            android:defaultValue="true"/>
+
         <ListPreference
             android:key="pref_textureShrinking_v2"
             android:title="@string/pref_textureShrinking"

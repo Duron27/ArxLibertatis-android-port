@@ -3,6 +3,7 @@
     <string name="app_name">OpenMW</string>
 
 
+
     <string-array name="pref_encoding_entries">
         <item>Central and Eastern European (win1250)</item>
         <item>Cyrillic (win1251)</item>
@@ -58,7 +59,7 @@
     </string-array>
 
     <string-array name="gs_groundcover_handling_entries">
-        <item>OFF</item>
+        <item>Off</item>
         <item>Paging</item>
         <item>Instancing</item>
     </string-array>
@@ -68,6 +69,51 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+
+    <string-array name="gs_shadow_map_resolution_entries">
+        <item>512</item>
+        <item>1024</item>
+        <item>2048</item>
+        <item>4096</item>
+    </string-array>
+
+    <string-array name="gs_shadow_map_resolution_values">
+        <item>512</item>
+        <item>1024</item>
+        <item>2048</item>
+        <item>4096</item>
+    </string-array>
+
+    <string-array name="gs_shadow_planes_computation_method_entries">
+        <item>None</item>
+        <item>Bounds</item>
+        <item>Primitives</item>
+    </string-array>
+
+    <string-array name="gs_shadow_planes_computation_method_values">
+        <item>none</item>
+        <item>bounds</item>
+        <item>primitives</item>
+    </string-array>
+
+    <string-array name="gs_shadow_pcf_entries">
+        <item>Disabled</item>
+        <item>4 samples</item>
+        <item>2x2x4 samples</item>
+        <item>3x3x4 samples</item>
+        <item>4x4x4 samples</item>
+        <item>5x5x4 samples</item>
+    </string-array>
+
+    <string-array name="gs_shadow_pcf_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
 
 
     <string name="general_settings">Setup</string>
@@ -150,6 +196,7 @@
     <string name="btn_back">Back</string>
     <string name="pref_customResolution">Custom resolution</string>
     <string name="pref_display_cutout_area">Display in cutout area</string>
+    <string name="pref_avoid16bits">Avoid 16 bits colors</string>
     <string name="mods">Mods…</string>
     <string name="action_about">About</string>
     <string name="about_title">About OMW</string>
@@ -164,6 +211,7 @@
     <string name="activity_settings">Settings</string>
     <string name="game_mechanics_activity_settings">Game Mechanics</string>
     <string name="visuals_activity_settings">Visuals</string>
+    <string name="shadows_activity_settings">Shadows</string>
     <string name="animations_activity_settings">Animations</string>
     <string name="interface_activity_settings">Interface</string>
     <string name="bug_fixes_activity_settings">Bug Fixes</string>

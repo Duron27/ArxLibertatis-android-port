@@ -1,5 +1,6 @@
 package ui.activity
 
+import android.app.ActivityManager
 import android.app.ProgressDialog
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -29,6 +30,7 @@ class DeltaPluginActivity : AppCompatActivity() {
     private lateinit var deltaQueryButton: Button
     private lateinit var copyButton: Button // New Button for copying
     private val handler = Handler(Looper.getMainLooper())
+    private lateinit var runnable: Runnable
     private var prefs: SharedPreferences? = null
     private val updateTextRunnable = Runnable { updateTextView() }
 
@@ -62,6 +64,39 @@ class DeltaPluginActivity : AppCompatActivity() {
         copyButton.setOnClickListener {
             copyTextToClipboard()
         }
+
+        val textView = findViewById<TextView>(R.id.memory_info)
+
+        runnable = Runnable {
+            val memoryInfo = ActivityManager.MemoryInfo()
+            val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            activityManager.getMemoryInfo(memoryInfo)
+
+            val totalMemory = memoryInfo.totalMem
+            val availableMemory = memoryInfo.availMem
+            val usedMemory = totalMemory - availableMemory
+
+            textView.text = "Total memory: ${humanReadableByteCountBin(totalMemory)}\n" +
+                    "Available memory: ${humanReadableByteCountBin(availableMemory)}\n" +
+                    "Used memory: ${humanReadableByteCountBin(usedMemory)}"
+
+            handler.postDelayed(runnable, 1000)
+        }
+
+        handler.post(runnable)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(runnable)
+    }
+
+    private fun humanReadableByteCountBin(bytes: Long): String {
+        val unit = 1024
+        if (bytes < unit) return "$bytes B"
+        val exp = (Math.log(bytes.toDouble()) / Math.log(unit.toDouble())).toInt()
+        val pre = "KMGTPE"[exp-1] + "i"
+        return String.format("%.1f %sB", bytes / Math.pow(unit.toDouble(), exp.toDouble()), pre)
     }
 
     private fun executeCommand() {
