@@ -151,10 +151,22 @@ class DeltaPluginActivity : AppCompatActivity() {
         Thread {
             val output = shellExec(Command, WorkingDir)
             runOnUiThread {
+                shellOutputTextView.append(output)
                 progressDialog.dismiss()
-                shellOutputTextView.append(output + "\n")
             }
+
+            // Write output to a file
+            try {
+                val file = File(Constants.USER_CONFIG + "/delta.log")
+                file.printWriter().use { out ->
+                    out.println(output)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
         }.start()
+        //handler.postDelayed(updateTextRunnable, 1000)
     }
 
     private fun executeSpecialCommand(pretend: Boolean = false) {
@@ -219,11 +231,21 @@ class DeltaPluginActivity : AppCompatActivity() {
             Command.append(" && ")
             Command.append("./libdelta_plugin.so -v --verbose -c " + Constants.USER_CONFIG + "/delta.cfg query --input " + Constants.USER_DELTA + "/output_groundcover.omwaddon --ignore " + Constants.USER_DELTA + "/deleted_groundcover.omwaddon match Static")
 
-            val output = shellExec(Command.toString(), WorkingDir)
+            var output = shellExec(Command.toString(), WorkingDir)
             val outputlines = output.split("\n")
             val modelLines = outputlines.filter { it.trim().startsWith("model:") }
             val paths = modelLines.map { it.substringAfter("model: \"grass").replace("\\\\", "/").trim().replace("\"", "") }
+
             runOnUiThread {
+                shellOutputTextView.append(output)
+                try {
+                    val file = File(Constants.USER_CONFIG + "/groundcoverify.log")
+                    file.printWriter().use { out ->
+                        out.println(output)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
                 shellOutputTextView.append((paths + "\n").toString())
             }
 
@@ -238,18 +260,17 @@ class DeltaPluginActivity : AppCompatActivity() {
                 Command2.append(Constants.USER_CONFIG + "/delta.cfg vfs-extract \"Meshes$correctedPath/$filename\" ")
                 Command2.append(Constants.USER_DELTA + "/Meshes/grass/$correctedPath/$filename")
 
-                val output2 = shellExec(Command2.toString(), WorkingDir)
+                output = shellExec(Command2.toString(), WorkingDir)
                 runOnUiThread {
-                    shellOutputTextView.append(output2 + "\n")
+                    shellOutputTextView.append(output)
+                    progressDialog.dismiss() // Dismiss the ProgressDialog
                 }
             }
 
-            runOnUiThread {
-                progressDialog.dismiss() // Dismiss the ProgressDialog
-            }
         }.start()
+        //handler.postDelayed(updateTextRunnable, 1000)
     }
-
+    
     private fun executeQueryCommand() {
         // Get the Application Context
         val context = applicationContext
@@ -268,7 +289,7 @@ class DeltaPluginActivity : AppCompatActivity() {
         val Command = "./libdelta_plugin.so -v --verbose -c ${Constants.USER_CONFIG}/delta.cfg query $commandInput"
 
         val output = shellExec(Command, WorkingDir)
-        shellOutputTextView.append("$output\n\n")
+        shellOutputTextView.append("$output")
     }
 
     private fun updateTextView() {
