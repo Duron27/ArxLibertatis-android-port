@@ -103,7 +103,6 @@ class MainActivity : AppCompatActivity() {
 
         val fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.setOnClickListener { checkStartGame() }
-        File(Constants.USER_FILE_STORAGE + "/config").mkdirs()
 
         if (prefs.getString("bugsnag_consent", "")!! == "") {
             askBugsnagConsent()
