@@ -150,8 +150,8 @@ index f1bccc13c97..ba3d4550c25 100644
              // TODO
          }
  
--        if (activeGrid)
-+        if (activeGrid && !mGroundcover)
+-        if (activeGrid && !refs.empty())
++        if (activeGrid && !mGroundcover && !refs.empty())
          {
              std::lock_guard<std::mutex> lock(mRefTrackerMutex);
              for (auto ref : getRefTracker().mBlacklist)

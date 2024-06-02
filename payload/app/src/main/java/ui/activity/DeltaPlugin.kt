@@ -177,6 +177,8 @@ class DeltaPluginActivity : AppCompatActivity() {
         progressDialog.setCancelable(false) // Set cancelable to false
         progressDialog.show() // Show the ProgressDialog
 
+        // Execute the command in a separate thread
+        Thread {
 
             val gamePath = PreferenceManager.getDefaultSharedPreferences(ctx)
                 .getString("game_files", "")!!
@@ -236,8 +238,7 @@ class DeltaPluginActivity : AppCompatActivity() {
                 Command2.append("./libdelta_plugin.so -v --verbose -c ")
                 Command2.append(Constants.USER_CONFIG + "/delta.cfg vfs-extract \"Meshes$correctedPath/$filename\" ")
                 Command2.append(Constants.USER_DELTA + "/Meshes/grass/$correctedPath/$filename")
-        // Execute the command in a separate thread
-        Thread {
+
                 val output2 = shellExec(Command2.toString(), WorkingDir)
                 runOnUiThread {
                     shellOutputTextView.append(output2 + "\n")
