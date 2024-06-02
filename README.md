@@ -26,7 +26,7 @@ USE AT YOUR OWN RISK!
 -   TES3MP - this is a dream...maybe way way beyond my skills
 -   Some kind of cloud syncing for mod list and saves
 
-# New in 1.6
+# New in version 1.6
 Added:
 -   Groundcoverify
 
