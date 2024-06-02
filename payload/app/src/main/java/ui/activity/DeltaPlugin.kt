@@ -150,28 +150,15 @@ class DeltaPluginActivity : AppCompatActivity() {
         // Execute the command in a separate thread
         Thread {
             val output = shellExec(Command, WorkingDir)
+            File(Constants.USER_CONFIG + "/delta.log").writeText(output)
             runOnUiThread {
-                shellOutputTextView.append(output)
                 progressDialog.dismiss()
+                shellOutputTextView.append(output + "\n")
             }
-
-            // Write output to a file
-            try {
-                val file = File(Constants.USER_CONFIG + "/delta.log")
-                file.printWriter().use { out ->
-                    out.println(output)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
         }.start()
-        //handler.postDelayed(updateTextRunnable, 1000)
     }
 
     private fun executeSpecialCommand(pretend: Boolean = false) {
-        val gamePath = PreferenceManager.getDefaultSharedPreferences(this)
-                .getString("game_files", "")!!
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val context = getApplicationContext()
@@ -190,8 +177,7 @@ class DeltaPluginActivity : AppCompatActivity() {
         progressDialog.setCancelable(false) // Set cancelable to false
         progressDialog.show() // Show the ProgressDialog
 
-        // Execute the command in a separate thread
-        Thread {
+
             val gamePath = PreferenceManager.getDefaultSharedPreferences(ctx)
                 .getString("game_files", "")!!
             prefs = PreferenceManager.getDefaultSharedPreferences(this)
@@ -231,24 +217,15 @@ class DeltaPluginActivity : AppCompatActivity() {
             Command.append(" && ")
             Command.append("./libdelta_plugin.so -v --verbose -c " + Constants.USER_CONFIG + "/delta.cfg query --input " + Constants.USER_DELTA + "/output_groundcover.omwaddon --ignore " + Constants.USER_DELTA + "/deleted_groundcover.omwaddon match Static")
 
-            var output = shellExec(Command.toString(), WorkingDir)
+            val output = shellExec(Command.toString(), WorkingDir)
             val outputlines = output.split("\n")
             val modelLines = outputlines.filter { it.trim().startsWith("model:") }
             val paths = modelLines.map { it.substringAfter("model: \"grass").replace("\\\\", "/").trim().replace("\"", "") }
-
+            File(Constants.USER_CONFIG + "/groundcoverify.log").writeText(output)
             runOnUiThread {
-                shellOutputTextView.append(output)
-                try {
-                    val file = File(Constants.USER_CONFIG + "/groundcoverify.log")
-                    file.printWriter().use { out ->
-                        out.println(output)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
                 shellOutputTextView.append((paths + "\n").toString())
             }
-
+            File(Constants.USER_CONFIG + "/paths.log").writeText(paths.toString())
             paths.forEach { path ->
                 val filename = path.substringAfterLast("/")
                 val correctedPath = path.substringBeforeLast("/").trim()
@@ -259,18 +236,20 @@ class DeltaPluginActivity : AppCompatActivity() {
                 Command2.append("./libdelta_plugin.so -v --verbose -c ")
                 Command2.append(Constants.USER_CONFIG + "/delta.cfg vfs-extract \"Meshes$correctedPath/$filename\" ")
                 Command2.append(Constants.USER_DELTA + "/Meshes/grass/$correctedPath/$filename")
-
-                output = shellExec(Command2.toString(), WorkingDir)
+        // Execute the command in a separate thread
+        Thread {
+                val output2 = shellExec(Command2.toString(), WorkingDir)
                 runOnUiThread {
-                    shellOutputTextView.append(output)
-                    progressDialog.dismiss() // Dismiss the ProgressDialog
+                    shellOutputTextView.append(output2 + "\n")
                 }
             }
 
+            runOnUiThread {
+                progressDialog.dismiss() // Dismiss the ProgressDialog
+            }
         }.start()
-        //handler.postDelayed(updateTextRunnable, 1000)
     }
-    
+
     private fun executeQueryCommand() {
         // Get the Application Context
         val context = applicationContext
@@ -289,7 +268,7 @@ class DeltaPluginActivity : AppCompatActivity() {
         val Command = "./libdelta_plugin.so -v --verbose -c ${Constants.USER_CONFIG}/delta.cfg query $commandInput"
 
         val output = shellExec(Command, WorkingDir)
-        shellOutputTextView.append("$output")
+        shellOutputTextView.append("$output\n\n")
     }
 
     private fun updateTextView() {
