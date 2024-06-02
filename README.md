@@ -25,7 +25,12 @@ USE AT YOUR OWN RISK!
 -   PLOX - load order sorter
 -   TES3MP - this is a dream...maybe way way beyond my skills
 -   Some kind of cloud syncing for mod list and saves
--   groundcoverify
+
+# New in 1.6
+Added:
+-   Groundcoverify
+
+Updated openmw to latest June/02/2024
 
 # New in version 1.5
 Added:
