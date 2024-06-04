@@ -495,55 +495,101 @@ class MainActivity : AppCompatActivity() {
     private fun writeUserSettings() {
         File(Constants.USER_CONFIG + "/settings.cfg").createNewFile()
 
-        // Write resolution to prevent issues if incorect one is set, probably need to account notch size too
-        val displayInCutoutArea = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_display_cutout_area", false)
-        val dm = DisplayMetrics()
-        windowManager.defaultDisplay.getRealMetrics(dm)
-        val orientation = this.getResources().getConfiguration().orientation
-        var displayWidth = 0
-        var displayHeight = 0
-        val cutout = windowManager.defaultDisplay.getCutout()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Write resolution to prevent issues if incorrect one is set, probably need to account notch size too
+            val displayInCutoutArea = PreferenceManager.getDefaultSharedPreferences(this)
+            .getBoolean("pref_display_cutout_area", false)
+            val dm = DisplayMetrics()
+            windowManager.defaultDisplay.getRealMetrics(dm)
+            val orientation = this.getResources().getConfiguration().orientation
+            var displayWidth = 0
+            var displayHeight = 0
+            val cutout = windowManager.defaultDisplay.getCutout()
 
-        if (cutout != null) {
-            if (orientation == Configuration.ORIENTATION_PORTRAIT)
-            {
-                displayWidth = if(resolutionX == 0) dm.heightPixels else resolutionX
-                displayHeight = if(resolutionY == 0) dm.widthPixels else resolutionY
-                if( displayInCutoutArea == false && resolutionX == 0) {
-                    val cutoutRectTop = cutout.getBoundingRectTop()
-                    val cutoutRectBottom = cutout.getBoundingRectBottom()
-                    displayWidth = dm.heightPixels - maxOf(cutoutRectTop.bottom, cutoutRectBottom.bottom - cutoutRectBottom.top)
+            if (cutout != null) {
+                if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    displayWidth = if (resolutionX == 0) dm.heightPixels else resolutionX
+                    displayHeight = if (resolutionY == 0) dm.widthPixels else resolutionY
+                    if (displayInCutoutArea == false && resolutionX == 0) {
+                        val cutoutRectTop = cutout.getBoundingRectTop()
+                        val cutoutRectBottom = cutout.getBoundingRectBottom()
+                        displayWidth = dm.heightPixels - maxOf(
+                            cutoutRectTop.bottom,
+                            cutoutRectBottom.bottom - cutoutRectBottom.top
+                        )
+                    }
+                } else {
+                    displayWidth = if (resolutionX == 0) dm.widthPixels else resolutionX
+                    displayHeight = if (resolutionY == 0) dm.heightPixels else resolutionY
+                    if (displayInCutoutArea == false && resolutionY == 0) {
+                        val cutoutRectLeft = cutout.getBoundingRectLeft()
+                        val cutoutRectRight = cutout.getBoundingRectRight()
+                        displayWidth = dm.widthPixels - maxOf(
+                            cutoutRectLeft.right,
+                            cutoutRectRight.right - cutoutRectRight.left
+                        )
+                    }
                 }
-            }
-            else
-            {
-                displayWidth = if(resolutionX == 0) dm.widthPixels else resolutionX
-                displayHeight = if(resolutionY == 0) dm.heightPixels else resolutionY
-                if( displayInCutoutArea == false && resolutionY == 0) {
-                    val cutoutRectLeft = cutout.getBoundingRectLeft()
-                    val cutoutRectRight = cutout.getBoundingRectRight()
-                    displayWidth = dm.widthPixels - maxOf(cutoutRectLeft.right, cutoutRectRight.right - cutoutRectRight.left)
-                }
-            }
 
-            writeSetting("Video", "resolution x", displayWidth.toString())
-            writeSetting("Video", "resolution y", displayHeight.toString())
-        }
-        else {
-            if (resolutionX != 0 && resolutionY != 0) {
                 writeSetting("Video", "resolution x", displayWidth.toString())
                 writeSetting("Video", "resolution y", displayHeight.toString())
-            }
-            else {
-                if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    writeSetting("Video", "resolution x", dm.heightPixels.toString())
-                    writeSetting("Video", "resolution y", dm.widthPixels.toString())
+            } else {
+                if (resolutionX != 0 && resolutionY != 0) {
+                    writeSetting("Video", "resolution x", displayWidth.toString())
+                    writeSetting("Video", "resolution y", displayHeight.toString())
+                } else {
+                    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        writeSetting("Video", "resolution x", dm.heightPixels.toString())
+                        writeSetting("Video", "resolution y", dm.widthPixels.toString())
+                    } else {
+                        writeSetting("Video", "resolution x", dm.widthPixels.toString())
+                        writeSetting("Video", "resolution y", dm.heightPixels.toString())
+                    }
                 }
-                else {
-                    writeSetting("Video", "resolution x", dm.widthPixels.toString())
-                    writeSetting("Video", "resolution y", dm.heightPixels.toString())
+            }
+        } else {
+            // Write resolution to prevent issues if incorrect one is set, probably need to account notch size too
+            val displayInCutoutArea = PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean("pref_display_cutout_area", false)
+            val dm = DisplayMetrics()
+            windowManager.defaultDisplay.getRealMetrics(dm)
+            val orientation = this.getResources().getConfiguration().orientation
+            var displayWidth = 0
+            var displayHeight = 0
+
+            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                displayWidth = if (resolutionX == 0) dm.heightPixels else resolutionX
+                displayHeight = if (resolutionY == 0) dm.widthPixels else resolutionY
+
+                if (displayInCutoutArea == false && resolutionX == 0) {
+                    val cutoutRectTop =
+                        windowManager.defaultDisplay.getCutout()!!.getBoundingRectTop()
+                    val cutoutRectBottom =
+                        windowManager.defaultDisplay.getCutout()!!.getBoundingRectBottom()
+                    if (cutoutRectTop != null && cutoutRectBottom != null)
+                        displayWidth = dm.heightPixels - maxOf(
+                            cutoutRectTop.bottom,
+                            cutoutRectBottom.bottom - cutoutRectBottom.top
+                        )
+                }
+            } else {
+                displayWidth = if (resolutionX == 0) dm.widthPixels else resolutionX
+                displayHeight = if (resolutionY == 0) dm.heightPixels else resolutionY
+
+                if (displayInCutoutArea == false && resolutionY == 0) {
+                    val cutoutRectLeft =
+                        windowManager.defaultDisplay.getCutout()!!.getBoundingRectLeft()
+                    val cutoutRectRight =
+                        windowManager.defaultDisplay.getCutout()!!.getBoundingRectRight()
+                    if (cutoutRectLeft != null && cutoutRectRight != null)
+                        displayWidth = dm.widthPixels - maxOf(
+                            cutoutRectLeft.right,
+                            cutoutRectRight.right - cutoutRectRight.left
+                        )
                 }
             }
+            writeSetting("Video", "resolution x", displayWidth.toString())
+            writeSetting("Video", "resolution y", displayHeight.toString())
         }
 
         // Game Mechanics
