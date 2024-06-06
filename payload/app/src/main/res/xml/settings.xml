@@ -113,7 +113,8 @@
 
         <CheckBoxPreference
             android:key="pref_display_cutout_area"
-            android:title="@string/pref_display_cutout_area" />
+            android:title="@string/pref_display_cutout_area"
+            android:defaultValue="true"/>
 
         <CheckBoxPreference
             android:key="pref_avoid16bits"

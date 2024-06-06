@@ -23,6 +23,7 @@ package ui.activity
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Process
+import android.os.Build.VERSION
 import android.preference.PreferenceManager
 import android.system.ErrnoException
 import android.system.Os
@@ -209,8 +210,8 @@ class GameActivity : SDLActivity() {
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val displayInCutoutArea = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_display_cutout_area", false)
-        if (displayInCutoutArea) {
+        val displayInCutoutArea = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_display_cutout_area", true)
+        if (displayInCutoutArea || android.os.Build.VERSION.SDK_INT < 30) {
             window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         }
 
