@@ -253,7 +253,7 @@ RUN wget -c http://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2 -O - | t
     make -j $(nproc) && make install
 
 # Setup SDL2_VERSION
-RUN wget -c https://www.libsdl.org/release/SDL2-${SDL2_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/ && \
+RUN wget -c https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_VERSION}/SDL2-${SDL2_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/ && \
     cd ${HOME}/src/SDL2-${SDL2_VERSION} && \
     ndk-build ${NDK_BUILD_FLAGS}
 RUN cp ${HOME}/src/SDL2-${SDL2_VERSION}/libs/${ABI}/libSDL2.so /root/prefix/lib/
