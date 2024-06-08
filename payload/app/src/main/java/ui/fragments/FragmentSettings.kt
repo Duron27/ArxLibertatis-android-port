@@ -112,12 +112,19 @@ class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener 
             data?.data?.also { uri ->
 
             val selectedDirectory = DocumentFile.fromTreeUri(activity, uri) ?: return
-            val storageDir = Environment.getExternalStorageDirectory()
-            val storagePath = storageDir.absolutePath
-            val path = storagePath + "/" + uri.lastPathSegment?.replace("primary:", "")
-            val iniFile = selectedDirectory.findFile("Morrowind.ini")
-            val dataFilesFolder = selectedDirectory.findFile("Data Files")
-            val sharedPref = preferenceScreen.sharedPreferences
+                val pattern = Regex("[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}")
+                val storageDir = Environment.getExternalStorageDirectory()
+                val storagePath = storageDir.absolutePath
+                val modifiedStoragePath = "/storage"
+                val pathSegment = uri.lastPathSegment
+                val path = if (pattern.containsMatchIn(pathSegment ?: "")) {
+                    modifiedStoragePath + "/" + pathSegment?.replace(":", "/")
+                } else {
+                    storagePath + "/" + pathSegment?.replace("primary:", "")
+                }               
+                val iniFile = selectedDirectory.findFile("Morrowind.ini")
+                val dataFilesFolder = selectedDirectory.findFile("Data Files")
+                val sharedPref = preferenceScreen.sharedPreferences
 
                 if (iniFile != null && dataFilesFolder != null && dataFilesFolder.isDirectory) {
                     val gameFilesPreference = findPreference("game_files")
