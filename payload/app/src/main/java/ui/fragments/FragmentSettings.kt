@@ -136,9 +136,10 @@ class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener 
                 } else {
                     val builder = AlertDialog.Builder(activity)
                     val input = EditText(activity)
+                    input.requestFocus() // Request focus
                     builder.setView(input)
                     builder.setTitle(getString(R.string.data_error_title))
-                    builder.setMessage(getString(R.string.data_error_message))
+                    builder.setMessage(getString(R.string.data_error_message_text))
                     builder.setPositiveButton("OK") { _, _ ->
                     val pathtext = input.text.toString()
                         if (pathtext != null && !pathtext.isEmpty()) {
