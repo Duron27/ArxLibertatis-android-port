@@ -12,7 +12,7 @@ ENV OPENAL_VERSION=1.23.1
 ENV BOOST_VERSION=1.83.0
 ENV LIBICU_VERSION=70-1
 ENV FFMPEG_VERSION=6.1
-ENV SDL2_VERSION=2.0.22
+ENV SDL2_VERSION=2.24.0
 ENV BULLET_VERSION=3.25
 ENV ZLIB_VERSION=1.3.1
 ENV LIBXML2_VERSION=2.12.5
@@ -47,7 +47,7 @@ ENV PREFIX=/root/prefix
 RUN cd ${HOME}/src && wget https://github.com/unicode-org/icu/archive/refs/tags/release-${LIBICU_VERSION}.zip && unzip -o ${HOME}/src/release-${LIBICU_VERSION}.zip && rm -rf release-${LIBICU_VERSION}.zip
 RUN wget https://dl.google.com/android/repository/commandlinetools-linux-${SDK_CMDLINE_TOOLS}.zip && unzip commandlinetools-linux-${SDK_CMDLINE_TOOLS}.zip && mkdir -p ${HOME}/Android/cmdline-tools/ && mv cmdline-tools/ ${HOME}/Android/cmdline-tools/latest && rm commandlinetools-linux-${SDK_CMDLINE_TOOLS}.zip
 RUN yes | ~/Android/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null
-RUN ~/Android/cmdline-tools/latest/bin/sdkmanager --install "ndk;${NDK_VERSION}" "platforms;android-28" "platform-tools" "build-tools;29.0.2" "emulator" --channel=0
+RUN ~/Android/cmdline-tools/latest/bin/sdkmanager --install "ndk;${NDK_VERSION}" "platforms;android-28" "platform-tools" "build-tools;29.0.2" --channel=0
 RUN yes | ~/Android/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null
 
 COPY --chmod=0755 patches /root/patches
