@@ -45,3 +45,5 @@ index 3dc7445662b..a83a2dce014 100644
 -    target_link_libraries(openmw-lib ${CMAKE_THREAD_LIBS_INIT})
 +    target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
  endif()
+ 
+ if(APPLE AND BUILD_OPENMW)
