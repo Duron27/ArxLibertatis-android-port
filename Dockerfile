@@ -22,7 +22,7 @@ ENV COLLADA_DOM_VERSION=2.5.0
 ENV OSG_VERSION=69cfecebfb6dc703b42e8de39eed750a84a87489
 ENV LZ4_VERSION=1.9.3
 ENV LUAJIT_VERSION=2.1.ROLLING
-ENV OPENMW_VERSION=05815b39527e41f820f8d24895e4fa1e82bb753c
+ENV OPENMW_VERSION=daada262d70424ce4bfa7a40f5e9f7fa3f423029
 ENV NDK_VERSION=26.3.11579264
 ENV SDK_CMDLINE_TOOLS=10406996_latest
 ENV PLATFORM_TOOLS_VERSION=29.0.0
@@ -397,6 +397,7 @@ RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/open
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/shaders.patch
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/Post_additions.patch
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/fix_shadows.patch
+RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/fixnew.patch
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/sdlfixreversed.patch
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/navmeshtool.patch
 RUN patch ${HOME}/src/openmw-${OPENMW_VERSION}/CMakeLists.txt < /root/patches/openmw/openmw_ignoreffmpegversion.patch
