@@ -57,7 +57,7 @@ RUN mkdir -p ${HOME}/src/icu-host-build && cd $_ && ${HOME}/src/icu-release-70-1
 ENV PATH=$PATH:/root/Android/cmdline-tools/latest/bin/:/root/Android/ndk/${NDK_VERSION}/:/root/Android/ndk/${NDK_VERSION}/toolchains/llvm/prebuilt/linux-x86_64:/root/Android/ndk/${NDK_VERSION}/toolchains/llvm/prebuilt/linux-x86_64/bin:/root/prefix/include:/root/prefix/lib:/root/prefix/:/root/.cargo/bin
 
 # NDK Settings
-ENV API=28
+ENV API=24
 ENV ABI=arm64-v8a
 ENV ARCH=aarch64
 ENV NDK_TRIPLET=${ARCH}-linux-android
