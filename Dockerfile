@@ -400,10 +400,9 @@ RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/open
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/fixnew.patch
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/sdlfixreversed.patch
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/navmeshtool.patch
-RUN patch ${HOME}/src/openmw-${OPENMW_VERSION}/CMakeLists.txt < /root/patches/openmw/openmw_ignoreffmpegversion.patch
 RUN cp /root/patches/openmw/android_main.cpp /root/src/openmw-${OPENMW_VERSION}/apps/openmw/android_main.cpp
 
-RUN cd ${HOME}/src/openmw-${OPENMW_VERSION}/build && cmake .. \
+RUN cd ${HOME}/src/openmw-${OPENMW_VERSION}/build && sed -i s/"NOT FFVER_OK"/"FALSE"/ CMakeLists.txt && cmake .. \
         ${COMMON_CMAKE_ARGS} \
         -DBUILD_BSATOOL=0 \
         -DBUILD_NIFTEST=0 \
