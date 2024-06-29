@@ -144,7 +144,7 @@ RUN wget -c http://prdownloads.sourceforge.net/libpng/libpng-${LIBPNG_VERSION}.t
     make install check_PROGRAMS= bin_PROGRAMS=
 
 # Setup FREETYPE2
-RUN wget -c https://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE2_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
+RUN wget -c http://prdownloads.sourceforge.net/freetype/freetype-${FREETYPE2_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/freetype-${FREETYPE2_VERSION}/build && cd $_ && \
         ${HOME}/src/freetype-${FREETYPE2_VERSION}/configure \
         ${COMMON_AUTOCONF_FLAGS} \
