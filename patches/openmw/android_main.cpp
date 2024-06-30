@@ -1,6 +1,4 @@
-#ifndef stderr
-int stderr = 0; // Hack: fix linker error
-#endif
+// enable if API 22 or below // int stderr = 0; // Hack: fix linker error
 
 #include "SDL_main.h"
 #include "engine.hpp"
