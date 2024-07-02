@@ -383,6 +383,9 @@ RUN wget -c https://github.com/openmw/osg/archive/${OSG_VERSION}.tar.gz -O - | t
         -DCMAKE_CXX_FLAGS=-Dauto_ptr=unique_ptr\ -I${PREFIX}/include/freetype2/\ "${CXXFLAGS}" && \
     make -j $(nproc) && make install
 
+# Create a zip of all the libraries
+RUN cd /root/prefix && zip -r /openmw-android-deps.zip ./*
+
 # Setup OPENMW_VERSION
 RUN wget -c https://github.com/OpenMW/openmw/archive/${OPENMW_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/ && \
     mkdir -p ${HOME}/src/openmw-${OPENMW_VERSION}/build && cd $_
