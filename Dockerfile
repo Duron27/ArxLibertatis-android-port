@@ -329,7 +329,7 @@ RUN bash -c "rm ${PREFIX}/lib/libluajit*.so*"
 
 # Setup LIBCOLLADA_VERSION
 RUN wget -c https://github.com/rdiankov/collada-dom/archive/v${COLLADA_DOM_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/ && cd ${HOME}/src/collada-dom-${COLLADA_DOM_VERSION} && \
-    patch -ruN dom/external-libs/minizip-1.1/ioapi.h < /root/patches/libcollada-minizip-fix.patch && \
+    sed -i 's@#if defined(USE_FILE32API)@#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(__ANDROID__)@g' dom/external-libs/minizip-1.1/ioapi.h && \
     mkdir -p ${HOME}/src/collada-dom-${COLLADA_DOM_VERSION}/build && cd $_ && \
     cmake .. \
         ${COMMON_CMAKE_ARGS} \
