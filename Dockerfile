@@ -9,7 +9,7 @@ ENV LIBJPEG_TURBO_VERSION=3.0.2
 ENV LIBPNG_VERSION=1.6.42
 ENV FREETYPE2_VERSION=2.13.2
 ENV OPENAL_VERSION=1.23.1
-ENV BOOST_VERSION=1.83.0
+ENV BOOST_VERSION=1.85.0
 ENV LIBICU_VERSION=70-1
 ENV FFMPEG_VERSION=6.1
 ENV SDL2_VERSION=2.24.0
@@ -17,12 +17,12 @@ ENV BULLET_VERSION=3.25
 ENV ZLIB_VERSION=1.3.1
 ENV LIBXML2_VERSION=2.12.5
 ENV MYGUI_VERSION=3.4.3
-ENV GL4ES_VERSION=1.1.5
+ENV GL4ES_VERSION=1.1.8
 ENV COLLADA_DOM_VERSION=2.5.0
-ENV OSG_VERSION=69cfecebfb6dc703b42e8de39eed750a84a87489
+ENV OSG_VERSION=3.6.5.1
 ENV LZ4_VERSION=1.9.3
 ENV LUAJIT_VERSION=2.1.ROLLING
-ENV OPENMW_VERSION=daada262d70424ce4bfa7a40f5e9f7fa3f423029
+ENV OPENMW_VERSION=061f10bef7200965e6cfed4882dafa83bd1f6366
 ENV NDK_VERSION=26.3.11579264
 ENV SDK_CMDLINE_TOOLS=10406996_latest
 ENV PLATFORM_TOOLS_VERSION=29.0.0
@@ -64,6 +64,8 @@ ENV NDK_TRIPLET=${ARCH}-linux-android
 ENV TOOLCHAIN=/root/Android/ndk/${NDK_VERSION}/toolchains/llvm/prebuilt/linux-x86_64
 ENV NDK_SYSROOT=${TOOLCHAIN}/sysroot/
 ENV ANDROID_SYSROOT=${TOOLCHAIN}/sysroot/
+ # ANDROID_NDK is needed for SDL2 cmake
+ENV ANDROID_NDK=/root/Android/ndk/${NDK_VERSION}/
 ENV AR=${TOOLCHAIN}/bin/llvm-ar
 ENV LD=${TOOLCHAIN}/bin/ld
 ENV RANLIB=${TOOLCHAIN}/bin/llvm-ranlib
@@ -183,38 +185,15 @@ RUN wget -c https://github.com/kcat/openal-soft/archive/${OPENAL_VERSION}.tar.gz
     make -j $(nproc) && make install
 
 # Setup BOOST
-ENV JAM=/root/src/boost-${BOOST_VERSION}/user-config.jam
-RUN wget -c https://github.com/boostorg/boost/releases/download/boost-${BOOST_VERSION}/boost-${BOOST_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
-        cd ${HOME}/src/boost-${BOOST_VERSION} && \
-        echo "using clang : ${ARCH} : ${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang++ ;" >> ${JAM} && \
-    ./bootstrap.sh \
-        --with-toolset=clang \
-        prefix=${PREFIX} && \
-    ./b2 \
-        -j4 \
-        --with-filesystem \
-        --with-program_options \
-        --with-system \
-        --with-iostreams \
-        --with-regex \
-        --prefix=${PREFIX} \
-        --ignore-site-config \
-        --user-config=${JAM} \
-        toolset=clang \
-        binary-format=elf \
-        abi=aapcs \
-        address-model=64 \
-        architecture=arm \
-        cflags="${CFLAGS}" \
-        cxxflags="${CXXFLAGS}" \
-        variant=release \
-        target-os=android \
-        threading=multi \
-        threadapi=pthread \
-        link=static \
-        runtime-link=static \
-        install
-RUN $RANLIB ${PREFIX}/lib/*.a
+RUN wget -c https://github.com/boostorg/boost/releases/download/boost-${BOOST_VERSION}/boost-${BOOST_VERSION}-cmake.tar.gz -O - | tar -xz -C $HOME/src/ && \
+    mkdir -p ${HOME}/src/boost-${BOOST_VERSION}/build && cd $_ && \
+    cmake ../ ${COMMON_CMAKE_ARGS} \
+        -DBOOST_INCLUDE_LIBRARIES="filesystem;program_options;iostreams;geometry" && \
+    make -j $(nproc) && make install
+# build system and regex
+RUN llvm-ar rc ${PREFIX}/lib/libboost_system.a $(find / -name "error_code.o" 2>/dev/null)
+RUN llvm-ar rc ${PREFIX}/lib/libboost_regex.a $(find / \( -name "posix_api.o" -o -name "regex.o" -o -name "regex_debug.o" -o -name "static_mutex.o" -o -name "wide_posix_api.o" \) 2>/dev/null)
+RUN $RANLIB ${PREFIX}/lib/libboost_{system,filesystem,program_options,iostreams,regex}.a
 
 # Setup FFMPEG_VERSION
 RUN wget -c http://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2 -O - | tar -xjf - -C ${HOME}/src/ && \
@@ -254,10 +233,12 @@ RUN wget -c http://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2 -O - | t
 
 # Setup SDL2_VERSION
 RUN wget -c https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_VERSION}/SDL2-${SDL2_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/ && \
-    cd ${HOME}/src/SDL2-${SDL2_VERSION} && \
-    ndk-build ${NDK_BUILD_FLAGS}
-RUN cp ${HOME}/src/SDL2-${SDL2_VERSION}/libs/${ABI}/libSDL2.so /root/prefix/lib/
-RUN cp -rf ${HOME}/src/SDL2-${SDL2_VERSION}/include /root/prefix/
+    mkdir -p ${HOME}/src/SDL2-${SDL2_VERSION}/build && cd $_ && \
+    cmake ../ ${COMMON_CMAKE_ARGS} \
+    -DSDL_STATIC=OFF \
+    -DCMAKE_C_FLAGS="-latomic -no-canonical-prefixes -Wl,--gc-sections  -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined -Wl,--fatal-warnings -Wl,--no-undefined-version -ldl -lGLESv1_CM -lGLESv2 -lOpenSLES -llog -landroid -ldl -lc -lm -I${PREFIX}" && \
+    make -j $(nproc) && make install
+RUN cp -rf ${HOME}/src/SDL2-${SDL2_VERSION}/include/* /root/prefix/include/
 
 # Setup BULLET
 RUN wget -c https://github.com/bulletphysics/bullet3/archive/${BULLET_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
@@ -274,10 +255,10 @@ RUN wget -c https://github.com/bulletphysics/bullet3/archive/${BULLET_VERSION}.t
     make -j $(nproc) && make install
 
 # Setup GL4ES_VERSION
-RUN wget -c https://github.com/Duron27/gl4es/archive/refs/tags/${GL4ES_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/
-RUN cd ${HOME}/src/gl4es-${GL4ES_VERSION} && \
-    ndk-build ${NDK_BUILD_FLAGS} && \
-    cp libs/${ABI}/libGL.so /root/prefix/lib/ && cp -r ${HOME}/src/gl4es-${GL4ES_VERSION}/include /root/prefix/include/gl4es/ && cp -r ${HOME}/src/gl4es-${GL4ES_VERSION}/include /root/prefix/
+RUN wget -c https://github.com/Duron27/gl4es/archive/refs/tags/${GL4ES_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/ && \
+    mkdir -p ${HOME}/src/gl4es-${GL4ES_VERSION}/build && cd $_ && \
+    cmake ../ ${COMMON_CMAKE_ARGS} && \
+    make -j $(nproc) && make install
 
 # Setup MYGUI
 RUN wget -c https://github.com/MyGUI/mygui/archive/MyGUI${MYGUI_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
@@ -328,8 +309,12 @@ RUN wget -c https://github.com/luaJit/LuaJIT/archive/v${LUAJIT_VERSION}.tar.gz -
 RUN bash -c "rm ${PREFIX}/lib/libluajit*.so*"
 
 # Setup LIBCOLLADA_VERSION
+# The 3 sed commands are required for boost 1.85.0
 RUN wget -c https://github.com/rdiankov/collada-dom/archive/v${COLLADA_DOM_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/ && cd ${HOME}/src/collada-dom-${COLLADA_DOM_VERSION} && \
-    sed -i 's@#if defined(USE_FILE32API)@#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(__ANDROID__)@g' dom/external-libs/minizip-1.1/ioapi.h && \
+    cd ${HOME}/src/collada-dom-${COLLADA_DOM_VERSION} && \
+    sed -i 's|#include <boost/filesystem/convenience.hpp>|#include <boost/filesystem.hpp>|g' dom/include/dae.h && \
+    sed -i 's|#include <boost/filesystem/convenience.hpp>|#include <boost/filesystem.hpp>|g' dom/src/dae/daeUtils.cpp && \
+    sed -i 's|std::string dir = archivePath.branch_path().string();|std::string dir = archivePath.parent_path().string();|g' dom/src/dae/daeZAEUncompressHandler.cpp && \
     mkdir -p ${HOME}/src/collada-dom-${COLLADA_DOM_VERSION}/build && cd $_ && \
     cmake .. \
         ${COMMON_CMAKE_ARGS} \
