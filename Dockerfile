@@ -104,6 +104,16 @@ ENV NDK_BUILD_FLAGS \
     "APP_PLATFORM=${API}" \
     "APP_ABI=${ABI}"
 
+# Setup rust build system for android
+RUN wget https://sh.rustup.rs -O rustup.sh && sha256sum rustup.sh && \
+    echo "32a680a84cf76014915b3f8aa44e3e40731f3af92cd45eb0fcc6264fd257c428  rustup.sh" | sha256sum -c - && \
+    sh rustup.sh -y && rm rustup.sh && \
+    ${HOME}/.cargo/bin/rustup target add ${NDK_TRIPLET} && \
+    ${HOME}/.cargo/bin/rustup toolchain install nightly && \
+    ${HOME}/.cargo/bin/rustup target add --toolchain nightly ${NDK_TRIPLET} && \
+    echo "[target.${NDK_TRIPLET}]" >> /root/.cargo/config && \
+    echo "linker = \"${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang\"" >> /root/.cargo/config
+
 # Setup LIBICU
 RUN mkdir -p ${HOME}/src/icu-${LIBICU_VERSION} && cd $_ && \
     ${HOME}/src/icu-release-${LIBICU_VERSION}/icu4c/source/configure \
@@ -367,7 +377,7 @@ RUN wget -c https://github.com/Duron27/osg/archive/refs/tags/${OSG_VERSION}.tar.
     make -j $(nproc) && make install
 
 # Create a zip of all the libraries
-RUN cd /root/prefix && zip -r /openmw-android-deps.zip ./*
+#RUN cd /root/prefix && zip -r /openmw-android-deps.zip ./*
 
 # Setup OPENMW_VERSION
 RUN wget -c https://github.com/OpenMW/openmw/archive/${OPENMW_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/
@@ -403,15 +413,6 @@ RUN mkdir -p ${HOME}/src/openmw-${OPENMW_VERSION}/build && cd $_ && \
         -DCMAKE_CXX_FLAGS=-I${PREFIX}/include/\ "${CXXFLAGS}" \
         -DMyGUI_LIBRARY=${PREFIX}/lib/libMyGUIEngineStatic.a && \
     make -j $(nproc)
-
-RUN wget https://sh.rustup.rs -O rustup.sh && sha256sum rustup.sh && \
-    echo "32a680a84cf76014915b3f8aa44e3e40731f3af92cd45eb0fcc6264fd257c428  rustup.sh" | sha256sum -c - && \
-    sh rustup.sh -y && rm rustup.sh && \
-    ${HOME}/.cargo/bin/rustup target add ${NDK_TRIPLET} && \
-    ${HOME}/.cargo/bin/rustup toolchain install nightly && \
-    ${HOME}/.cargo/bin/rustup target add --toolchain nightly ${NDK_TRIPLET} && \
-    echo "[target.${NDK_TRIPLET}]" >> /root/.cargo/config && \
-    echo "linker = \"${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang\"" >> /root/.cargo/config
 
 RUN cd root/src && git clone https://gitlab.com/bmwinger/delta-plugin && cd delta-plugin && cargo build --target ${NDK_TRIPLET} --release
 RUN cp /root/src/delta-plugin/target/${NDK_TRIPLET}/release/delta_plugin ${PREFIX}/lib/libdelta_plugin.so
