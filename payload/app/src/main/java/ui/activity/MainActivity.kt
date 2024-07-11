@@ -681,11 +681,13 @@ class MainActivity : AppCompatActivity() {
                 // Only reinstall static files if they are of a mismatched version
                 try {
                     val stamp = File(Constants.VERSION_STAMP).readText().trim()
-                    if (stamp.toInt() != BuildConfig.VERSION_CODE) {
-                        reinstallStaticFiles()
+                    if (stamp.toInt() != BuildConfig.RANDOMIZER) {
+                        //reinstallStaticFiles()
+                        removeResourceFiles()
                     }
                 } catch (e: Exception) {
-                    reinstallStaticFiles()
+                     //reinstallStaticFiles()
+                    removeResourceFiles()
                 }
 
                 val inst = GameInstaller(prefs.getString("game_files", "")!!)
