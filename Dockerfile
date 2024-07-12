@@ -50,8 +50,6 @@ RUN yes | ~/Android/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null
 RUN ~/Android/cmdline-tools/latest/bin/sdkmanager --install "ndk;${NDK_VERSION}" "platforms;android-28" "platform-tools" "build-tools;29.0.2" --channel=0
 RUN yes | ~/Android/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null
 
-COPY --chmod=0755 patches /root/patches
-
 #Setup ICU for the Host
 RUN mkdir -p ${HOME}/src/icu-host-build && cd $_ && ${HOME}/src/icu-release-70-1/icu4c/source/configure --disable-tests --disable-samples --disable-icuio --disable-extras CC="gcc" CXX="g++" && make -j $(nproc)
 ENV PATH=$PATH:/root/Android/cmdline-tools/latest/bin/:/root/Android/ndk/${NDK_VERSION}/:/root/Android/ndk/${NDK_VERSION}/toolchains/llvm/prebuilt/linux-x86_64:/root/Android/ndk/${NDK_VERSION}/toolchains/llvm/prebuilt/linux-x86_64/bin:/root/prefix/include:/root/prefix/lib:/root/prefix/:/root/.cargo/bin
@@ -82,7 +80,7 @@ ENV LDFLAGS="-fPIC -Wl,--undefined-version -flto=thin -fuse-ld=lld"
 
 ENV COMMON_CMAKE_ARGS \
   "-DCMAKE_TOOLCHAIN_FILE=/root/Android/ndk/${NDK_VERSION}/build/cmake/android.toolchain.cmake" \
-  "-DANDROID_ABI=$ABI" \
+  "-DANDROID_ABI=${ABI}" \
   "-DANDROID_PLATFORM=${API}" \
   "-DANDROID_STL=c++_shared" \
   "-DANDROID_CPP_FEATURES=" \
@@ -134,8 +132,7 @@ RUN cd $HOME/src/ && git clone https://github.com/libarchive/bzip2 && cd bzip2 &
 RUN wget -c https://github.com/madler/zlib/archive/refs/tags/v${ZLIB_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/zlib-${ZLIB_VERSION}/build && cd $_ && \
     cmake ${HOME}/src/zlib-${ZLIB_VERSION} \
-        ${COMMON_CMAKE_ARGS} \
-        -DCMAKE_CXX_FLAGS="${CXXFLAGS}" && \
+        ${COMMON_CMAKE_ARGS} && \
     make -j $(nproc) && make install
 
 # Setup LIBJPEG_TURBO
@@ -143,7 +140,6 @@ RUN wget -c https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/${L
     mkdir -p ${HOME}/src/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}/build && cd $_ && \
     cmake ${HOME}/src/libjpeg-turbo-${LIBJPEG_TURBO_VERSION} \
         ${COMMON_CMAKE_ARGS} \
-        -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
         -DENABLE_SHARED=false && \
     make -j $(nproc) && make install
 
@@ -176,7 +172,6 @@ RUN wget -c https://github.com/GNOME/libxml2/archive/refs/tags/v${LIBXML2_VERSIO
         -DLIBXML2_WITH_PROGRAMS=OFF \
         -DLIBXML2_WITH_PYTHON=OFF \
         -DLIBXML2_WITH_TESTS=OFF \
-        -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
         -DLIBXML2_WITH_ZLIB=ON && \
     make -j $(nproc) && make install
 
@@ -190,7 +185,6 @@ RUN wget -c https://github.com/kcat/openal-soft/archive/${OPENAL_VERSION}.tar.gz
         -DALSOFT_UTILS=OFF \
         -DALSOFT_NO_CONFIG_UTIL=ON \
         -DALSOFT_BACKEND_OPENSL=ON \
-        -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
         -DALSOFT_BACKEND_WAVE=OFF && \
     make -j $(nproc) && make install
 
@@ -246,7 +240,7 @@ RUN wget -c https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_V
     mkdir -p ${HOME}/src/SDL2-${SDL2_VERSION}/build && cd $_ && \
     cmake ../ ${COMMON_CMAKE_ARGS} \
     -DSDL_STATIC=OFF \
-    -DCMAKE_C_FLAGS="-latomic -no-canonical-prefixes -Wl,--gc-sections  -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined -Wl,--fatal-warnings -Wl,--no-undefined-version -ldl -lGLESv1_CM -lGLESv2 -lOpenSLES -llog -landroid -ldl -lc -lm -I${PREFIX}" && \
+    -DCMAKE_C_FLAGS=-DHAVE_GCC_FVISIBILITY=OFF\ "${CFLAGS}" && \
     make -j $(nproc) && make install
 RUN cp -rf ${HOME}/src/SDL2-${SDL2_VERSION}/include/* /root/prefix/include/
 
@@ -260,7 +254,6 @@ RUN wget -c https://github.com/bulletphysics/bullet3/archive/${BULLET_VERSION}.t
         -DBUILD_UNIT_TESTS=OFF \
         -DBUILD_EXTRAS=OFF \
         -DUSE_DOUBLE_PRECISION=ON \
-        -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
         -DBULLET2_MULTITHREADING=ON && \
     make -j $(nproc) && make install
 
@@ -280,7 +273,6 @@ RUN wget -c https://github.com/MyGUI/mygui/archive/MyGUI${MYGUI_VERSION}.tar.gz 
         -DMYGUI_BUILD_TOOLS=OFF \
         -DMYGUI_BUILD_PLUGINS=OFF \
         -DMYGUI_DONT_USE_OBSOLETE=ON \
-        -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
         -DMYGUI_STATIC=ON && \
     make -j $(nproc) && make install
 
@@ -290,7 +282,6 @@ RUN wget -c https://github.com/lz4/lz4/archive/v${LZ4_VERSION}.tar.gz -O - | tar
     cmake ${HOME}/src/lz4-${LZ4_VERSION}/build/cmake/ \
         ${COMMON_CMAKE_ARGS} \
         -DBUILD_STATIC_LIBS=ON \
-        -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
         -DBUILD_SHARED_LIBS=OFF && \
     make -j $(nproc) && make install
 
@@ -335,6 +326,10 @@ RUN wget -c https://github.com/rdiankov/collada-dom/archive/v${COLLADA_DOM_VERSI
         -DCMAKE_CXX_FLAGS=-Dauto_ptr=unique_ptr\ "${CXXFLAGS}" && \
     make -j $(nproc) && make install
 
+# Setup Delta Plugin
+RUN cd root/src && git clone https://gitlab.com/bmwinger/delta-plugin && cd delta-plugin && cargo build --target ${NDK_TRIPLET} --release
+RUN cp /root/src/delta-plugin/target/${NDK_TRIPLET}/release/delta_plugin ${PREFIX}/lib/libdelta_plugin.so
+
 # Setup OPENSCENEGRAPH_VERSION
 RUN wget -c https://github.com/Duron27/osg/archive/refs/tags/${OSG_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/ && \
     mkdir -p ${HOME}/src/osg-${OSG_VERSION}/build && cd $_ && \
@@ -354,9 +349,7 @@ RUN wget -c https://github.com/Duron27/osg/archive/refs/tags/${OSG_VERSION}.tar.
         -DOSG_CPP_EXCEPTIONS_AVAILABLE=TRUE \
         -DJPEG_INCLUDE_DIR=${PREFIX}/include/ \
         -DPNG_INCLUDE_DIR=${PREFIX}/include/ \
-        -DFREETYPE_DIR=${PREFIX}/include/ \
         -DCOLLADA_INCLUDE_DIR=${PREFIX}/include/collada-dom2.5 \
-        -DCOLLADA_DIR=${PREFIX}/include/collada-dom2.5/1.4 \
         -DOSG_GL1_AVAILABLE=ON \
         -DOSG_GL2_AVAILABLE=OFF \
         -DOSG_GL3_AVAILABLE=OFF \
@@ -379,6 +372,8 @@ RUN wget -c https://github.com/Duron27/osg/archive/refs/tags/${OSG_VERSION}.tar.
 # Create a zip of all the libraries
 #RUN cd /root/prefix && zip -r /openmw-android-deps.zip ./*
 
+COPY --chmod=0755 patches /root/patches
+
 # Setup OPENMW_VERSION
 RUN wget -c https://github.com/OpenMW/openmw/archive/${OPENMW_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/Settings_cfg_on_ok.patch
@@ -389,6 +384,11 @@ RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/open
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/fixnew.patch
 RUN patch -d ${HOME}/src/openmw-${OPENMW_VERSION} -p1 -t -N < /root/patches/openmw/navmeshtool.patch
 RUN cp /root/patches/openmw/android_main.cpp /root/src/openmw-${OPENMW_VERSION}/apps/openmw/android_main.cpp
+
+# sed commands
+# change post processing window size for android
+RUN sed -i 's/600 600/600 400/g' ${HOME}/src/openmw-${OPENMW_VERSION}/files/data/mygui/openmw_postprocessor_hud.layout
+
 RUN mkdir -p ${HOME}/src/openmw-${OPENMW_VERSION}/build && cd $_ && \
     cmake .. \
         ${COMMON_CMAKE_ARGS} \
@@ -413,9 +413,6 @@ RUN mkdir -p ${HOME}/src/openmw-${OPENMW_VERSION}/build && cd $_ && \
         -DCMAKE_CXX_FLAGS=-I${PREFIX}/include/\ "${CXXFLAGS}" \
         -DMyGUI_LIBRARY=${PREFIX}/lib/libMyGUIEngineStatic.a && \
     make -j $(nproc)
-
-RUN cd root/src && git clone https://gitlab.com/bmwinger/delta-plugin && cd delta-plugin && cargo build --target ${NDK_TRIPLET} --release
-RUN cp /root/src/delta-plugin/target/${NDK_TRIPLET}/release/delta_plugin ${PREFIX}/lib/libdelta_plugin.so
 
 COPY --chmod=0755 payload /root/payload
 COPY --chmod=0755 mods /root/mods
@@ -466,4 +463,3 @@ RUN JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which java)))))
 RUN cd /root/payload/ && ./gradlew assembleRelease
 
 RUN cp /root/payload/app/build/outputs/apk/mainline/release/*.apk openmw-android.apk
-# RUN cp /root/payload/app/build/outputs/apk/nightly/debug/*.apk openmw-android.apk
