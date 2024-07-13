@@ -1,49 +1,129 @@
+From b3abc436dd43842de59b3c8a5daa12fe95fc0af9 Mon Sep 17 00:00:00 2001
+From: elsid <elsid.mail@gmail.com>
+Date: Sun, 30 Jun 2024 15:52:46 +0200
+Subject: [PATCH 1/2] Keep separation between openmw and openmw-lib on Android
+
+They are not set up properly so CMake configuration fails because of not found
+openmw-lib target since it's not defined for Android.
+---
+ apps/openmw/CMakeLists.txt | 33 ++++++++++++++-------------------
+ 1 file changed, 14 insertions(+), 19 deletions(-)
+
 diff --git a/apps/openmw/CMakeLists.txt b/apps/openmw/CMakeLists.txt
-index 3dc7445662b..a83a2dce014 100644
+index 3c5a6423fd..60ea46ecff 100644
 --- a/apps/openmw/CMakeLists.txt
 +++ b/apps/openmw/CMakeLists.txt
-@@ -9,7 +9,7 @@ set(OPENMW_RESOURCES
+@@ -8,10 +8,6 @@ set(OPENMW_RESOURCES
+     ${CMAKE_SOURCE_DIR}/files/windows/openmw.exe.manifest
  )
  
- if (ANDROID)
+-if (ANDROID)
 -    set(OPENMW_SOURCES ${OPENMW_SOURCES} android_main.cpp)
-+    set(OPENMW_SOURCES ${OPENMW_SOURCES} main.cpp android_main.cpp)
- endif()
- 
+-endif()
+-
  set(OPENMW_HEADERS
-@@ -140,7 +140,7 @@ endif ()
+     doc.hpp
+     engine.hpp
+@@ -19,7 +15,7 @@ set(OPENMW_HEADERS
+     profile.hpp
+ )
+ 
+-source_group(apps/openmw FILES main.cpp ${OPENMW_SOURCES} ${OPENMW_HEADERS} ${OPENMW_RESOURCES})
++source_group(apps/openmw FILES main.cpp android_main.cpp ${OPENMW_SOURCES} ${OPENMW_HEADERS} ${OPENMW_RESOURCES})
+ 
+ add_openmw_dir (mwrender
+     actors objects renderingmanager animation rotatecontroller sky skyutil npcanimation esm4npcanimation vismask
+@@ -122,23 +118,22 @@ add_openmw_dir (mwbase
+ 
+ # Main executable
+ 
+-if (NOT ANDROID)
+-    add_library(openmw-lib STATIC
+-        ${OPENMW_FILES}
+-        ${OPENMW_SOURCES}
+-    )
++add_library(openmw-lib STATIC
++    ${OPENMW_FILES}
++    ${OPENMW_SOURCES}
++)
+ 
+-    # Otherwise linker fails with LNK1149 because main.cpp has __declspec(dllexport)
+-    if(NOT WIN32)
+-        set_target_properties(openmw-lib PROPERTIES OUTPUT_NAME openmw)
+-    endif()
+-endif ()
++# Otherwise linker fails with LNK1149 because main.cpp has __declspec(dllexport)
++if(NOT WIN32)
++    set_target_properties(openmw-lib PROPERTIES OUTPUT_NAME openmw)
++endif()
  
  if(BUILD_OPENMW)
      if (ANDROID)
 -        add_library(openmw-lib SHARED
 +        add_library(openmw SHARED
              ${OPENMW_FILES}
-             ${OPENMW_SOURCES}
+-            ${OPENMW_SOURCES}
++            main.cpp
++            android_main.cpp
          )
-@@ -161,7 +161,7 @@ include_directories(
-     ${FFmpeg_INCLUDE_DIRS}
- )
- 
--target_link_libraries(openmw-lib
-+target_link_libraries(openmw
-     # CMake's built-in OSG finder does not use pkgconfig, so we have to
-     # manually ensure the order is correct for inter-library dependencies.
-     # This only makes a difference with `-DOPENMW_USE_SYSTEM_OSG=ON -DOSG_STATIC=ON`.
-@@ -213,7 +213,7 @@ endif()
- add_definitions(-DMYGUI_DONT_USE_OBSOLETE=ON)
- 
- if (ANDROID)
--    target_link_libraries(openmw-lib EGL android log z)
-+    target_link_libraries(openmw EGL android log z)
- endif (ANDROID)
- 
- if (USE_SYSTEM_TINYXML)
-@@ -226,7 +226,7 @@ endif()
- 
- # Fix for not visible pthreads functions for linker with glibc 2.15
- if (UNIX AND NOT APPLE)
--    target_link_libraries(openmw-lib ${CMAKE_THREAD_LIBS_INIT})
-+    target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
+     else()
+         openmw_add_executable(openmw
+@@ -146,9 +141,9 @@ if(BUILD_OPENMW)
+             ${OPENMW_RESOURCES}
+             main.cpp
+         )
+-
+-        target_link_libraries(openmw openmw-lib)
+     endif()
++
++    target_link_libraries(openmw openmw-lib)
  endif()
  
- if(APPLE AND BUILD_OPENMW)
+ # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
+-- 
+GitLab
+
+
+From 73d48720efcbe74ebe2027cfc974f8a653578b8b Mon Sep 17 00:00:00 2001
+From: elsid <elsid.mail@gmail.com>
+Date: Sun, 30 Jun 2024 16:06:49 +0200
+Subject: [PATCH 2/2] Do not change output names for targets
+
+Changing them does not solve any problem but only creates some.
+---
+ apps/opencs/CMakeLists.txt | 2 --
+ apps/openmw/CMakeLists.txt | 5 -----
+ 2 files changed, 7 deletions(-)
+
+diff --git a/apps/opencs/CMakeLists.txt b/apps/opencs/CMakeLists.txt
+index 8c50438291..bfcf70c020 100644
+--- a/apps/opencs/CMakeLists.txt
++++ b/apps/opencs/CMakeLists.txt
+@@ -180,8 +180,6 @@ add_library(openmw-cs-lib STATIC
+     ${OPENCS_RES_SRC}
+ )
+ 
+-set_target_properties(openmw-cs-lib PROPERTIES OUTPUT_NAME openmw-cs)
+-
+ if(BUILD_OPENCS)
+     openmw_add_executable(openmw-cs
+         MACOSX_BUNDLE
+diff --git a/apps/openmw/CMakeLists.txt b/apps/openmw/CMakeLists.txt
+index 60ea46ecff..c269eb8fc7 100644
+--- a/apps/openmw/CMakeLists.txt
++++ b/apps/openmw/CMakeLists.txt
+@@ -123,11 +123,6 @@ add_library(openmw-lib STATIC
+     ${OPENMW_SOURCES}
+ )
+ 
+-# Otherwise linker fails with LNK1149 because main.cpp has __declspec(dllexport)
+-if(NOT WIN32)
+-    set_target_properties(openmw-lib PROPERTIES OUTPUT_NAME openmw)
+-endif()
+-
+ if(BUILD_OPENMW)
+     if (ANDROID)
+         add_library(openmw SHARED
+-- 
+GitLab
+
