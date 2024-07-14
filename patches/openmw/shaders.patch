@@ -142,3 +142,43 @@ index 3174384212e..8510a0933c1 100644
 +uniform vec2 scaling;// = vec2(1.0, 1.0);
 
  varying vec2 uv;
+
+diff --git a/files/shaders/compatibility/fog.glsl b/files/shaders/compatibility/fog.glsl
+index a7cccbf7876..a856e9f929d 100644
+--- a/files/shaders/compatibility/fog.glsl
++++ b/files/shaders/compatibility/fog.glsl
+@@ -16,8 +16,8 @@ vec4 applyFogAtDist(vec4 color, float euclideanDist, float linearDist, float far
+ #else
+     float fogValue = clamp((dist - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
+ #endif
+-#ifdef ADDITIVE_BLENDING
+-    color.xyz *= 1.0 - fogValue;
++#if defined(ADDITIVE_BLENDING)
++    color.xyz = mix(color.xyz, gl_Fog.color.xyz, fogValue);
+ #else
+     color.xyz = mix(color.xyz, gl_Fog.color.xyz, fogValue);
+ #endif
+@@ -25,8 +25,8 @@ vec4 applyFogAtDist(vec4 color, float euclideanDist, float linearDist, float far
+ #if @skyBlending
+     float fadeValue = clamp((far - dist) / (far - skyBlendingStart), 0.0, 1.0);
+     fadeValue *= fadeValue;
+-#ifdef ADDITIVE_BLENDING
+-    color.xyz *= fadeValue;
++#if defined(ADDITIVE_BLENDING)
++    color.xyz = mix(sampleSkyColor(gl_FragCoord.xy / screenRes), color.xyz, fadeValue);
+ #else
+     color.xyz = mix(sampleSkyColor(gl_FragCoord.xy / screenRes), color.xyz, fadeValue);
+ #endif
+ diff --git a/files/shaders/compatibility/water.frag b/files/shaders/compatibility/water.frag
+index d1324e01bd..e26a7744d4 100644
+--- a/files/shaders/compatibility/water.frag
++++ b/files/shaders/compatibility/water.frag
+@@ -140,7 +140,7 @@ void main(void)
+     float sunFade = length(gl_LightModel.ambient.xyz);
+ 
+     // fresnel
+-    float ior = (cameraPos.z>0.0)?(1.333/1.0):(1.0/1.333); // air to water; water to air
++    float ior = 1.333; // air to water; water to air
+     float fresnel = clamp(fresnel_dielectric(viewDir, normal, ior), 0.0, 1.0);
+ 
+     vec2 screenCoordsOffset = normal.xy * REFL_BUMP;
