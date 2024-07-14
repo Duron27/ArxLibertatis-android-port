@@ -239,8 +239,8 @@ RUN wget -c http://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2 -O - | t
 RUN wget -c https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_VERSION}/SDL2-${SDL2_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/ && \
     mkdir -p ${HOME}/src/SDL2-${SDL2_VERSION}/build && cd $_ && \
     cmake ../ ${COMMON_CMAKE_ARGS} \
-    -DSDL_STATIC=OFF \
-    -DCMAKE_C_FLAGS=-DHAVE_GCC_FVISIBILITY=OFF\ "${CFLAGS}" && \
+        -DSDL_STATIC=OFF \
+        -DCMAKE_C_FLAGS=-DHAVE_GCC_FVISIBILITY=OFF\ "${CFLAGS}" && \
     make -j $(nproc) && make install
 RUN cp -rf ${HOME}/src/SDL2-${SDL2_VERSION}/include/* /root/prefix/include/
 
