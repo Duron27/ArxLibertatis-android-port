@@ -295,7 +295,7 @@ RUN wget -c https://github.com/luaJit/LuaJIT/archive/v${LUAJIT_VERSION}.tar.gz -
     PREFIX=${PREFIX} \
     CROSS=${TOOLCHAIN}/bin/llvm- \
     STATIC_CC=${NDK_TRIPLET}${API}-clang \
-    DYNAMIC_CC='${NDK_TRIPLET}${API}-clang -fPIC' \
+    DYNAMIC_CC="${NDK_TRIPLET}${API}-clang -fPIC" \
     TARGET_LD=${NDK_TRIPLET}${API}-clang && \
     make install \
     HOST_CC='gcc -m64' \
@@ -304,7 +304,7 @@ RUN wget -c https://github.com/luaJit/LuaJIT/archive/v${LUAJIT_VERSION}.tar.gz -
     PREFIX=${PREFIX} \
     CROSS=${TOOLCHAIN}/bin/llvm- \
     STATIC_CC=${NDK_TRIPLET}${API}-clang \
-    DYNAMIC_CC='${NDK_TRIPLET}${API}-clang -fPIC' \
+    DYNAMIC_CC="${NDK_TRIPLET}${API}-clang -fPIC" \
     TARGET_LD=${NDK_TRIPLET}${API}-clang
 
 RUN bash -c "rm ${PREFIX}/lib/libluajit*.so*"
