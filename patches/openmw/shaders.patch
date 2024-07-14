@@ -169,7 +169,8 @@ index a7cccbf7876..a856e9f929d 100644
  #else
      color.xyz = mix(sampleSkyColor(gl_FragCoord.xy / screenRes), color.xyz, fadeValue);
  #endif
- diff --git a/files/shaders/compatibility/water.frag b/files/shaders/compatibility/water.frag
+ 
+diff --git a/files/shaders/compatibility/water.frag b/files/shaders/compatibility/water.frag
 index d1324e01bd..e26a7744d4 100644
 --- a/files/shaders/compatibility/water.frag
 +++ b/files/shaders/compatibility/water.frag
