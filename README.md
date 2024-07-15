@@ -28,7 +28,7 @@ USE AT YOUR OWN RISK!
 
 # New in version 1.7
 Added:
--   Lots of fixes include usb storage
+-   Lots of fixes including usb storage
 
 Updated openmw to latest
 
