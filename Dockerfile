@@ -330,13 +330,13 @@ RUN cd /root/src && git clone https://github.com/vsgopenmw-dev/VulkanSceneGraph 
         ${COMMON_CMAKE_ARGS} \
         -DDYNAMIC_OPENTHREADS=OFF \
         -DBUILD_VSG_PLUGIN_VSG=ON \
-        -DBUILD_OSG_PLUGIN_DAE=ON \
-        -DBUILD_OSG_PLUGIN_DDS=ON \
-        -DBUILD_OSG_PLUGIN_TGA=ON \
-        -DBUILD_OSG_PLUGIN_BMP=ON \
-        -DBUILD_OSG_PLUGIN_JPEG=ON \
-        -DBUILD_OSG_PLUGIN_PNG=ON \
-        -DBUILD_OSG_PLUGIN_FREETYPE=ON \
+        -DBUILD_VSG_PLUGIN_DAE=ON \
+        -DBUILD_VSG_PLUGIN_DDS=ON \
+        -DBUILD_VSG_PLUGIN_TGA=ON \
+        -DBUILD_VSG_PLUGIN_BMP=ON \
+        -DBUILD_VSG_PLUGIN_JPEG=ON \
+        -DBUILD_VSG_PLUGIN_PNG=ON \
+        -DBUILD_VSG_PLUGIN_FREETYPE=ON \
         -DOSG_CPP_EXCEPTIONS_AVAILABLE=TRUE \
         -DJPEG_INCLUDE_DIR=${PREFIX}/include/ \
         -DPNG_INCLUDE_DIR=${PREFIX}/include/ \
@@ -356,13 +356,10 @@ RUN cd /root/src && git clone https://github.com/vsgopenmw-dev/VulkanSceneGraph 
 #    mkdir build && cd build &&\
 #    cmake ../ ${COMMON_CMAKE_ARGS}
 
-
 COPY --chmod=0755 patches /root/patches
+COPY --chmod=0755 vsgopenmw /root/src/vsgopenmw
 
 # Setup OPENMW_VERSION
-RUN cd /root/src && git clone https://github.com/vsgopenmw-dev/vsgopenmw && mkdir -p vsgopenmw/build && cd $_
-RUN cp /root/patches/openmw/android_main.cpp /root/src/vsgopenmw/apps/openmw/android_main.cpp
-
 RUN cd ${HOME}/src/vsgopenmw/build && cmake .. \
         ${COMMON_CMAKE_ARGS} \
         -DBUILD_BSATOOL=0 \
@@ -376,12 +373,13 @@ RUN cd ${HOME}/src/vsgopenmw/build && cmake .. \
         -DBUILD_WIZARD=0 \
         -DBUILD_MYGUI_PLUGIN=0 \
         -DBUILD_BULLETOBJECTTOOL=0 \
+        -DOPENMW_USE_SYSTEM_MYGUI=ON \
         -DOPENMW_USE_SYSTEM_SQLITE3=OFF \
         -DOPENMW_USE_SYSTEM_YAML_CPP=OFF \
         -DOPENMW_USE_SYSTEM_ICU=ON \
         -DUSE_SYSTEM_TINYXML=FALSE \
         -DOPENMW_USE_SYSTEM_RECASTNAVIGATION=FALSE \
-        -DOPENMW_USE_SYSTEM_VSG=FALSE \
+        -DOPENMW_USE_SYSTEM_VSG=OFF \
         -DOPENMW_USE_SYSTEM_VSGXCHANGE=FALSE \
         -DVulkan_FIND_VERSION=/root/Android/ndk/26.1.10909125/sources/third_party/vulkan/src/include \
         -DOPENAL_INCLUDE_DIR=${PREFIX}/include/AL/ \
@@ -418,13 +416,14 @@ RUN cd ${DST}/resources/vfs/ && cp -r /root/mods/* .
 
 # Global Config
 RUN mkdir -p "${DST}/openmw/"
-RUN cp "${SRC}/defaults.cfg" "${DST}/openmw/defaults.bin"
+RUN cp "/root/patches/openmw/defaults.bin" "${DST}/openmw/defaults.bin"
+RUN cp "${SRC}/defaults.cfg" "${DST}/openmw/"
 RUN cp "${SRC}/gamecontrollerdb.txt" "${DST}/openmw/"
 RUN cat "${SRC}/openmw.cfg" | grep -v "data=" | grep -v "data-local=" >> "${DST}/openmw/openmw.base.cfg"
 RUN cat "/root/payload/app/openmw.base.cfg" >> "${DST}/openmw/openmw.base.cfg"
-RUN mkdir -p /root/payload/app/src/main/assets/libopenmw/resources && cd $_ && echo "${APP_VERSION}" >> version
-RUN sed -i "4i\    <string name='version_info'>CaveBros Version ${APP_VERSION}</string>" /root/payload/app/src/main/res/values/strings.xml
-RUN sed -i "92i\    ndkVersion \"${NDK_VERSION}\"" /root/payload/app/build.gradle
+RUN mkdir -p /root/payload/app/src/main/assets/libopenmw/resources && cd $_ && echo "Vulkan 0.01" >> version
+RUN sed -i "4i\    <string name='version_info'>CaveBros Version Vulkan 0.01</string>" /root/payload/app/src/main/res/values/strings.xml
+RUN sed -i "75i\    ndkVersion \"${NDK_VERSION}\"" /root/payload/app/build.gradle
 
 # licensing info
 RUN cp "/root/payload/3rdparty-licenses.txt" "${DST}"
@@ -440,4 +439,4 @@ RUN alternatives --set java java-11-openjdk.x86_64
 RUN JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which java)))))
 RUN cd /root/payload/ && ./gradlew assembleRelease
 
-RUN cp /root/payload/app/build/outputs/apk/mainline/release/*.apk openmw-android.apk
+RUN cp /root/payload/app/build/outputs/apk/mainline/release/*.apk openmw-vulkan.apk
