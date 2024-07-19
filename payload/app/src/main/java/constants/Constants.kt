@@ -58,8 +58,14 @@ object Constants {
     // e.g. /sdcard/omw/config
     var USER_CONFIG = ""
 
+    // e.g. /sdcard/omw/delta
+    var USER_DELTA = ""
+
     // e.g. /sdcard/omw/config/openmw.cfg
     var USER_OPENMW_CFG = ""
+
+    // e.g. /sdcard/omw/config/delta.cfg
+    var USER_DELTA_CFG = ""
 
     // Contains app version code for currently deployed resources; redeployed on mismatch
     // e.g. /data/data/is.xyz.omw/files/stamp

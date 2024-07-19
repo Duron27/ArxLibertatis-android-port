@@ -27,21 +27,24 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
+import android.os.Build.VERSION
+import android.os.Environment
 import android.preference.EditTextPreference
 import android.preference.Preference
 import android.preference.PreferenceFragment
 import android.preference.PreferenceGroup
+import android.widget.EditText
 import androidx.documentfile.provider.DocumentFile
 import com.libopenmw.openmw.R
 import file.GameInstaller
 import ui.activity.ConfigureControls
+import ui.activity.DeltaPluginActivity
 import ui.activity.MainActivity
 import ui.activity.ModsActivity
 import ui.activity.SettingsActivity
-import android.os.Environment
 import utils.MyApp
-import java.util.*
-
+import java.io.File
+import java.util.Locale
 
 class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener {
 
@@ -94,6 +97,13 @@ class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener 
             startActivityForResult(intent, REQUEST_CODE_OPEN_DOCUMENT_TREE)
             true
         }
+        val deltaPluginPreference: Preference? = findPreference("delta_plugin")
+        deltaPluginPreference?.setOnPreferenceClickListener {
+            // Start DeltaPluginActivity when the preference is clicked
+            val intent = Intent(activity, DeltaPluginActivity::class.java)
+            startActivity(intent)
+            true
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -101,13 +111,17 @@ class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener 
         if (requestCode == REQUEST_CODE_OPEN_DOCUMENT_TREE && resultCode == Activity.RESULT_OK) {
             data?.data?.also { uri ->
 
-                val selectedDirectory = DocumentFile.fromTreeUri(activity, uri) ?: return
-
-                // Get the primary external storage directory
+            val selectedDirectory = DocumentFile.fromTreeUri(activity, uri) ?: return
+                val pattern = Regex("[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}")
                 val storageDir = Environment.getExternalStorageDirectory()
                 val storagePath = storageDir.absolutePath
-
-                val path = storagePath + "/" + uri.lastPathSegment?.replace("primary:", "")
+                val modifiedStoragePath = "/storage"
+                val pathSegment = uri.lastPathSegment
+                val path = if (pattern.containsMatchIn(pathSegment ?: "")) {
+                    modifiedStoragePath + "/" + pathSegment?.replace(":", "/")
+                } else {
+                    storagePath + "/" + pathSegment?.replace("primary:", "")
+                }               
                 val iniFile = selectedDirectory.findFile("Morrowind.ini")
                 val dataFilesFolder = selectedDirectory.findFile("Data Files")
                 val sharedPref = preferenceScreen.sharedPreferences
@@ -120,16 +134,52 @@ class FragmentSettings : PreferenceFragment(), OnSharedPreferenceChangeListener 
                         apply()
                     }
                 } else {
-                    val gameFilesPreference = findPreference("game_files")
-                    gameFilesPreference?.summary = path
-                    showError(R.string.data_error_title, R.string.data_error_message)
-                    with(sharedPref.edit()) {
-                        putString("game_files", "")
-                        apply()
+                    val builder = AlertDialog.Builder(activity)
+                    val input = EditText(activity)
+                    input.requestFocus() // Request focus
+                    builder.setView(input)
+                    builder.setTitle(getString(R.string.data_error_title))
+                    builder.setMessage(getString(R.string.data_error_message_text))
+                    builder.setPositiveButton("OK") { _, _ ->
+                    val pathtext = input.text.toString()
+                        if (pathtext != null && !pathtext.isEmpty()) {
+                            val iniFile = File(
+                                pathtext,
+                                "Morrowind.ini"
+                            ) // Assuming ini file is named iniFile.ini
+                            val dataFilesFolder = File(pathtext, "Data Files")
+                            if (iniFile.exists() && dataFilesFolder.isDirectory) {
+                                val gameFilesPreference = findPreference("game_files")
+                                gameFilesPreference?.summary = pathtext
+                                with(sharedPref.edit()) {
+                                    putString("game_files", pathtext)
+                                    apply()
+                                }
+                            } else {
+                                showError(R.string.data_error_title, R.string.data_error_message)
+                                with(sharedPref.edit()) {
+                                    putString("game_files", "")
+                                    apply()
+
+                                }
+                            }
+                        }
+                }
+                    builder.setNegativeButton("Cancel") {
+                    dialog, _ -> dialog.cancel()
+                        showError(R.string.data_error_title, R.string.data_error_message)
+                        with(sharedPref.edit()) {
+                            putString("game_files", "")
+                            apply()
+                        }
                     }
+                    builder.show()
                 }
             }
         }
+
+        if (android.os.Build.VERSION.SDK_INT < 30)
+            findPreference("pref_display_cutout_area").isEnabled = false
     }
 
     /**

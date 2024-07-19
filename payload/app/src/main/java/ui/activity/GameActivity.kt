@@ -23,6 +23,7 @@ package ui.activity
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Process
+import android.os.Build.VERSION
 import android.preference.PreferenceManager
 import android.system.ErrnoException
 import android.system.Os
@@ -92,8 +93,7 @@ class GameActivity : SDLActivity() {
         System.loadLibrary("SDL2")
 
         try {
-            Os.setenv("OPENMW_GLES_VERSION", "2", true)
-            Os.setenv("LIBGL_ES", "2", true)
+            // Environment variables specific to Vulkan can be set here
         } catch (e: ErrnoException) {
             Log.e("OpenMW", "Failed setting environment variables.")
             e.printStackTrace()
@@ -103,6 +103,10 @@ class GameActivity : SDLActivity() {
         if (textureShrinkingOption == "low") Os.setenv("LIBGL_SHRINK", "2", true)
         if (textureShrinkingOption == "medium") Os.setenv("LIBGL_SHRINK", "7", true)
         if (textureShrinkingOption == "high") Os.setenv("LIBGL_SHRINK", "6", true)
+        
+                val avoid16bits = prefs!!.getBoolean("pref_avoid16bits", true)
+        if (avoid16bits == true) Os.setenv("LIBGL_AVOID16BITS", "1", true)
+        else Os.setenv("LIBGL_AVOID16BITS", "0", true)
 
         Os.setenv("OSG_VERTEX_BUFFER_HINT", "VBO", true)
         Os.setenv("OPENMW_USER_FILE_STORAGE", Constants.USER_FILE_STORAGE + "/", true)
@@ -121,7 +125,7 @@ class GameActivity : SDLActivity() {
             }
         }
 
-        System.loadLibrary("GL")
+        System.loadLibrary("vulkan")
         System.loadLibrary("openmw")
     }
 
@@ -209,8 +213,8 @@ class GameActivity : SDLActivity() {
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val displayInCutoutArea = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_display_cutout_area", false)
-        if (displayInCutoutArea) {
+        val displayInCutoutArea = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_display_cutout_area", true)
+        if (displayInCutoutArea || android.os.Build.VERSION.SDK_INT < 30) {
             window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         }
 

@@ -137,6 +137,15 @@ class ModsCollection(private val type: ModType,
                blacklist.add("LeFemmArmor.esp")
                blacklist.add("master_index.esp")
                blacklist.add("Siege at Firemoth.esp")
+               blacklist.add("delta-merged.omwaddon")
+               blacklist.add("output_deleted.omwaddon")
+               blacklist.add("output_groundcover.omwaddon")
+           }
+
+           if(type == ModType.Plugin) {
+               blacklist.add("delta-merged.omwaddon")
+               blacklist.add("output_deleted.omwaddon")
+               blacklist.add("output_groundcover.omwaddon")
            }
 
      	   // Collect filenames of mods on the FS

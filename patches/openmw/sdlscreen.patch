@@ -1,0 +1,12 @@
+diff --git a/apps/openmw/engine.cpp b/apps/openmw/engine.cpp
+index ca1b0f577d1..f4afbafd39b 100644
+--- a/apps/openmw/engine.cpp
++++ b/apps/openmw/engine.cpp
+@@ -380,6 +380,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
+     , mGlMaxTextureImageUnits(0)
+ {
+     SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0"); // We use only gamepads
++    SDL_SetHint(SDL_HINT_EVENT_LOGGING, "2");
+ 
+     Uint32 flags
+         = SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK | SDL_INIT_SENSOR;

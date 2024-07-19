@@ -357,10 +357,10 @@ RUN cd /root/src && git clone https://github.com/vsgopenmw-dev/VulkanSceneGraph 
 #    cmake ../ ${COMMON_CMAKE_ARGS}
 
 COPY --chmod=0755 patches /root/patches
-COPY --chmod=0755 vsgopenmw /root/src/vsgopenmw
 
 # Setup OPENMW_VERSION
-RUN cd ${HOME}/src/vsgopenmw/build && cmake .. \
+RUN cd /root/src && git clone https://github.com/Duron27/vsgopenmw
+RUN mkdir -p  ${HOME}/src/vsgopenmw/build && cd $_ && cmake .. \
         ${COMMON_CMAKE_ARGS} \
         -DBUILD_BSATOOL=0 \
         -DBUILD_NIFTEST=0 \
@@ -385,7 +385,7 @@ RUN cd ${HOME}/src/vsgopenmw/build && cmake .. \
         -DOPENAL_INCLUDE_DIR=${PREFIX}/include/AL/ \
         -DVSG_INCLUDE_DIR=${PREFIX}/include/vsg/ \
         -DBullet_INCLUDE_DIR=${PREFIX}/include/bullet/ \
-        -DOSG_STATIC=TRUE \
+        -DVSG_STATIC=TRUE \
         -DCMAKE_CXX_FLAGS=-I${PREFIX}/include/\ "${CXXFLAGS}" \
         -DMyGUI_LIBRARY=${PREFIX}/lib/libMyGUIEngineStatic.a && \
     make -j $(nproc)
@@ -439,4 +439,4 @@ RUN alternatives --set java java-11-openjdk.x86_64
 RUN JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which java)))))
 RUN cd /root/payload/ && ./gradlew assembleRelease
 
-RUN cp /root/payload/app/build/outputs/apk/mainline/release/*.apk openmw-vulkan.apk
+RUN cp /root/payload/app/build/outputs/apk/mainline/release/*.apk openmw-android.apk

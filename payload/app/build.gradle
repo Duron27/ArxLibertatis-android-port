@@ -3,6 +3,12 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.bugsnag.android.gradle'
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('release-keystore.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 ext {
     versionFile = new File(project.rootDir, 'app/src/main/assets/libopenmw/resources/version')
     calculateVersion = {
@@ -13,6 +19,15 @@ ext {
 
 android {
     compileSdkVersion 29
+
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storePassword keystoreProperties['storePassword']
+        }
+    }
 
     sourceSets {
         main {
@@ -26,7 +41,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "is.xyz.omw"
+        applicationId "is.cavebros.omw"
         versionCode 49
         versionName calculateVersion()
 
@@ -34,8 +49,9 @@ android {
         // Do not update past 29 -- see https://github.com/xyzz/openmw-android/issues/30
         targetSdkVersion 29
 
+        buildConfigField("int", "RANDOMIZER", Math.abs(new Random().nextInt(999)).toString())
         ndk {
-            abiFilters "arm64-v8a", "armeabi-v7a", "x86", "x86_64"
+            abiFilters "arm64-v8a", "x86", "x86_64"
         }
     }
 
@@ -51,10 +67,12 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
         }
 
         debug {
             applicationIdSuffix ".debug"
+            signingConfig signingConfigs.debug
             debuggable false
         }
     }
@@ -68,11 +86,12 @@ android {
 
         nightly {
             dimension "version"
-            applicationId "is.xyz.omw_nightly"
+            applicationId "is.cavebros.omw_nightly"
             versionNameSuffix "-nightly"
         }
     }
-    ndkVersion '26.1.10909125'
+    ndkVersion"26.3.11579264"
+
     
     applicationVariants.all { variant ->
         variant.outputs.all {
