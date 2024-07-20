@@ -72,6 +72,7 @@ ENV CC=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang
 ENV CXX=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang++
 ENV clang=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang
 ENV clang++=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang++
+ENV PKG_CONFIG_LIBDIR=${PREFIX}/lib/pkgconfig
 
 # Global C, CXX and LDFLAGS
 ENV CFLAGS="-fPIC -O3 -flto=thin"
