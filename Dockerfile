@@ -282,7 +282,7 @@ RUN wget -c https://github.com/MyGUI/mygui/archive/MyGUI${MYGUI_VERSION}.tar.gz 
 # Setup LZ4
 RUN wget -c https://github.com/lz4/lz4/archive/v${LZ4_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/lz4-${LZ4_VERSION}/build && cd $_ && \
-    cmake ../ \
+    cmake cmake/ \
         ${COMMON_CMAKE_ARGS} \
         -DBUILD_STATIC_LIBS=ON \
         -DBUILD_SHARED_LIBS=OFF && \
