@@ -132,14 +132,14 @@ RUN cd $HOME/src/ && git clone https://github.com/libarchive/bzip2 && cd bzip2 &
 # Setup ZLIB
 RUN wget -c https://github.com/madler/zlib/archive/refs/tags/v${ZLIB_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/zlib-${ZLIB_VERSION}/build && cd $_ && \
-    cmake ${HOME}/src/zlib-${ZLIB_VERSION} \
+    cmake ../ \
         ${COMMON_CMAKE_ARGS} && \
     make -j $(nproc) && make install
 
 # Setup LIBJPEG_TURBO
 RUN wget -c https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/${LIBJPEG_TURBO_VERSION}/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}/build && cd $_ && \
-    cmake ${HOME}/src/libjpeg-turbo-${LIBJPEG_TURBO_VERSION} \
+    cmake ../ \
         ${COMMON_CMAKE_ARGS} \
         -DENABLE_SHARED=false && \
     make -j $(nproc) && make install
@@ -155,15 +155,17 @@ RUN wget -c http://prdownloads.sourceforge.net/libpng/libpng-${LIBPNG_VERSION}.t
 # Setup FREETYPE2
 RUN wget -c http://prdownloads.sourceforge.net/freetype/freetype-${FREETYPE2_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/freetype-${FREETYPE2_VERSION}/build && cd $_ && \
-        ${HOME}/src/freetype-${FREETYPE2_VERSION}/configure \
-        ${COMMON_AUTOCONF_FLAGS} \
-        --with-png=no && \
+    cmake ../ \
+        ${COMMON_CMAKE_ARGS} \
+	    -DCMAKE_DISABLE_FIND_PACKAGE_ZLIB=TRUE \
+        -DWITH_BZip2=TRUE \
+	    -DCMAKE_DISABLE_FIND_PACKAGE_PNG=TRUE && \
     make -j $(nproc) && make install
 
 # Setup LIBXML
 RUN wget -c https://github.com/GNOME/libxml2/archive/refs/tags/v${LIBXML2_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/libxml2-${LIBXML2_VERSION}/build && cd $_ && \
-    cmake ${HOME}/src/libxml2-${LIBXML2_VERSION} \
+    cmake ../ \
         ${COMMON_CMAKE_ARGS} \
         -DBUILD_SHARED_LIBS=OFF \
         -DLIBXML2_WITH_THREADS=ON \
@@ -179,7 +181,7 @@ RUN wget -c https://github.com/GNOME/libxml2/archive/refs/tags/v${LIBXML2_VERSIO
 # Setup OPENAL
 RUN wget -c https://github.com/kcat/openal-soft/archive/${OPENAL_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/openal-soft-${OPENAL_VERSION}/build && cd $_ && \
-    cmake ${HOME}/src/openal-soft-${OPENAL_VERSION} \
+    cmake ../ \
         ${COMMON_CMAKE_ARGS} \
         -DALSOFT_EXAMPLES=OFF \
         -DALSOFT_TESTS=OFF \
@@ -248,7 +250,7 @@ RUN cp -rf ${HOME}/src/SDL2-${SDL2_VERSION}/include/* /root/prefix/include/
 # Setup BULLET
 RUN wget -c https://github.com/bulletphysics/bullet3/archive/${BULLET_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/bullet3-${BULLET_VERSION}/build && cd $_ && \
-    cmake ${HOME}/src/bullet3-${BULLET_VERSION} \
+    cmake ../ \
         ${COMMON_CMAKE_ARGS} \
         -DBUILD_BULLET2_DEMOS=OFF \
         -DBUILD_CPU_DEMOS=OFF \
@@ -267,7 +269,7 @@ RUN wget -c https://github.com/Duron27/gl4es/archive/refs/tags/${GL4ES_VERSION}.
 # Setup MYGUI
 RUN wget -c https://github.com/MyGUI/mygui/archive/MyGUI${MYGUI_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/mygui-MyGUI${MYGUI_VERSION}/build && cd $_ && \
-    cmake ${HOME}/src/mygui-MyGUI${MYGUI_VERSION} \
+    cmake ../ \
         ${COMMON_CMAKE_ARGS} \
         -DMYGUI_RENDERSYSTEM=1 \
         -DMYGUI_BUILD_DEMOS=OFF \
@@ -280,7 +282,7 @@ RUN wget -c https://github.com/MyGUI/mygui/archive/MyGUI${MYGUI_VERSION}.tar.gz 
 # Setup LZ4
 RUN wget -c https://github.com/lz4/lz4/archive/v${LZ4_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/lz4-${LZ4_VERSION}/build && cd $_ && \
-    cmake ${HOME}/src/lz4-${LZ4_VERSION}/build/cmake/ \
+    cmake ../ \
         ${COMMON_CMAKE_ARGS} \
         -DBUILD_STATIC_LIBS=ON \
         -DBUILD_SHARED_LIBS=OFF && \
