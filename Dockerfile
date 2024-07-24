@@ -35,7 +35,7 @@ RUN dnf install -y dnf-plugins-core && dnf config-manager --set-enabled crb && d
 RUN dnf install -y https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm \
     && dnf install -y xz p7zip bzip2 libstdc++-devel glibc-devel zip unzip libcurl-devel java-11-openjdk which wget python-devel doxygen nano gcc-c++ git java-${JAVA_VERSION}-openjdk cmake patch
 
-RUN alternatives --set java java-17-openjdk.x86_64
+RUN alternatives --set java java-${JAVA_VERSION}-openjdk.x86_64
 RUN JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which java)))))
 ENV ANDROID_SDK_ROOT=/root/Android/cmdline-tools/latest/bin
 ENV ANDROID_HOME=/root/Android
