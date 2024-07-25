@@ -27,37 +27,6 @@ index 9f57d52a7e4..495fa3f47a8 100644
  
  target_link_libraries(openmw-navmeshtool
      ${Boost_PROGRAM_OPTIONS_LIBRARY}
-diff --git a/apps/navmeshtool/main.cpp b/apps/navmeshtool/main.cpp
-index b93e6cd7c86..fdb183e4a36 100644
---- a/apps/navmeshtool/main.cpp
-+++ b/apps/navmeshtool/main.cpp
-@@ -51,8 +51,8 @@
- 
- namespace NavMeshTool
- {
--    namespace
--    {
-+//    namespace
-+//    {
-         namespace bpo = boost::program_options;
- 
-         using StringsVector = std::vector<std::string>;
-@@ -255,10 +255,11 @@ namespace NavMeshTool
- 
-             return 0;
-         }
--    }
-+//    }
- }
--
-+/*
- int main(int argc, char* argv[])
- {
-     return Debug::wrapApplication(NavMeshTool::runNavMeshTool, argc, argv, NavMeshTool::applicationName);
- }
-+*/
-\ No newline at end of file
-
 diff --git a/apps/navmeshtool/navmesh.cpp b/apps/navmeshtool/navmesh.cpp
 index 384c9654660..e41a248e6d8 100644
 --- a/apps/navmeshtool/navmesh.cpp
@@ -132,3 +101,34 @@ index cc51462322d..a806df6fcd3 100644
      if (parseOptions(argc, argv, *engine, cfgMgr))
      {
          engine->go();
+
+diff --git a/apps/navmeshtool/main.cpp b/apps/navmeshtool/main.cpp
+index ed1ab57274..78d9e2e445 100644
+--- a/apps/navmeshtool/main.cpp
++++ b/apps/navmeshtool/main.cpp
+@@ -52,8 +52,8 @@
+ 
+ namespace NavMeshTool
+ {
+-    namespace
+-    {
++//    namespace
++//    {
+         namespace bpo = boost::program_options;
+ 
+         using StringsVector = std::vector<std::string>;
+@@ -261,10 +261,12 @@ namespace NavMeshTool
+ 
+             return 0;
+         }
+-    }
++//    }
+ }
+ 
++/*
+ int main(int argc, char* argv[])
+ {
+     return wrapApplication(NavMeshTool::runNavMeshTool, argc, argv, NavMeshTool::applicationName);
+ }
++*/
+

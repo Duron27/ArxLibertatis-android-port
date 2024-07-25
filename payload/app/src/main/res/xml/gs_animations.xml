@@ -35,6 +35,11 @@
             android:summary="Makes NPCs and player movement more smooth. Recommended to use with turn to movement direction enabled."/>
 
         <CheckBoxPreference
+            android:key="gs_smooth_transitions"
+            android:title="Smooth Animation Transitions"
+            android:summary="Smoothes out animation transitions for essentially every animation in the game."/>
+
+        <CheckBoxPreference
             android:key="gs_turn_to_movement_direction"
             android:title="Turn to Movement Direction"
             android:summary="Affects side and diagonal movement. Enabling this setting makes movement more realistic. If disabled then the whole character's body is pointed to the direction of view. Diagonal movement has no special animation and causes sliding. If enabled then the character turns lower body to the direction of movement. Upper body is turned partially. Head is always pointed to the direction of view. In combat mode it works only for diagonal movement. In non-combat mode it changes straight right and straight left movement as well. Also turns the whole body up or down when swimming according to the movement direction."/>
