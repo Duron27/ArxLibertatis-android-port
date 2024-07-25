@@ -72,7 +72,7 @@ ENV CC=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang
 ENV CXX=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang++
 ENV clang=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang
 ENV clang++=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang++
-#ENV PKG_CONFIG_LIBDIR=${PREFIX}/lib/pkgconfig
+ENV PKG_CONFIG_LIBDIR=${PREFIX}/lib/pkgconfig
 
 # Global C, CXX and LDFLAGS
 ENV CFLAGS="-fPIC -O3 -flto=thin"
@@ -127,7 +127,10 @@ RUN mkdir -p ${HOME}/src/icu-${LIBICU_VERSION} && cd $_ && \
     make install check_PROGRAMS= bin_PROGRAMS=
 
 # Setup Bzip2
-RUN cd $HOME/src/ && git clone https://github.com/libarchive/bzip2 && cd bzip2 && cmake . $COMMON_CMAKE_ARGS && make -j $(nproc) && make install
+RUN cd $HOME/src/ && git clone https://github.com/libarchive/bzip2 && cd bzip2 && \
+    cmake . \
+        $COMMON_CMAKE_ARGS && \
+    make -j $(nproc) && make install
 
 # Setup ZLIB
 RUN wget -c https://github.com/madler/zlib/archive/refs/tags/v${ZLIB_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
@@ -158,7 +161,7 @@ RUN wget -c http://prdownloads.sourceforge.net/freetype/freetype-${FREETYPE2_VER
     cmake ../ \
         ${COMMON_CMAKE_ARGS} \
 	    -DCMAKE_DISABLE_FIND_PACKAGE_ZLIB=TRUE \
-        -DWITH_BZip2=TRUE \
+        -DCMAKE_DISABLE_FIND_PACKAGE_BZip2=TRUE \
 	    -DCMAKE_DISABLE_FIND_PACKAGE_PNG=TRUE && \
     make -j $(nproc) && make install
 
