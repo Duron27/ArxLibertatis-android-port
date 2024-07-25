@@ -42,20 +42,22 @@ index b93e6cd7c86..fdb183e4a36 100644
          namespace bpo = boost::program_options;
  
          using StringsVector = std::vector<std::string>;
-@@ -261,10 +261,12 @@ namespace NavMeshTool
+@@ -255,10 +255,11 @@ namespace NavMeshTool
  
              return 0;
          }
 -    }
 +//    }
  }
- 
+-
 +/*
  int main(int argc, char* argv[])
  {
-     return wrapApplication(NavMeshTool::runNavMeshTool, argc, argv, NavMeshTool::applicationName);
+     return Debug::wrapApplication(NavMeshTool::runNavMeshTool, argc, argv, NavMeshTool::applicationName);
  }
 +*/
+\ No newline at end of file
+
 diff --git a/apps/navmeshtool/navmesh.cpp b/apps/navmeshtool/navmesh.cpp
 index 384c9654660..e41a248e6d8 100644
 --- a/apps/navmeshtool/navmesh.cpp
