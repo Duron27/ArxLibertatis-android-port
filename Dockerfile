@@ -33,7 +33,7 @@ ARG APP_VERSION=unknown
 
 RUN dnf install -y dnf-plugins-core && dnf config-manager --set-enabled crb && dnf install -y epel-release
 RUN dnf install -y https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm \
-    && dnf install -y xz p7zip bzip2 libstdc++-devel glibc-devel zip unzip libcurl-devel java-11-openjdk which wget python-devel doxygen nano gcc-c++ git java-${JAVA_VERSION}-openjdk cmake patch
+    && dnf install -y xz p7zip bzip2 libstdc++-devel glibc-devel zip unzip libcurl-devel java-11-openjdk which wget python-devel doxygen nano gcc-c++ libxcb-devel git java-${JAVA_VERSION}-openjdk cmake patch
 
 RUN alternatives --set java java-${JAVA_VERSION}-openjdk.x86_64
 RUN JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which java)))))
