@@ -117,18 +117,17 @@ index ed1ab57274..78d9e2e445 100644
          namespace bpo = boost::program_options;
  
          using StringsVector = std::vector<std::string>;
-@@ -261,10 +261,12 @@ namespace NavMeshTool
+@@ -255,10 +255,11 @@ namespace NavMeshTool
  
              return 0;
          }
 -    }
 +//    }
  }
- 
+-
 +/*
  int main(int argc, char* argv[])
  {
-     return wrapApplication(NavMeshTool::runNavMeshTool, argc, argv, NavMeshTool::applicationName);
+     return Debug::wrapApplication(NavMeshTool::runNavMeshTool, argc, argv, NavMeshTool::applicationName);
  }
 +*/
-
