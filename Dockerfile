@@ -17,12 +17,13 @@ ENV BULLET_VERSION=3.25
 ENV ZLIB_VERSION=1.3.1
 ENV LIBXML2_VERSION=2.12.5
 ENV MYGUI_VERSION=3.4.3
-ENV GL4ES_VERSION=1.1.8
 ENV COLLADA_DOM_VERSION=2.5.0
-ENV OSG_VERSION=3.6.5.1
 ENV LZ4_VERSION=1.9.3
 ENV LUAJIT_VERSION=2.1.ROLLING
-ENV OPENMW_VERSION=061f10bef7200965e6cfed4882dafa83bd1f6366
+ENV RECAST_VERSION=455a019e7aef99354ac3020f04c1fe3541aa4d19
+ENV VSG_VERSION=1.0.9
+ENV VSGXCHANGE_VERSION=1.0.5
+ENV VSGOPENMW_VERSION=0.2
 ENV NDK_VERSION=26.3.11579264
 ENV SDK_CMDLINE_TOOLS=10406996_latest
 ENV PLATFORM_TOOLS_VERSION=29.0.0
@@ -33,9 +34,9 @@ ARG APP_VERSION=unknown
 
 RUN dnf install -y dnf-plugins-core && dnf config-manager --set-enabled crb && dnf install -y epel-release
 RUN dnf install -y https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm \
-    && dnf install -y xz p7zip bzip2 libstdc++-devel glibc-devel zip unzip libcurl-devel java-11-openjdk which wget python-devel doxygen nano gcc-c++ git java-${JAVA_VERSION}-openjdk cmake patch
+    && dnf install -y xz p7zip bzip2 libstdc++-devel glibc-devel zip unzip libcurl-devel java-11-openjdk which wget python-devel doxygen nano gcc-c++ libxcb-devel git java-${JAVA_VERSION}-openjdk cmake patch
 
-RUN alternatives --set java java-17-openjdk.x86_64
+RUN alternatives --set java java-${JAVA_VERSION}-openjdk.x86_64
 RUN JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which java)))))
 ENV ANDROID_SDK_ROOT=/root/Android/cmdline-tools/latest/bin
 ENV ANDROID_HOME=/root/Android
@@ -72,6 +73,7 @@ ENV CC=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang
 ENV CXX=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang++
 ENV clang=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang
 ENV clang++=${TOOLCHAIN}/bin/${NDK_TRIPLET}${API}-clang++
+ENV PKG_CONFIG_LIBDIR=${PREFIX}/lib/pkgconfig
 
 # Global C, CXX and LDFLAGS
 ENV CFLAGS="-fPIC -O3 -flto=thin"
@@ -126,19 +128,22 @@ RUN mkdir -p ${HOME}/src/icu-${LIBICU_VERSION} && cd $_ && \
     make install check_PROGRAMS= bin_PROGRAMS=
 
 # Setup Bzip2
-RUN cd $HOME/src/ && git clone https://github.com/libarchive/bzip2 && cd bzip2 && cmake . $COMMON_CMAKE_ARGS && make -j $(nproc) && make install
+RUN cd $HOME/src/ && git clone https://github.com/libarchive/bzip2 && cd bzip2 && \
+    cmake . \
+        $COMMON_CMAKE_ARGS && \
+    make -j $(nproc) && make install
 
 # Setup ZLIB
 RUN wget -c https://github.com/madler/zlib/archive/refs/tags/v${ZLIB_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/zlib-${ZLIB_VERSION}/build && cd $_ && \
-    cmake ${HOME}/src/zlib-${ZLIB_VERSION} \
+    cmake ../ \
         ${COMMON_CMAKE_ARGS} && \
     make -j $(nproc) && make install
 
 # Setup LIBJPEG_TURBO
 RUN wget -c https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/${LIBJPEG_TURBO_VERSION}/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}/build && cd $_ && \
-    cmake ${HOME}/src/libjpeg-turbo-${LIBJPEG_TURBO_VERSION} \
+    cmake ../ \
         ${COMMON_CMAKE_ARGS} \
         -DENABLE_SHARED=false && \
     make -j $(nproc) && make install
@@ -154,15 +159,17 @@ RUN wget -c http://prdownloads.sourceforge.net/libpng/libpng-${LIBPNG_VERSION}.t
 # Setup FREETYPE2
 RUN wget -c http://prdownloads.sourceforge.net/freetype/freetype-${FREETYPE2_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/freetype-${FREETYPE2_VERSION}/build && cd $_ && \
-        ${HOME}/src/freetype-${FREETYPE2_VERSION}/configure \
-        ${COMMON_AUTOCONF_FLAGS} \
-        --with-png=no && \
+    cmake ../ \
+        ${COMMON_CMAKE_ARGS} \
+	    -DCMAKE_DISABLE_FIND_PACKAGE_ZLIB=TRUE \
+        -DCMAKE_DISABLE_FIND_PACKAGE_BZip2=TRUE \
+	    -DCMAKE_DISABLE_FIND_PACKAGE_PNG=TRUE && \
     make -j $(nproc) && make install
 
 # Setup LIBXML
 RUN wget -c https://github.com/GNOME/libxml2/archive/refs/tags/v${LIBXML2_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/libxml2-${LIBXML2_VERSION}/build && cd $_ && \
-    cmake ${HOME}/src/libxml2-${LIBXML2_VERSION} \
+    cmake ../ \
         ${COMMON_CMAKE_ARGS} \
         -DBUILD_SHARED_LIBS=OFF \
         -DLIBXML2_WITH_THREADS=ON \
@@ -178,7 +185,7 @@ RUN wget -c https://github.com/GNOME/libxml2/archive/refs/tags/v${LIBXML2_VERSIO
 # Setup OPENAL
 RUN wget -c https://github.com/kcat/openal-soft/archive/${OPENAL_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/openal-soft-${OPENAL_VERSION}/build && cd $_ && \
-    cmake ${HOME}/src/openal-soft-${OPENAL_VERSION} \
+    cmake ../ \
         ${COMMON_CMAKE_ARGS} \
         -DALSOFT_EXAMPLES=OFF \
         -DALSOFT_TESTS=OFF \
@@ -240,6 +247,8 @@ RUN wget -c https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_V
     mkdir -p ${HOME}/src/SDL2-${SDL2_VERSION}/build && cd $_ && \
     cmake ../ ${COMMON_CMAKE_ARGS} \
         -DSDL_STATIC=OFF \
+        -DSDL_VULKAN=ON \
+        -DSDL_OPENGL=OFF \
         -DCMAKE_C_FLAGS=-DHAVE_GCC_FVISIBILITY=OFF\ "${CFLAGS}" && \
     make -j $(nproc) && make install
 RUN cp -rf ${HOME}/src/SDL2-${SDL2_VERSION}/include/* /root/prefix/include/
@@ -247,7 +256,7 @@ RUN cp -rf ${HOME}/src/SDL2-${SDL2_VERSION}/include/* /root/prefix/include/
 # Setup BULLET
 RUN wget -c https://github.com/bulletphysics/bullet3/archive/${BULLET_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/bullet3-${BULLET_VERSION}/build && cd $_ && \
-    cmake ${HOME}/src/bullet3-${BULLET_VERSION} \
+    cmake ../ \
         ${COMMON_CMAKE_ARGS} \
         -DBUILD_BULLET2_DEMOS=OFF \
         -DBUILD_CPU_DEMOS=OFF \
@@ -260,7 +269,7 @@ RUN wget -c https://github.com/bulletphysics/bullet3/archive/${BULLET_VERSION}.t
 # Setup MYGUI
 RUN wget -c https://github.com/MyGUI/mygui/archive/MyGUI${MYGUI_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/mygui-MyGUI${MYGUI_VERSION}/build && cd $_ && \
-    cmake ${HOME}/src/mygui-MyGUI${MYGUI_VERSION} \
+    cmake ../ \
         ${COMMON_CMAKE_ARGS} \
         -DMYGUI_RENDERSYSTEM=1 \
         -DMYGUI_BUILD_DEMOS=OFF \
@@ -273,7 +282,7 @@ RUN wget -c https://github.com/MyGUI/mygui/archive/MyGUI${MYGUI_VERSION}.tar.gz 
 # Setup LZ4
 RUN wget -c https://github.com/lz4/lz4/archive/v${LZ4_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
     mkdir -p ${HOME}/src/lz4-${LZ4_VERSION}/build && cd $_ && \
-    cmake ${HOME}/src/lz4-${LZ4_VERSION}/build/cmake/ \
+    cmake cmake/ \
         ${COMMON_CMAKE_ARGS} \
         -DBUILD_STATIC_LIBS=ON \
         -DBUILD_SHARED_LIBS=OFF && \
@@ -320,13 +329,27 @@ RUN wget -c https://github.com/rdiankov/collada-dom/archive/v${COLLADA_DOM_VERSI
         -DCMAKE_CXX_FLAGS=-Dauto_ptr=unique_ptr\ "${CXXFLAGS}" && \
     make -j $(nproc) && make install
 
+# Setup RECAST
+RUN wget -c https://github.com/recastnavigation/recastnavigation/archive/${RECAST_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
+    mkdir -p ${HOME}/src/recastnavigation-${RECAST_VERSION}/build && cd $_ && \
+    cmake ../ \
+        ${COMMON_CMAKE_ARGS} \
+        -DRECASTNAVIGATION_DEMO=OFF \
+        -DRECASTNAVIGATION_TESTS=OFF \
+        -DRECASTNAVIGATION_EXAMPLES=OFF && \
+    make -j $(nproc) && make install
+
 # Setup Delta Plugin
 RUN cd root/src && git clone https://gitlab.com/bmwinger/delta-plugin && cd delta-plugin && cargo build --target ${NDK_TRIPLET} --release
 RUN cp /root/src/delta-plugin/target/${NDK_TRIPLET}/release/delta_plugin ${PREFIX}/lib/libdelta_plugin.so
 
-# Setup OPENSCENEGRAPH_VERSION
-RUN cd /root/src && git clone https://github.com/vsgopenmw-dev/VulkanSceneGraph && mkdir -p VulkanSceneGraph/build && cd $_ && \
-    cmake .. \
+COPY --chmod=0755 patches /root/patches
+
+# Setup VULKANSCENEGRAPH_VERSION
+RUN wget -c https://github.com/vsg-dev/VulkanSceneGraph/archive/refs/tags/v${VSG_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/ && \
+    patch -d ${HOME}/src/VulkanSceneGraph-${VSG_VERSION} -p1 -t -N < /root/patches/vsg/android_rotate.patch && \
+    mkdir -p ${HOME}/src/VulkanSceneGraph-${VSG_VERSION}/build && cd $_ && \
+    cmake ../ \
         ${COMMON_CMAKE_ARGS} \
         -DDYNAMIC_OPENTHREADS=OFF \
         -DBUILD_VSG_PLUGIN_VSG=ON \
@@ -343,26 +366,32 @@ RUN cd /root/src && git clone https://github.com/vsgopenmw-dev/VulkanSceneGraph 
         -DFREETYPE_DIR=${PREFIX}/include/ \
         -DCOLLADA_INCLUDE_DIR=${PREFIX}/include/collada-dom2.5 \
         -DCOLLADA_DIR=${PREFIX}/include/collada-dom2.5/1.4 \
-        -DVulkan_FIND_VERSION=/root/Android/ndk/26.1.10909125/sources/third_party/vulkan/src/include \
-        -DOSG_FIND_3RD_PARTY_DEPS=OFF \
-        -DCMAKE_CXX_FLAGS=-Dauto_ptr=unique_ptr\ -I${PREFIX}/include/freetype2/\ "${CXXFLAGS}" && \
+        -DOSG_FIND_3RD_PARTY_DEPS=OFF && \
     make -j $(nproc) && make install
 
+# Setup VSGXCHANGE
+RUN wget -c https://github.com/vsg-dev/vsgXchange/archive/refs/tags/v${VSGXCHANGE_VERSION}.tar.gz -O - | tar -xz -C $HOME/src/ && \
+    mkdir -p ${HOME}/src/vsgXchange-${VSGXCHANGE_VERSION}/build && cd $_ && \
+    cmake ../ \
+        ${COMMON_CMAKE_ARGS} && \
+    make -j $(nproc) && make install
 
 # Create a zip of all the libraries
 #RUN cd /root/prefix && zip -r /openmw-android-deps.zip ./*
 
-#RUN cd /root/src && git clone https://github.com/recastnavigation/recastnavigation && cd recastnavigation && \
-#    mkdir build && cd build &&\
-#    cmake ../ ${COMMON_CMAKE_ARGS}
+# Setup VSGOPENMW_VERSION
+RUN wget -c https://github.com/Duron27/vsgopenmw/archive/refs/tags/${VSGOPENMW_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/
+RUN cp /root/patches/vsgopenmw/android_main.cpp /root/src/vsgopenmw-${VSGOPENMW_VERSION}/apps/openmw/android_main.cpp
+RUN cp /root/patches/vsgopenmw/defaults.bin /root/src/vsgopenmw-${VSGOPENMW_VERSION}/apps/openmw/defaults.bin
 
-COPY --chmod=0755 patches /root/patches
+# sed commands
+# change post processing window size for android
+RUN sed -i 's/600 600/600 400/g' ${HOME}/src/vsgopenmw-${VSGOPENMW_VERSION}/files/data/mygui/openmw_postprocessor_hud.layout
 
-# Setup OPENMW_VERSION
-RUN cd /root/src && git clone https://github.com/Duron27/vsgopenmw
-RUN mkdir -p  ${HOME}/src/vsgopenmw/build && cd $_ && cmake .. \
+RUN mkdir -p ${HOME}/src/vsgopenmw-${VSGOPENMW_VERSION}/build && cd $_ && \
+    cmake .. \
         ${COMMON_CMAKE_ARGS} \
-        -DBUILD_BSATOOL=0 \
+       	-DBUILD_BSATOOL=0 \
         -DBUILD_NIFTEST=0 \
         -DBUILD_ESMTOOL=0 \
         -DBUILD_LAUNCHER=0 \
@@ -373,20 +402,16 @@ RUN mkdir -p  ${HOME}/src/vsgopenmw/build && cd $_ && cmake .. \
         -DBUILD_WIZARD=0 \
         -DBUILD_MYGUI_PLUGIN=0 \
         -DBUILD_BULLETOBJECTTOOL=0 \
-        -DOPENMW_USE_SYSTEM_MYGUI=ON \
         -DOPENMW_USE_SYSTEM_SQLITE3=OFF \
         -DOPENMW_USE_SYSTEM_YAML_CPP=OFF \
         -DOPENMW_USE_SYSTEM_ICU=ON \
-        -DUSE_SYSTEM_TINYXML=FALSE \
-        -DOPENMW_USE_SYSTEM_RECASTNAVIGATION=FALSE \
-        -DOPENMW_USE_SYSTEM_VSG=OFF \
-        -DOPENMW_USE_SYSTEM_VSGXCHANGE=FALSE \
-        -DVulkan_FIND_VERSION=/root/Android/ndk/26.1.10909125/sources/third_party/vulkan/src/include \
-        -DOPENAL_INCLUDE_DIR=${PREFIX}/include/AL/ \
         -DVSG_INCLUDE_DIR=${PREFIX}/include/vsg/ \
+        -DOPENMW_USE_SYSTEM_VSGXCHANGE=ON \
+        -DOPENMW_USE_SYSTEM_VSG=ON \
+        -DOPENMW_USE_SYSTEM_RECASTNAVIGATION=ON \
+        -DUSE_SYSTEM_TINYXML=FALSE \
         -DBullet_INCLUDE_DIR=${PREFIX}/include/bullet/ \
-        -DVSG_STATIC=TRUE \
-        -DCMAKE_CXX_FLAGS=-I${PREFIX}/include/\ "${CXXFLAGS}" \
+        -DOSG_STATIC=TRUE \
         -DMyGUI_LIBRARY=${PREFIX}/lib/libMyGUIEngineStatic.a && \
     make -j $(nproc)
 
@@ -397,15 +422,15 @@ COPY --chmod=0755 mods /root/mods
 RUN rm -rf /root/payload/app/wrap/ && rm -rf /root/payload/app/src/main/jniLibs/${ABI}/ && mkdir -p /root/payload/app/src/main/jniLibs/${ABI}/
 
 # libopenmw.so is a special case
-RUN find ${HOME}/src/vsgopenmw/ -iname "libopenmw.so" -exec cp "{}" /root/payload/app/src/main/jniLibs/${ABI}/libopenmw.so \;
+RUN find /root/src/vsgopenmw-${VSGOPENMW_VERSION}/ -iname "libopenmw.so" -exec cp "{}" /root/payload/app/src/main/jniLibs/${ABI}/libopenmw.so \;
 
 # copy over libs we compiled
 RUN cp ${PREFIX}/lib/{libopenal,libSDL2,libcollada-dom2.5-dp,libdelta_plugin}.so /root/payload/app/src/main/jniLibs/${ABI}/
 
 # copy over libc++_shared
 RUN find ${TOOLCHAIN}/sysroot/usr/lib/${NDK_TRIPLET} -iname "libc++_shared.so" -exec cp "{}" /root/payload/app/src/main/jniLibs/${ABI}/ \;
-ENV DST=/root/payload/app/src/main/assets/libopenmw
-ENV SRC=/root/src/vsgopenmw/build
+ENV DST=/root/payload/app/src/main/assets/libopenmw/
+ENV SRC=/root/src/vsgopenmw-${VSGOPENMW_VERSION}/build/
 RUN rm -rf "${DST}" && mkdir -p "${DST}"
 
 # Copy over Resources
@@ -416,14 +441,14 @@ RUN cd ${DST}/resources/vfs/ && cp -r /root/mods/* .
 
 # Global Config
 RUN mkdir -p "${DST}/openmw/"
-RUN cp "/root/patches/openmw/defaults.bin" "${DST}/openmw/defaults.bin"
+RUN cp "/root/patches/vsgopenmw/defaults.bin" "${DST}/openmw/defaults.bin"
 RUN cp "${SRC}/defaults.cfg" "${DST}/openmw/"
 RUN cp "${SRC}/gamecontrollerdb.txt" "${DST}/openmw/"
 RUN cat "${SRC}/openmw.cfg" | grep -v "data=" | grep -v "data-local=" >> "${DST}/openmw/openmw.base.cfg"
 RUN cat "/root/payload/app/openmw.base.cfg" >> "${DST}/openmw/openmw.base.cfg"
-RUN mkdir -p /root/payload/app/src/main/assets/libopenmw/resources && cd $_ && echo "Vulkan 0.01" >> version
-RUN sed -i "4i\    <string name='version_info'>CaveBros Version Vulkan 0.01</string>" /root/payload/app/src/main/res/values/strings.xml
-RUN sed -i "75i\    ndkVersion \"${NDK_VERSION}\"" /root/payload/app/build.gradle
+RUN mkdir -p /root/payload/app/src/main/assets/libopenmw/resources && cd $_ && echo "${APP_VERSION}" >> version
+RUN sed -i "4i\    <string name='version_info'>CaveBros Vulkan Version ${APP_VERSION}</string>" /root/payload/app/src/main/res/values/strings.xml
+RUN sed -i "92i\    ndkVersion \"${NDK_VERSION}\"" /root/payload/app/build.gradle
 
 # licensing info
 RUN cp "/root/payload/3rdparty-licenses.txt" "${DST}"
@@ -439,4 +464,4 @@ RUN alternatives --set java java-11-openjdk.x86_64
 RUN JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which java)))))
 RUN cd /root/payload/ && ./gradlew assembleRelease
 
-RUN cp /root/payload/app/build/outputs/apk/mainline/release/*.apk openmw-android.apk
+RUN cp /root/payload/app/build/outputs/apk/mainline/release/*.apk vsgopenmw-android.apk

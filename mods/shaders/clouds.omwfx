@@ -19,13 +19,13 @@ uniform_float scattering_factor {
 
 uniform_bool replace_skybox {
     header = "Skybox";
-    default = true;
+    default = false;
     display_name = "Replace Skybox";
     description = "Override the default skybox";
 }
 
 uniform_bool better_sun {
-    default = true;
+    default = false;
     display_name = "Better Sun";
     description = "Render a better sun over the default Morrowind one";
 }

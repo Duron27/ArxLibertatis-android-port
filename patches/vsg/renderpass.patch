@@ -1,0 +1,41 @@
+From e9c9766b32b8878f5a6f66b7a291faa7e02838b7 Mon Sep 17 00:00:00 2001
+From: Duron27 <duron27@gmail.com>
+Date: Sat, 20 Jul 2024 17:50:33 -0400
+Subject: [PATCH] renderpass test
+
+lets see
+---
+ src/vsg/app/RenderGraph.cpp | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/src/vsg/vk/RenderPass.cpp b/src/vsg/vk/RenderPass.cpp
+index 58d7457bc..a69bc0e27 100644
+--- a/src/vsg/vk/RenderPass.cpp
++++ b/src/vsg/vk/RenderPass.cpp
+@@ -148,6 +148,7 @@ RenderPass::RenderPass(Device* in_device, const Attachments& in_attachments, con
+ 
+         VkRenderPassCreateInfo2 renderPassInfo = {};
+         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO_2;
++        renderPassInfo.flags = VK_RENDER_PASS_CREATE_TRANSFORM_BIT_QCOM;
+         renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+         renderPassInfo.pAttachments = copyAttachmentDescriptions(attachments);
+         renderPassInfo.subpassCount = static_cast<uint32_t>(subpasses.size());
+diff --git a/src/vsg/app/RenderGraph.cpp b/src/vsg/app/RenderGraph.cpp
+index dfb9a797d..2d8a4642d 100644
+--- a/src/vsg/app/RenderGraph.cpp
++++ b/src/vsg/app/RenderGraph.cpp
+@@ -112,8 +112,14 @@ void RenderGraph::accept(RecordTraversal& recordTraversal) const
+         this_renderGraph->resized();
+     }
+ 
++	typedef struct VkRenderPassTransformBeginInfoQCOM {
++   VkStructureType sType;
++   void* pNext;
++   VkSurfaceTransformFlagBitsKHR transform;
++	} VkRenderPassTransformBeginInfoQCOM;
++
+     VkRenderPassBeginInfo renderPassInfo = {};
+     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+ 
+     if (framebuffer)
+     {

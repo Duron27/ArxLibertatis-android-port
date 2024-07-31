@@ -1,26 +1,31 @@
+From 57b05a99323241c9ae91a3ea4cda32c94370805c Mon Sep 17 00:00:00 2001
+From: Duron27 <duron27@gmail.com>
+Date: Sat, 20 Jul 2024 18:11:40 -0400
+Subject: [PATCH] fragment test
+
 diff --git a/files/shaders/lib/core/fragment.h.glsl b/files/shaders/lib/core/fragment.h.glsl
-index 1bc2a1f79ab..de41dbc7ab1 100644
+index 1bc2a1f79ab..b70751e47d4 100644
 --- a/files/shaders/lib/core/fragment.h.glsl
 +++ b/files/shaders/lib/core/fragment.h.glsl
 @@ -1,20 +1,43 @@
  #ifndef OPENMW_FRAGMENT_H_GLSL
  #define OPENMW_FRAGMENT_H_GLSL
-
+ 
 -@link "lib/core/fragment.glsl" if !@useOVR_multiview
 -@link "lib/core/fragment_multiview.glsl" if @useOVR_multiview
 +uniform sampler2D reflectionMap;
-
+ 
 -vec4 sampleReflectionMap(vec2 uv);
 +vec4 sampleReflectionMap(vec2 uv)
 +{
 +    return texture2D(reflectionMap, uv);
 +}
-
- #if @waterRefraction
+ 
+ #if @refraction_enabled
 -vec4 sampleRefractionMap(vec2 uv);
 -float sampleRefractionDepthMap(vec2 uv);
 +uniform sampler2D refractionMap;
-+uniform highp sampler2D refractionDepthMap;
++uniform sampler2D refractionDepthMap;
 +
 +vec4 sampleRefractionMap(vec2 uv)
 +{
@@ -33,7 +38,7 @@ index 1bc2a1f79ab..de41dbc7ab1 100644
 +}
 +
  #endif
-
+ 
 -vec4 samplerLastShader(vec2 uv);
 +uniform sampler2D lastShader;
 +
@@ -41,7 +46,7 @@ index 1bc2a1f79ab..de41dbc7ab1 100644
 +{
 +    return texture2D(lastShader, uv);
 +}
-
+ 
  #if @skyBlending
 -vec3 sampleSkyColor(vec2 uv);
 +uniform sampler2D sky;
@@ -51,43 +56,32 @@ index 1bc2a1f79ab..de41dbc7ab1 100644
 +    return texture2D(sky, uv).xyz;
 +}
  #endif
-
+ 
  #endif  // OPENMW_FRAGMENT_H_GLSL
-diff --git a/files/shaders/lib/core/vertex.h.glsl b/files/shaders/lib/core/vertex.h.glsl
-index 6e22f6deb15..c8a1080574d 100644
+
+ diff --git a/files/shaders/lib/core/vertex.h.glsl b/files/shaders/lib/core/vertex.h.glsl
+index 6e22f6deb15..eba5f139c09 100644
 --- a/files/shaders/lib/core/vertex.h.glsl
 +++ b/files/shaders/lib/core/vertex.h.glsl
 @@ -1,6 +1,16 @@
 -@link "lib/core/vertex.glsl" if !@useOVR_multiview
 -@link "lib/core/vertex_multiview.glsl" if @useOVR_multiview
 +uniform mat4 projectionMatrix;
-
+ 
 -vec4 modelToClip(vec4 pos);
 -vec4 modelToView(vec4 pos);
 -vec4 viewToClip(vec4 pos);
-+vec4 modelToView(vec4 pos)
-+{
-+    return gl_ModelViewMatrix * pos;
-+}
-+
 +vec4 modelToClip(vec4 pos)
 +{
 +    return projectionMatrix * modelToView(pos);
++}
++
++vec4 modelToView(vec4 pos)
++{
++    return gl_ModelViewMatrix * pos;
 +}
 +
 +vec4 viewToClip(vec4 pos)
 +{
 +    return projectionMatrix * pos;
 +}
-
-diff --git a/files/shaders/compatibility/fullscreen_tri.vert b/files/shaders/compatibility/fullscreen_tri.vert
-index 3174384212e..8510a0933c1 100644
---- a/files/shaders/compatibility/fullscreen_tri.vert
-+++ b/files/shaders/compatibility/fullscreen_tri.vert
-@@ -1,6 +1,6 @@
- #version 120
-
--uniform vec2 scaling = vec2(1.0, 1.0);
-+uniform vec2 scaling;// = vec2(1.0, 1.0);
-
- varying vec2 uv;

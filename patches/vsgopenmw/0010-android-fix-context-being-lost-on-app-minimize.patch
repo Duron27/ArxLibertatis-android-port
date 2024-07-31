@@ -62,4 +62,3 @@ index 3be977657a..6c3dd611bf 100644
  #if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
          if (!isatty(fileno(stdin)))
  #endif
-

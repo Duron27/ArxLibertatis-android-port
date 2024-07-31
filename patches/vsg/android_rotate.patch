@@ -1,0 +1,21 @@
+From 7ddff1f3f3bd6f02f1c2b60b77313279735bd8f7 Mon Sep 17 00:00:00 2001
+From: Duron27 <duron27@gmail.com>
+Date: Sat, 20 Jul 2024 14:03:23 -0400
+Subject: [PATCH] Update Swapchain.cpp
+
+---
+ src/vsg/vk/Swapchain.cpp | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/src/vsg/vk/Swapchain.cpp b/src/vsg/vk/Swapchain.cpp
+index 5d51958f6..bcd7470e6 100644
+--- a/src/vsg/vk/Swapchain.cpp
++++ b/src/vsg/vk/Swapchain.cpp
+@@ -207,6 +207,6 @@ Swapchain::Swapchain(PhysicalDevice* physicalDevice, Device* device, Surface* su
+         createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+     }
+ 
+-    createInfo.preTransform = details.capabilities.currentTransform;
++    createInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+     createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+     createInfo.presentMode = presentMode;

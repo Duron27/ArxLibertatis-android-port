@@ -1,0 +1,21 @@
+From 4157530fd360c0797e4a5136570c34bfb4d2e7f6 Mon Sep 17 00:00:00 2001
+From: Bret Curtis <psi29a@gmail.com>
+Date: Sun, 21 Jul 2024 15:26:35 +0200
+Subject: [PATCH] ShaderSet fix
+
+---
+ include/vsg/state/ViewDependentState.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/vsg/state/ViewDependentState.h b/include/vsg/state/ViewDependentState.h
+index 79af0d0e9..d57209401 100644
+--- a/include/vsg/state/ViewDependentState.h
++++ b/include/vsg/state/ViewDependentState.h
+@@ -20,6 +20,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
+ #include <vsg/state/BindDescriptorSet.h>
+ #include <vsg/state/DescriptorBuffer.h>
+ #include <vsg/state/DescriptorImage.h>
++#include <vsg/utils/ShaderSet.h>
+ 
+ namespace vsg
+ {

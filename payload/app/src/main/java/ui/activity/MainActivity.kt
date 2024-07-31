@@ -253,6 +253,7 @@ class MainActivity : AppCompatActivity() {
         this@MainActivity.startActivityForResult(intent, 1)
     }
 
+
     /**
      * Set up fixed screen resolution
      * This doesn't do anything unless the user chose to override screen resolution
@@ -623,6 +624,7 @@ class MainActivity : AppCompatActivity() {
         writeSetting("Game", "shield sheathing", if(prefs.getBoolean("gs_shield_sheating", false)) "true" else "false")
         writeSetting("Game", "graphic herbalism", if(prefs.getBoolean("gs_enable_graphics_herbalism", true)) "true" else "false")
         writeSetting("Game", "smooth movement", if(prefs.getBoolean("gs_smooth_movement", false)) "true" else "false")
+        writeSetting("Game", "Smooth Animation Transitions", if(prefs.getBoolean("gs_smooth_transitions", false)) "true" else "false")
         writeSetting("Game", "turn to movement direction", if(prefs.getBoolean("gs_turn_to_movement_direction", false)) "true" else "false")
 
         // Interface
@@ -646,7 +648,7 @@ class MainActivity : AppCompatActivity() {
         // Engine Settings
         writeSetting("Groundcover", "enabled", if(prefs.getString("gs_groundcover_handling", "0") == "2") "true" else "false")
         writeSetting("Groundcover", "paging", if(prefs.getString("gs_groundcover_handling", "0") == "1") "true" else "false")
-        writeSetting("Navigator", "enable", if(prefs.getBoolean("gs_build_navmesh", true)) "true" else "false")
+        writeSetting("Navigator", "enable", if(prefs.getBoolean("gs_build_navmesh", false)) "true" else "false")
         writeSetting("Navigator", "write to navmeshdb", if(prefs.getBoolean("gs_write_navmesh", false)) "true" else "false")
         writeSetting("Navigator", "async nav mesh updater threads", prefs.getString("gs_navmesh_threads", "1").toString())
         writeSetting("Physics", "async num threads", prefs.getString("gs_physics_threads", "1").toString())
