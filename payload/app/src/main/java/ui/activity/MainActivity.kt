@@ -624,7 +624,7 @@ class MainActivity : AppCompatActivity() {
         writeSetting("Game", "shield sheathing", if(prefs.getBoolean("gs_shield_sheating", false)) "true" else "false")
         writeSetting("Game", "graphic herbalism", if(prefs.getBoolean("gs_enable_graphics_herbalism", true)) "true" else "false")
         writeSetting("Game", "smooth movement", if(prefs.getBoolean("gs_smooth_movement", false)) "true" else "false")
-        writeSetting("Game", "Smooth Animation Transitions", if(prefs.getBoolean("gs_smooth_transitions", false)) "true" else "false")
+        writeSetting("Game", "smooth animation transitions", if(prefs.getBoolean("gs_smooth_transitions", false)) "true" else "false")
         writeSetting("Game", "turn to movement direction", if(prefs.getBoolean("gs_turn_to_movement_direction", false)) "true" else "false")
 
         // Interface
