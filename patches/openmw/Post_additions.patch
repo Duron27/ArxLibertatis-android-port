@@ -1,21 +1,3 @@
-From d9166daa2f45493cf8d4fb9d1a1f29d373a5094d Mon Sep 17 00:00:00 2001
-From: sisah <jirielbunda@seznam.cz>
-Date: Tue, 12 Mar 2024 15:13:08 -0400
-Subject: [PATCH] postprocessing changes
-
----
- apps/openmw/mwrender/luminancecalculator.cpp     |  4 ++--
- apps/openmw/mwrender/npcanimation.cpp            |  2 +-
- apps/openmw/mwrender/postprocessor.cpp           |  6 +++---
- apps/openmw/mwrender/renderingmanager.cpp        |  4 ++--
- apps/openmw/mwrender/transparentpass.cpp         |  7 ++++---
- components/fx/parse_constants.hpp                |  5 +++--
- components/fx/pass.cpp                           |  2 +-
- components/shader/shadervisitor.cpp              |  9 +++++++++
- files/data/mygui/openmw_postprocessor_hud.layout |  2 +-
- files/data/shaders/bloomlinear.omwfx             | 10 +++++-----
- 10 files changed, 31 insertions(+), 20 deletions(-)
-
 diff --git a/apps/openmw/mwrender/luminancecalculator.cpp b/apps/openmw/mwrender/luminancecalculator.cpp
 index ae29b7fdcc8d..de4ac766f1bb 100644
 --- a/apps/openmw/mwrender/luminancecalculator.cpp
@@ -64,21 +46,7 @@ index 1aaeb460b7db..d3f4ed092c33 100644
          mCanvases[frameId]->setTextureDistortion(getTexture(Tex_Distortion, frameId));
 
          mTransparentDepthPostPass->mFbo[frameId] = mFbos[frameId][FBO_Primary];
-@@ -407,12 +407,12 @@ namespace MWRender
-             mPrevPassLights = mPassLights;
 
-             mViewer->stopThreading();
--
-+/*
-             auto& shaderManager = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getShaderManager();
-             auto defines = shaderManager.getGlobalDefines();
-             defines["disableNormals"] = mNormals ? "0" : "1";
-             shaderManager.setGlobalDefines(defines);
--
-+*/
-             mRendering.getLightRoot()->setCollectPPLights(mPassLights);
-             mStateUpdater->bindPointLights(mPassLights ? mRendering.getLightRoot()->getPPLightsBuffer() : nullptr);
-             mStateUpdater->reset();
 diff --git a/apps/openmw/mwrender/renderingmanager.cpp b/apps/openmw/mwrender/renderingmanager.cpp
 index fa90a7feae3d..fb1892211320 100644
 --- a/apps/openmw/mwrender/renderingmanager.cpp
@@ -119,34 +87,6 @@ index ce53b1c2193e..431c26c179c0 100644
 
          // draw transparent post-pass to populate a postprocess friendly depth texture with alpha-clipped geometry
 
-diff --git a/components/fx/parse_constants.hpp b/components/fx/parse_constants.hpp
-index 9be54ed3a763..2057476f3e20 100644
---- a/components/fx/parse_constants.hpp
-+++ b/components/fx/parse_constants.hpp
-@@ -35,7 +35,7 @@ namespace fx
-             { "bgra", GL_BGRA },
-         } };
-
--        constexpr std::array<std::pair<std::string_view, int>, 9> SourceType = { {
-+        constexpr std::array<std::pair<std::string_view, int>, 10> SourceType = { {
-             { "byte", GL_BYTE },
-             { "unsigned_byte", GL_UNSIGNED_BYTE },
-             { "short", GL_SHORT },
-@@ -43,6 +43,7 @@ namespace fx
-             { "int", GL_INT },
-             { "unsigned_int", GL_UNSIGNED_INT },
-             { "unsigned_int_24_8", GL_UNSIGNED_INT_24_8 },
-+            { "half_float", GL_HALF_FLOAT },
-             { "float", GL_FLOAT },
-             { "double", GL_DOUBLE },
-         } };
-@@ -129,4 +130,4 @@ namespace fx
-     }
- }
-
--#endif
-\ No newline at end of file
-+#endif
 diff --git a/components/fx/pass.cpp b/components/fx/pass.cpp
 index cf50d20fe22d..20d090ef6cf5 100644
 --- a/components/fx/pass.cpp
@@ -187,45 +127,3 @@ index 70464f571e62..1dc9a9314209 100644
          defineMap["softParticles"] = reqs.mSoftParticles ? "1" : "0";
 
          Stereo::shaderStereoDefines(defineMap);
-diff --git a/files/data/shaders/bloomlinear.omwfx b/files/data/shaders/bloomlinear.omwfx
-index 3de7139f39af..4c583a9a8986 100644
---- a/files/data/shaders/bloomlinear.omwfx
-+++ b/files/data/shaders/bloomlinear.omwfx
-@@ -80,8 +80,8 @@ shared {
-         radius = max(radius, 0.1);
-         // hack: make the radius wider on the screen edges
-         // (makes things in the corner of the screen look less "wrong" with not-extremely-low FOVs)
--        radius *= pow(texcoord.x*2.0-1.0, 2)+1.0;
--        radius *= pow(texcoord.y*2.0-1.0, 2)+1.0;
-+        radius *= pow(texcoord.x*2.0-1.0, 2.0)+1.0;
-+        radius *= pow(texcoord.y*2.0-1.0, 2.0)+1.0;
-         return radius;
-     }
-     vec3 powv(vec3 a, float x)
-@@ -94,7 +94,7 @@ render_target RT_NoMipmap {
-     width_ratio = 0.25;
-     height_ratio = 0.25;
-     internal_format = rgb16f;
--    source_type = float;
-+    source_type = half_float;
-     source_format = rgb;
-     mipmaps = false;
-     min_filter = nearest;
-@@ -105,7 +105,7 @@ render_target RT_Horizontal {
-     width_ratio = 0.25;
-     height_ratio = 0.25;
-     internal_format = rgb16f;
--    source_type = float;
-+    source_type = half_float;
-     source_format = rgb;
-     mipmaps = false;
-     min_filter = nearest;
-@@ -116,7 +116,7 @@ render_target RT_Vertical {
-     width_ratio = 0.25;
-     height_ratio = 0.25;
-     internal_format = rgb16f;
--    source_type = float;
-+    source_type = half_float;
-     source_format = rgb;
-     mipmaps = false;
-     min_filter = linear;
