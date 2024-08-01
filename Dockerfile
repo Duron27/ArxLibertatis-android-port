@@ -395,6 +395,9 @@ RUN cp /root/patches/openmw/android_main.cpp /root/src/openmw-${OPENMW_VERSION}/
 # change post processing window size for android
 RUN sed -i 's/600 600/600 400/g' ${HOME}/src/openmw-${OPENMW_VERSION}/files/data/mygui/openmw_postprocessor_hud.layout
 
+# Snells Window
+RUN sed -i 's/float ior = (cameraPos.z>0.0)?(1.333\/1.0):(1.0\/1.333);/float ior = 1.333;/g' ${HOME}/src/openmw-${OPENMW_VERSION}/files/shaders/compatibility/water.frag
+
 RUN mkdir -p ${HOME}/src/openmw-${OPENMW_VERSION}/build && cd $_ && \
     cmake .. \
         ${COMMON_CMAKE_ARGS} \
