@@ -500,7 +500,7 @@ class MainActivity : AppCompatActivity() {
     private fun writeUserSettings() {
         File(Constants.USER_CONFIG + "/settings.cfg").createNewFile()
 
-        // Write resolution to prevent issues if incorect one is set, probably need to account notch size too
+        // Write resolution to prevent issues if incorrect one is set, probably need to account notch size too
         val displayInCutoutArea = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_display_cutout_area", true)
         val dm = DisplayMetrics()
         windowManager.defaultDisplay.getRealMetrics(dm)
