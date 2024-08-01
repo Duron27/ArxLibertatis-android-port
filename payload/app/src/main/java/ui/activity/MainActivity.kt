@@ -674,6 +674,11 @@ class MainActivity : AppCompatActivity() {
             scaling = MyApp.app.defaultScaling
         }
 
+        val dialog = ProgressDialog.show(
+            this, "", "Preparing for launch...", true)
+
+        val activity = this
+
         // hide the controls so that ScreenResolutionHelper can get the right resolution
         hideAndroidControls(this)
 
@@ -772,6 +777,7 @@ class MainActivity : AppCompatActivity() {
 
                 runOnUiThread {
                     obtainFixedScreenResolution()
+                    dialog.hide()
                     runGame()
                 }
             } catch (e: IOException) {
