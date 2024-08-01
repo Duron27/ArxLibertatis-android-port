@@ -14,6 +14,7 @@
     <Preference
         android:key="game_settings_shadows"
         android:title="Shadows"
+        android:summary="Disabled if your device doesn't support shadows."
         />
 
     <Preference
