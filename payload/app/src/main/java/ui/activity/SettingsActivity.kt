@@ -43,14 +43,6 @@ import android.preference.PreferenceFragment
 import android.preference.PreferenceGroup
 import constants.Constants
 import android.widget.Toast
-import android.opengl.EGL14.EGL_CONTEXT_CLIENT_VERSION
-import android.opengl.EGL14.EGL_OPENGL_ES2_BIT
-import android.opengl.GLES20
-import javax.microedition.khronos.egl.EGL10
-import javax.microedition.khronos.egl.EGL10.*
-import javax.microedition.khronos.egl.EGLConfig
-import javax.microedition.khronos.egl.EGLContext
-import javax.microedition.khronos.egl.EGLDisplay
 
 class FragmentGameSettings : PreferenceFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -138,6 +130,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 }
 
+@SuppressLint("ValidFragment")
 class FragmentGameSettingsPage(val res: Int) : PreferenceFragment(), OnSharedPreferenceChangeListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -145,47 +138,10 @@ class FragmentGameSettingsPage(val res: Int) : PreferenceFragment(), OnSharedPre
         addPreferencesFromResource(res)
         preferenceScreen.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
 
-        val config = intArrayOf(
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-            EGL_RED_SIZE, 8,
-            EGL_GREEN_SIZE, 8,
-            EGL_BLUE_SIZE, 8,
-            EGL_ALPHA_SIZE, 8,
-            EGL_DEPTH_SIZE, 0,
-            EGL_STENCIL_SIZE, 0,
-            EGL_NONE
-        )
+        if (res == R.xml.gs_game_mechanics) findPreference("gs_always_allow_npc_to_follow_over_water_surface").isEnabled = preferenceScreen.sharedPreferences.getBoolean("gs_build_navmesh", true)
 
-        fun chooseEglConfig(egl: EGL10, eglDisplay: EGLDisplay) : EGLConfig {
-            val configsCount = intArrayOf(0);
-            val configs = arrayOfNulls<EGLConfig>(1);
-            egl.eglChooseConfig(eglDisplay, config, configs, 1, configsCount)
-            return configs[0]!!
-        }
-
-        fun getExtensionList() {
-            val egl = EGLContext.getEGL() as EGL10
-            val eglDisplay = egl.eglGetDisplay(EGL_DEFAULT_DISPLAY)
-            egl.eglInitialize(eglDisplay, intArrayOf(0,0))   // getting OpenGL ES 2
-            val eglConfig = chooseEglConfig(egl, eglDisplay);
-            val eglContext = egl.eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, intArrayOf(EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE));
-
-            //FIXME: Create some surface to dont rely on extension, pbuffer require egl 1.4 what is better?
-            //val eglSurface = egl.eglCreateWindowSurface(eglDisplay, eglConfig, texture_view.surfaceTexture, null)
-            if (egl.eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, eglContext) == true) {
-                val extensions = GLES20.glGetString(GLES20.GL_EXTENSIONS)
-                File(Constants.USER_FILE_STORAGE + "/launcher/extensions.log").writeText(extensions.replace(" ", "\n"))
-
-            }
-        }
-
-        if (res == R.xml.gs_shadows) getExtensionList()
-
-        // what is this?
-        //if (res == R.xml.gs_game_mechanics) findPreference("gs_always_allow_npc_to_follow_over_water_surface").isEnabled = preferenceScreen.sharedPreferences.getBoolean("gs_build_navmesh", true)
-
-        if (res == R.xml.gs_animations) updatePreference(preferenceScreen.sharedPreferences, "gs_use_additional_animation_sources")
-        if (res == R.xml.gs_engine) updatePreference(preferenceScreen.sharedPreferences, "gs_build_navmesh")
+            if (res == R.xml.gs_animations) updatePreference(preferenceScreen.sharedPreferences, "gs_use_additional_animation_sources")
+                if (res == R.xml.gs_engine) updatePreference(preferenceScreen.sharedPreferences, "gs_build_navmesh")
     }
 
     override fun onDestroy() {
@@ -394,4 +350,3 @@ class Engine_SettingsActivity : AppCompatActivity() {
         }
     }
 }
-
