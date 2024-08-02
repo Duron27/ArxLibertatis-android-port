@@ -4,7 +4,7 @@
     <PreferenceCategory android:title="Shadows">
 
         <CheckBoxPreference
-            android:key="gs_enable_shadows"
+            android:key="gs_shadows"
             android:title="Enable Shadows"
             android:summary="Enable shadows."/>
 
