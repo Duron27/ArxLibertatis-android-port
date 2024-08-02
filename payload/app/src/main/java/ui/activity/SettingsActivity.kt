@@ -174,25 +174,8 @@ class FragmentGameSettingsPage(val res: Int) : PreferenceFragment(), OnSharedPre
             //val eglSurface = egl.eglCreateWindowSurface(eglDisplay, eglConfig, texture_view.surfaceTexture, null)
             if (egl.eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, eglContext) == true) {
                 val extensions = GLES20.glGetString(GLES20.GL_EXTENSIONS)
-                File(Constants.USER_FILE_STORAGE + "/launcher/extensions.log").writeText(extensions.replace(" ", "\n"))
-
-                egl.eglDestroyContext(eglDisplay, eglContext)
-                //egl.eglDestroySurface(eglDisplay, eglSurface)
-
-                if (extensions.contains("GL_EXT_depth_clamp") == false) {
-                    findPreference("gs_object_shadows").isEnabled = false
-                    findPreference("gs_terrain_shadows").isEnabled = false
-                    findPreference("gs_actor_shadows").isEnabled = false
-                    findPreference("gs_player_shadows").isEnabled = false
-                    findPreference("gs_indoor_shadows").isEnabled = false
-                    findPreference("gs_shadow_map_resolution").isEnabled = false
-                    findPreference("gs_shadow_computation_method").isEnabled = false
-                    findPreference("gs_shadows_distance").isEnabled = false
-                    findPreference("gs_shadows_fade_start").isEnabled = false
-                    findPreference("gs_shadows_pcf").isEnabled = false
-                }
-            }
-            else Toast.makeText(this.getActivity(), "Cant check for extensions!, shadows setting wont be applyed!", Toast.LENGTH_SHORT).show()
+                File(Constants.USER_FILE_STORAGE + "/launcher/extensions.log").writeText(extensions.replace(" ", "\n"))              
+                
         }
 
         if (res == R.xml.gs_shadows) getExtensionList()
