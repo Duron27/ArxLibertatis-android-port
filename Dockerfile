@@ -337,9 +337,9 @@ RUN cd root/src && git clone https://gitlab.com/bmwinger/delta-plugin && cd delt
 RUN cp /root/src/delta-plugin/target/${NDK_TRIPLET}/release/delta_plugin ${PREFIX}/lib/libdelta_plugin.so
 
 # Install QT for android
-RUN pip install aqtinstall
-RUN aqt install-qt linux android 5.15.2 android --autodesktop
-RUN cp -r /5.15.2/android/* ${PREFIX} && rm -rf /5.15.2
+#RUN pip install aqtinstall
+#RUN aqt install-qt linux android 5.15.2 android --autodesktop
+#RUN cp -r /5.15.2/android/* ${PREFIX} && rm -rf /5.15.2
 
 # Setup OPENSCENEGRAPH_VERSION
 RUN wget -c https://github.com/Duron27/osg/archive/refs/tags/${OSG_VERSION}.tar.gz -O - | tar -xz -C ${HOME}/src/ && \
