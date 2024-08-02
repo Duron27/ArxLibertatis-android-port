@@ -389,7 +389,7 @@ RUN cp /root/patches/vsgopenmw/defaults.bin /root/src/vsgopenmw-${VSGOPENMW_VERS
 RUN sed -i 's/600 600/600 400/g' ${HOME}/src/vsgopenmw-${VSGOPENMW_VERSION}/files/data/mygui/openmw_postprocessor_hud.layout
 
 RUN mkdir -p ${HOME}/src/vsgopenmw-${VSGOPENMW_VERSION}/build && cd $_ && \
-    cmake .. \
+    cmake ../ \
         ${COMMON_CMAKE_ARGS} \
        	-DBUILD_BSATOOL=0 \
         -DBUILD_NIFTEST=0 \
