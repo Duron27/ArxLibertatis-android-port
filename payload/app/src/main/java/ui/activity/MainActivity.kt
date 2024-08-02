@@ -597,6 +597,7 @@ class MainActivity : AppCompatActivity() {
         writeSetting("Post Processing", "transparent postpass", if(prefs.getBoolean("gs_transparent_postpass", false)) "true" else "false")
 
         // Visuals Shadows
+        writeSetting("Shadows", "enable shadows", if(prefs.getBoolean("gs_shadows", false)) "true" else "false")
         writeSetting("Shadows", "object shadows", if(prefs.getBoolean("gs_object_shadows", false)) "true" else "false")
         writeSetting("Shadows", "terrain shadows", if(prefs.getBoolean("gs_terrain_shadows", false)) "true" else "false")
         writeSetting("Shadows", "actor shadows", if(prefs.getBoolean("gs_actor_shadows", false)) "true" else "false")
