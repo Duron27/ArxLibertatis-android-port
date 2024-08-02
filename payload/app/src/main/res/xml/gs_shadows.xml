@@ -4,11 +4,6 @@
     <PreferenceCategory android:title="Shadows">
 
         <CheckBoxPreference
-            android:key="gs_shadows"
-            android:title="Enable Shadows"
-            android:summary="Enable shadows."/>
-
-        <CheckBoxPreference
             android:key="gs_object_shadows"
             android:title="Enable Object Shadows"
             android:summary="Enable shadows for primarily inanimate objects. May have a significant performance impact."/>
