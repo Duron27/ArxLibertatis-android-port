@@ -464,4 +464,4 @@ RUN alternatives --set java java-11-openjdk.x86_64
 RUN JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which java)))))
 RUN cd /root/payload/ && ./gradlew assembleRelease
 
-RUN cp /root/payload/app/build/outputs/apk/mainline/release/*.apk vsgopenmw-android.apk
+RUN cp /root/payload/app/build/outputs/apk/mainline/release/*.apk openmw-android.apk
