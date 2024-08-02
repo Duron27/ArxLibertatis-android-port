@@ -598,16 +598,16 @@ class MainActivity : AppCompatActivity() {
 
         // Visuals Shadows
         writeSetting("Shadows", "enable shadows", if(prefs.getBoolean("gs_shadows", false)) "true" else "false")
-        writeSetting("Shadows", "object shadows", if(prefs.getBoolean("gs_object_shadows", false)) "true" else "false")
-        writeSetting("Shadows", "terrain shadows", if(prefs.getBoolean("gs_terrain_shadows", false)) "true" else "false")
-        writeSetting("Shadows", "actor shadows", if(prefs.getBoolean("gs_actor_shadows", false)) "true" else "false")
-        writeSetting("Shadows", "player shadows", if(prefs.getBoolean("gs_player_shadows", false)) "true" else "false")
-        writeSetting("Shadows", "indoor shadows", if(prefs.getBoolean("gs_indoor_shadows", true)) "true" else "false")
+        writeSetting("Shadows", "actor shadows", if(prefs.getBoolean("gs_shadows_actor", false)) "true" else "false")
+        writeSetting("Shadows", "player shadows", if(prefs.getBoolean("gs_shadows_player", false)) "true" else "false")
+        writeSetting("Shadows", "terrain shadows", if(prefs.getBoolean("gs_shadows_terrain", false)) "true" else "false")
+        writeSetting("Shadows", "object shadows", if(prefs.getBoolean("gs_shadows_object", false)) "true" else "false")
+        writeSetting("Shadows", "enable indoor shadows", if(prefs.getBoolean("gs_shadows_indoor", false)) "true" else "false")
+        writeSetting("Shadows", "number of shadow maps", prefs.getString("gs_shadow_maps", "4").toString())
+        writeSetting("Shadows", "maximum shadow rendering distance", prefs.getString("gs_shadow_distance", "3000").toString())
         writeSetting("Shadows", "shadow map resolution", prefs.getString("gs_shadow_map_resolution", "1024").toString())
-        writeSetting("Shadows", "compute scene bounds", prefs.getString("gs_shadow_computation_method", "bounds").toString())
-        writeSetting("Shadows", "maximum shadow map distance", prefs.getString("gs_shadows_distance", "8192").toString())
-        writeSetting("Shadows", "shadow fade start", prefs.getString("gs_shadows_fade_start", "0.9").toString())
-        writeSetting("Shadows", "percentage closer filtering", prefs.getString("gs_shadows_pcf", "1").toString())
+        writeSetting("Shadows", "split point uniform logarithmic ratio", prefs.getString("gs_shadow_split_point", "0.5").toString())
+        writeSetting("Shadows", "percentage closer filtering", prefs.getString("gs_shadow_pcf", "1").toString())
 
         // Animations
         writeSetting("Game", "use magic item animations", if(prefs.getBoolean("gs_use_magic_item_animation", false)) "true" else "false")
