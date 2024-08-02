@@ -26,6 +26,17 @@ USE AT YOUR OWN RISK!
 -   TES3MP - this is a dream...maybe way way beyond my skills
 -   Some kind of cloud syncing for mod list and saves
 
+# Vulkan alpha based on vsgopenmw and built in the Vulkan branch.
+This is not really playable but a neat aplha to mess around with.
+tons of bugs.
+-   losses screen context then you minimise the game. (black screen with sound)
+-   settings don't get saved when you click "ok"
+-   performance is not great. something is causing issues with that.
+-   water looks messed up. Could be textures, could be shaders...no idea yet.
+
+# New in version 1.8
+Updated openmw to latest
+
 # New in version 1.7
 Added:
 -   Lots of fixes including usb storage
