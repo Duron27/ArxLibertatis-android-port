@@ -160,9 +160,9 @@ RUN wget -c http://prdownloads.sourceforge.net/freetype/freetype-${FREETYPE2_VER
     mkdir -p ${HOME}/src/freetype-${FREETYPE2_VERSION}/build && cd $_ && \
     cmake ../ \
         ${COMMON_CMAKE_ARGS} \
-	    -DCMAKE_DISABLE_FIND_PACKAGE_ZLIB=TRUE \
+        -DCMAKE_DISABLE_FIND_PACKAGE_ZLIB=TRUE \
         -DCMAKE_DISABLE_FIND_PACKAGE_BZip2=TRUE \
-	    -DCMAKE_DISABLE_FIND_PACKAGE_PNG=TRUE && \
+        -DCMAKE_DISABLE_FIND_PACKAGE_PNG=TRUE && \
     make -j $(nproc) && make install
 
 # Setup LIBXML
