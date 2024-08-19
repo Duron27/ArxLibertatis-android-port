@@ -1,6 +1,7 @@
 package com.arxlibertatis.ui.fragment
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.createChooser
@@ -10,6 +11,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.preference.Preference
 import com.arxlibertatis.R
 import com.arxlibertatis.interfaces.SettingsFragmentMvpView
@@ -55,10 +57,18 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsFragmentMvpView{
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId){
+        return when (item.itemId) {
             R.id.copy_game_assets -> {
-                presenter.copyGameAssets(requireContext(), preferenceScreen.sharedPreferences!!)
-                true
+                AlertDialog.Builder(this)
+                    .setTitle("Confirmation")
+                    .setMessage("Are you sure you want to reset user configuration?")
+                    .setPositiveButton("Yes") { _, _ ->
+                        presenter.copyGameAssets(requireContext(), preferenceScreen.sharedPreferences!!)
+                        Toast.makeText(this, "Assets Reset!", Toast.LENGTH_SHORT).show()
+                    }
+                    .setNegativeButton("No", null)
+                    .show() // Show the dialog
+                true // Return true to indicate the event was handled
             }
             else -> super.onOptionsItemSelected(item)
         }
