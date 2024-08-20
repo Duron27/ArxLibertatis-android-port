@@ -61,7 +61,7 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsFragmentMvpView{
             R.id.copy_game_assets -> {
                 AlertDialog.Builder(this)
                     .setTitle("Confirmation")
-                    .setMessage("Are you sure you want to reset user configuration?")
+                    .setMessage("Are you sure you want to reset asset folder?")
                     .setPositiveButton("Yes") { _, _ ->
                         presenter.copyGameAssets(requireContext(), preferenceScreen.sharedPreferences!!)
                         Toast.makeText(this, "Assets Reset!", Toast.LENGTH_SHORT).show()
